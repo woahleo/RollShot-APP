@@ -13,8 +13,9 @@ export default function BookForm({ packages, dates, cars }: { packages: Package[
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
-  if (!packages.length) return <p className="small muted">This shooter hasn&apos;t added packages yet.</p>;
-  if (!dates.length) return <p className="small muted">No open dates right now. Message them to ask.</p>;
+  if (!packages.length || !dates.length) {
+    return <p className="small muted">{!packages.length ? "No packages yet." : "No open dates right now."} Message them below to ask when they can shoot.</p>;
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -30,6 +31,7 @@ export default function BookForm({ packages, dates, cars }: { packages: Package[
 
   return (
     <form onSubmit={submit}>
+      <p className="small" style={{ margin: "0 0 8px" }}><b>1.</b> Pick a package</p>
       <div className="list" style={{ marginBottom: 14 }}>
         {packages.map((k) => (
           <label key={k.id} style={{ cursor: "pointer" }}>
@@ -41,7 +43,7 @@ export default function BookForm({ packages, dates, cars }: { packages: Package[
           </label>
         ))}
       </div>
-      <p className="small muted" style={{ margin: "0 0 8px" }}>Open dates and golden hour</p>
+      <p className="small" style={{ margin: "0 0 8px" }}><b>2.</b> Pick a date <span className="muted">(golden hour shown)</span></p>
       <div className="dates" style={{ marginBottom: 14 }}>
         {dates.map((d) => (
           <button type="button" key={d} className="date" aria-pressed={date === d} onClick={() => setDate(d)}>
@@ -51,7 +53,7 @@ export default function BookForm({ packages, dates, cars }: { packages: Package[
         ))}
       </div>
       <label className="field">
-        <span>Your car</span>
+        <span><b style={{ color: "var(--ink)" }}>3.</b> Your car</span>
         {cars.length > 1 ? (
           <select value={car} onChange={(e) => setCar(e.target.value)}>
             {cars.map((c) => (
@@ -62,8 +64,8 @@ export default function BookForm({ packages, dates, cars }: { packages: Package[
           <input value={car} onChange={(e) => setCar(e.target.value)} placeholder="2021 Black BMW M3" maxLength={120} />
         )}
       </label>
-      <button className="btn pink" style={{ width: "100%" }} disabled={busy}>Request this date</button>
-      <p className="small muted">Free to request. If it rains, move it for free.</p>
+      <button className="btn pink" style={{ width: "100%" }} disabled={busy}>Book now</button>
+      <p className="small muted">Free to request. The shooter confirms, then chat fully opens. If it rains, move it for free.</p>
       {error && <p className="error">{error}</p>}
     </form>
   );

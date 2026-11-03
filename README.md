@@ -22,14 +22,14 @@ Built with Next.js (App Router) and Supabase (sign-in, Postgres, photo storage, 
 1. Create a free project at [supabase.com](https://supabase.com).
 2. In the Supabase SQL editor, paste and run `supabase/migrations/0001_init.sql`.
 3. Copy `.env.example` to `.env.local` and fill in the project URL and anon key (Project Settings > API).
-4. In Supabase > Authentication > URL Configuration, set the Site URL to `http://localhost:3000` (and later your real domain), and add `http://localhost:3000/auth/callback` to the redirect URLs.
+4. In Supabase > Authentication > URL Configuration, set the Site URL to `http://localhost:3000` (and later your real domain), and add `http://localhost:3000/**` to the redirect URLs (the `/**` matters: sign-in links carry extra details after `/auth/callback`).
 5. `npm install` then `npm run dev`, and open http://localhost:3000.
 
 Email sign-in links work right away. For Google, add the Google provider in Supabase > Authentication > Providers with a client ID from Google Cloud. Apple needs an Apple Developer account and can wait.
 
 ## Deploy
 
-Import the repo on [vercel.com](https://vercel.com), add the two environment variables, deploy, then add the Vercel URL to the Supabase redirect URLs.
+Import the repo on [vercel.com](https://vercel.com), add the two environment variables, deploy, then set the Supabase Site URL to the Vercel URL and add `https://<your-vercel-url>/**` to the redirect URLs.
 
 ## Next up
 

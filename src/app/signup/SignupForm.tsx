@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/client";
 
 type Role = "client" | "pro";
 
-export default function SignupForm({ initialRole, next, linkError }: { initialRole: Role | null; next: string; linkError: boolean }) {
+export default function SignupForm({ initialRole, next, linkError, providers }: { initialRole: Role | null; next: string; linkError: boolean; providers: { google: boolean; apple: boolean } }) {
   const [role, setRole] = useState<Role | null>(initialRole);
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
@@ -48,11 +48,15 @@ export default function SignupForm({ initialRole, next, linkError }: { initialRo
         <button className="chip" aria-pressed={role === "client"} onClick={() => setRole("client")}>I own a car</button>
         <button className="chip" aria-pressed={role === "pro"} onClick={() => setRole("pro")}>I shoot cars</button>
       </div>
-      <div className="list">
-        <button className="btn" disabled={busy} onClick={() => oauth("google")}>Continue with Google</button>
-        <button className="btn" disabled={busy} onClick={() => oauth("apple")}>Continue with Apple</button>
-      </div>
-      <div className="divider">or</div>
+      {(providers.google || providers.apple) && (
+        <>
+          <div className="list">
+            {providers.google && <button className="btn" disabled={busy} onClick={() => oauth("google")}>Continue with Google</button>}
+            {providers.apple && <button className="btn" disabled={busy} onClick={() => oauth("apple")}>Continue with Apple</button>}
+          </div>
+          <div className="divider">or</div>
+        </>
+      )}
       <form onSubmit={magic}>
         <label className="field">
           <span>Email</span>

@@ -2,7 +2,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { CITIES } from "@/lib/types";
+import { CITIES, KIND_LABEL, type Kind } from "@/lib/types";
 
 type Role = "client" | "pro";
 
@@ -11,6 +11,7 @@ export default function Onboarding({ userId, defaultName, initialRole }: { userI
   const [role, setRole] = useState<Role | null>(initialRole);
   const [name, setName] = useState(defaultName);
   const [city, setCity] = useState<string>(CITIES[0]);
+  const [kind, setKind] = useState<Kind>("photo");
   const [car, setCar] = useState({ year: "", make: "", model: "", color: "" });
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -23,7 +24,7 @@ export default function Onboarding({ userId, defaultName, initialRole }: { userI
     const { error: e1 } = await supabase.from("profiles").insert({ id: userId, role, name: name.trim() });
     if (e1) { setBusy(false); return setError(e1.message); }
     if (role === "pro") {
-      const { error: e2 } = await supabase.from("pros").insert({ id: userId, city });
+      const { error: e2 } = await supabase.from("pros").insert({ id: userId, city, kind });
       if (e2) { setBusy(false); return setError(e2.message); }
       router.replace("/pro/edit");
     } else {
@@ -43,6 +44,15 @@ export default function Onboarding({ userId, defaultName, initialRole }: { userI
         <button type="button" className="chip" aria-pressed={role === "pro"} onClick={() => setRole("pro")}>I shoot cars</button>
       </div>
       <label className="field"><span>Your name</span><input required maxLength={80} value={name} onChange={(e) => setName(e.target.value)} /></label>
+      {role === "pro" && (
+        <div className="field"><span>What you do</span>
+          <div className="chips">
+            {(Object.keys(KIND_LABEL) as Kind[]).map((k) => (
+              <button type="button" key={k} className="chip" aria-pressed={kind === k} onClick={() => setKind(k)}>{KIND_LABEL[k]}</button>
+            ))}
+          </div>
+        </div>
+      )}
       {role === "pro" && (
         <label className="field"><span>Where you shoot</span>
           <select value={city} onChange={(e) => setCity(e.target.value)}>{CITIES.map((c) => <option key={c}>{c}</option>)}</select>
