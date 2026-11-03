@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getMe } from "@/lib/supabase/server";
-import type { Message, Thread } from "@/lib/types";
+import { carLabel, type Car, type Message, type Package, type Thread } from "@/lib/types";
+import { today } from "@/lib/sun";
 import Chat from "./Chat";
 
 export default async function ChatPage({ params }: { params: Promise<{ id: string }> }) {
@@ -15,14 +16,17 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
     .maybeSingle();
   if (!data) notFound();
   const t = data as Thread & { pro: { profiles: { name: string } | null } | null; client: { name: string } | null };
-  const [{ data: messages }, { data: bookings }] = await Promise.all([
+  const isPro = t.pro_id === user.id;
+  const [{ data: messages }, { data: bookings }, { data: packages }, { data: pro }, { data: cars }] = await Promise.all([
     supabase.from("messages").select("*").eq("thread_id", id).order("created_at"),
     supabase.from("bookings").select("status").eq("pro_id", t.pro_id).eq("client_id", t.client_id),
+    isPro ? supabase.from("packages").select("*").eq("pro_id", user.id).order("position") : Promise.resolve({ data: [] }),
+    isPro ? supabase.from("pros").select("open_dates").eq("id", user.id).single() : Promise.resolve({ data: null }),
+    isPro ? Promise.resolve({ data: [] }) : supabase.from("cars").select("*").eq("owner_id", user.id).order("created_at"),
   ]);
   const statuses = (bookings ?? []).map((b) => b.status as string);
   const confirmed = statuses.some((s) => s === "confirmed" || s === "rescheduled");
   const requested = statuses.some((s) => s !== "declined");
-  const isPro = t.pro_id === user.id;
   const other = isPro ? t.client?.name : t.pro?.profiles?.name;
 
   return (
@@ -38,6 +42,11 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
         initial={(messages ?? []) as Message[]}
         confirmed={confirmed}
         requested={requested}
+        unlimited={t.unlimited}
+        otherName={other ?? ""}
+        packages={(packages ?? []) as Package[]}
+        openDates={((pro as { open_dates: string[] } | null)?.open_dates ?? []).filter((d) => d >= today()).sort()}
+        cars={((cars ?? []) as Car[]).map(carLabel).filter(Boolean)}
       />
     </main>
   );

@@ -13,10 +13,11 @@ export type Booking = {
   id: string; pro_id: string; client_id: string; package_name: string; price: number;
   shoot_date: string; car: string | null; status: BookingStatus; rain_from: string | null; created_at: string;
 };
-export type Thread = { id: string; pro_id: string; client_id: string; updated_at: string };
+export type Thread = { id: string; pro_id: string; client_id: string; updated_at: string; unlimited: boolean };
 export type Message = {
   id: string; thread_id: string; sender_id: string | null; kind: "text" | "system" | "offer";
   body: string; package_id: string | null; created_at: string;
+  offer_name: string | null; offer_price: number | null; offer_dates: string[] | null; booking_id: string | null;
 };
 
 export const CITIES = ["West Palm Beach", "Boca Raton", "Fort Lauderdale", "Miami"] as const;
