@@ -28,3 +28,36 @@ export function videoHost(url: string) {
   if (host.includes("vimeo")) return "Vimeo";
   return "Video";
 }
+
+/**
+ * A cover image for a video, taken from about half a second in, at most 720px wide, as JPEG.
+ * Also returns how long the video is. Fails for formats this browser can't play.
+ */
+export async function videoCover(file: File): Promise<{ blob: Blob; seconds: number }> {
+  const url = URL.createObjectURL(file);
+  try {
+    const v = document.createElement("video");
+    v.muted = true;
+    v.playsInline = true;
+    v.preload = "auto";
+    v.src = url;
+    await new Promise<void>((ok, fail) => {
+      v.onloadeddata = () => ok();
+      v.onerror = () => fail(new Error("This browser can't read that video. Try exporting it as MP4."));
+      setTimeout(() => fail(new Error("That video took too long to open.")), 15000);
+    });
+    await new Promise<void>((ok) => {
+      v.onseeked = () => ok();
+      v.currentTime = Math.min(0.5, (v.duration || 1) / 2);
+    });
+    const scale = Math.min(1, 720 / v.videoWidth);
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.round(v.videoWidth * scale);
+    canvas.height = Math.round(v.videoHeight * scale);
+    canvas.getContext("2d")!.drawImage(v, 0, 0, canvas.width, canvas.height);
+    const blob = await new Promise<Blob>((ok, fail) => canvas.toBlob((b) => (b ? ok(b) : fail(new Error("Could not make a cover"))), "image/jpeg", 0.8));
+    return { blob, seconds: v.duration };
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
