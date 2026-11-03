@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getMe } from "@/lib/supabase/server";
 import { proPath, type Booking, type Pro } from "@/lib/types";
+import PortfolioPhotos from "@/components/PortfolioPhotos";
 import { prettyDate, today } from "@/lib/sun";
 import BookingRow from "@/components/BookingRow";
 import { lateCancels } from "@/lib/lateCancels";
@@ -59,9 +60,10 @@ export default async function Dashboard() {
           {noPackages && noDates && " and "}
           {noDates && <a href="#dates">open dates</a>} so they can pick a day and press Book now.
         </p>
-      ) : p.photos.length === 0 ? (
-        <p className="notice" style={{ marginTop: 16 }}>Clients book what they can see. <Link href="/pro/edit">Add portfolio photos</Link> to show up properly.</p>
       ) : null}
+      <div style={{ marginTop: 24 }}>
+        <PortfolioPhotos userId={user.id} photos={p.photos} pageHref={proPath({ id: user.id, handle: p.handle })} />
+      </div>
       <h2>Requests</h2>
       {requests.length === 0 && <p className="muted">Nothing waiting. Open more dates below to get requests.</p>}
       <div style={{ display: "grid", gap: 10 }}>
@@ -108,7 +110,7 @@ export default async function Dashboard() {
         </div>
       )}
       {posts.length === 0 && toPost.length === 0 && (
-        <p className="muted">Nothing posted yet. After a shoot, post the photos here and they show on your page.</p>
+        <p className="muted">Shoots booked through Rollshot show up here after the day so you can post them. For older work, use Your photos above.</p>
       )}
       {posts.length > 0 && (
         <div className="grid pros" style={{ marginTop: 16 }}>
