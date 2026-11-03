@@ -30,9 +30,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <div className="wrap">
             <Link href="/" className="logo">Rollshot</Link>
             <nav className="nav">
-              <Link href="/book">Find a photographer</Link>
+              {profile?.role !== "pro" && <Link href="/book">Find a photographer</Link>}
               {profile?.role === "pro" && <Link href="/pro">Dashboard</Link>}
-              {profile?.role === "client" && <Link href="/me">My shoots</Link>}
+              {profile?.role === "client" && <Link href="/me">My garage</Link>}
               {user && <Link href="/messages">Messages</Link>}
               {label && <span className="badge">{label}</span>}
               {!user && <Link href="/signup">Sign up</Link>}
