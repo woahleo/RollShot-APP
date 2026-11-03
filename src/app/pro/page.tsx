@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { getMe } from "@/lib/supabase/server";
 import { proPath, type Booking, type Pro } from "@/lib/types";
 import PortfolioPhotos from "@/components/PortfolioPhotos";
+import ReelPicker from "@/components/ReelPicker";
 import { prettyDate, today } from "@/lib/sun";
 import BookingRow from "@/components/BookingRow";
 import { lateCancels } from "@/lib/lateCancels";
@@ -81,6 +82,10 @@ export default async function Dashboard() {
 
       <section>
         <PortfolioPhotos userId={user.id} photos={p.photos} pageHref={proPath({ id: user.id, handle: p.handle })} />
+      </section>
+
+      <section>
+        <ReelPicker userId={user.id} reels={p.reels ?? []} pageHref={proPath({ id: user.id, handle: p.handle })} />
       </section>
 
       {(toPost.length > 0 || posts.length > 0) && (

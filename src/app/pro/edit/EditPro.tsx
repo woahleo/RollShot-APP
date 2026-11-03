@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import { CITIES, HANDLE_RE, KIND_LABEL, proPath, SHOOT_TYPES, type Kind, type Package, type Pro } from "@/lib/types";
 import AvatarUpload from "@/components/AvatarUpload";
 import PortfolioPhotos from "@/components/PortfolioPhotos";
+import ReelPicker from "@/components/ReelPicker";
 
 type Props = {
   userId: string; name: string; avatar: string | null; site: string;
@@ -84,6 +85,7 @@ export default function EditPro({ userId, name, avatar, site, pro, packages, con
       </div>
 
       <PortfolioPhotos userId={userId} photos={pro.photos} pageHref={proPath(pro)} />
+      <ReelPicker userId={userId} reels={pro.reels ?? []} pageHref={proPath(pro)} />
 
       <form className="card" onSubmit={saveInfo}>
         <h3>About you</h3>

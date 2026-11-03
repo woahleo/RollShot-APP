@@ -409,3 +409,16 @@ button.link { background: none; border: 0; padding: 0; color: var(--ink); text-d
 .owner-page .pro-head { margin-top: 8px; }
 .owner-car { margin-top: 40px; }
 .owner-sub { margin: 18px 0 10px; }
+
+/* Instagram reels on a creator's page */
+.reels-head { margin: 36px 0 14px; }
+.reels { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); align-items: start; }
+.reel { min-width: 0; }
+.reel .instagram-media, .reel iframe { margin: 0 !important; min-width: 0 !important; width: 100% !important; max-width: 100% !important; border-radius: 16px !important; }
+.reel blockquote.instagram-media { display: grid; place-items: center; min-height: 220px; background: var(--soft); border: 1px solid var(--line); }
+.reel-add { flex-wrap: nowrap; gap: 8px; }
+.reel-add input { flex: 1; min-width: 0; }
+.reel-list { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 8px; }
+.reel-list li { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; justify-content: space-between; padding: 8px 12px; border: 1px solid var(--line); border-radius: 12px; }
+.reel-list li a { min-width: 0; overflow-wrap: anywhere; }
+.reel-list .btn { padding: 4px 10px; font-size: 12.5px; }

@@ -11,6 +11,7 @@ import { lateCancels, lateLabel } from "@/lib/lateCancels";
 import MessageButton from "./MessageButton";
 import Availability from "./Availability";
 import ShotCard, { type ShotRow } from "@/components/ShotCard";
+import Reels from "@/components/Reels";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
@@ -100,6 +101,12 @@ export default async function ProPage({ params }: { params: Promise<{ id: string
             <PhotoGallery photos={pro.photos.map(photoUrl)} alt={`Car shot by ${name}`} />
           ) : (
             <p className="notice">No portfolio photos yet.</p>
+          )}
+          {(pro.reels?.length ?? 0) > 0 && (
+            <>
+              <h2 className="reels-head">Videos</h2>
+              <Reels links={pro.reels!} />
+            </>
           )}
         </div>
         <aside id="book" className="card book-card">
