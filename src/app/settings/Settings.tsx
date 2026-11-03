@@ -3,10 +3,11 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { Role } from "@/lib/types";
+import AvatarUpload from "@/components/AvatarUpload";
 
-type Props = { userId: string; email: string; name: string; role: Role; label: string; photos: string[] };
+type Props = { userId: string; email: string; name: string; role: Role; label: string; photos: string[]; avatar: string | null };
 
-export default function Settings({ userId, email, name: initialName, role, label, photos }: Props) {
+export default function Settings({ userId, email, name: initialName, role, label, photos, avatar }: Props) {
   const router = useRouter();
   const supabase = createClient();
   const [name, setName] = useState(initialName);
@@ -36,7 +37,8 @@ export default function Settings({ userId, email, name: initialName, role, label
 
   async function deleteAccount() {
     setBusy(true);
-    if (photos.length) await supabase.storage.from("portfolio").remove(photos);
+    const files = avatar ? [...photos, avatar] : photos;
+    if (files.length) await supabase.storage.from("portfolio").remove(files);
     const { error } = await supabase.rpc("delete_my_account");
     if (error) { setBusy(false); return setMsg(error.message); }
     await supabase.auth.signOut();
@@ -50,6 +52,7 @@ export default function Settings({ userId, email, name: initialName, role, label
 
       <form className="card" onSubmit={saveName}>
         <h3>Account</h3>
+        <AvatarUpload userId={userId} name={initialName} avatar={avatar} />
         <label className="field"><span>Email</span><input value={email} disabled /></label>
         <label className="field"><span>Name</span><input required maxLength={80} value={name} onChange={(e) => setName(e.target.value)} /></label>
         <button className="btn solid">Save name</button>

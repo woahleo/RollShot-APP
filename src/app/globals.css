@@ -198,7 +198,7 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--pink); outl
 .viewfinder.has-photo { color: #fff; background: #111; border: 0; box-shadow: var(--shadow); }
 .viewfinder.has-photo::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgb(0 0 0 / .28), transparent 30%, transparent 62%, rgb(0 0 0 / .5)); pointer-events: none; }
 .vf-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.viewfinder .vf-c, .viewfinder .vf-hud, .viewfinder .vf-focus, .viewfinder figcaption { z-index: 1; }
+.viewfinder .vf-c, .viewfinder .vf-hud, .viewfinder figcaption { z-index: 1; }
 .viewfinder.has-photo .vf-c { border-color: #fff; }
 .viewfinder figcaption { position: absolute; left: 44px; bottom: 44px; font-size: 13px; }
 .viewfinder figcaption a { color: #fff; text-decoration: none; background: rgb(0 0 0 / .35); backdrop-filter: blur(8px); padding: 6px 12px; border-radius: 999px; }
@@ -214,8 +214,6 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--pink); outl
 @keyframes blink { 50% { opacity: .2; } }
 @media (prefers-reduced-motion: reduce) { .rec { animation: none; } }
 .vf-car { position: absolute; left: 10%; right: 10%; width: 80%; bottom: 22%; opacity: .85; }
-.vf-focus { position: absolute; left: 50%; top: 61%; width: 96px; height: 56px; transform: translate(-50%, -50%); border: 1px solid var(--pink); border-radius: 4px; }
-.viewfinder.has-photo .vf-focus { top: 52%; width: 120px; height: 72px; border-color: color-mix(in srgb, var(--pink) 85%, #fff); }
 .section { padding-block: 24px 40px; }
 .steps { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin-top: 12px; }
 .step { border-top: 1px solid var(--line); padding-top: 16px; }
@@ -293,3 +291,18 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--pink); outl
 .post-body .line b { font-weight: 400; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .post-body .line span { white-space: nowrap; }
 .post-body p { margin: 0; color: var(--muted); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+/* Profile pictures */
+.pic { display: inline-grid; place-items: center; flex: none; border-radius: 50%; object-fit: cover; background: var(--chip); }
+.pic.initial { background: linear-gradient(135deg, var(--pink), var(--sky) 60%, var(--sun)); color: #fff; font-weight: 400; line-height: 1; }
+.avatar { overflow: hidden; padding: 0; display: grid; place-items: center; }
+.avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.avatar-upload { display: flex; align-items: center; gap: 16px; }
+.pro-head { display: flex; align-items: center; gap: 16px; min-width: 0; }
+.pro-head h1 { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+@media (max-width: 560px) { .pro-head .pic { width: 56px !important; height: 56px !important; } }
+.handle-input { display: flex; align-items: stretch; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); overflow: hidden; }
+.handle-input span { display: flex; align-items: center; padding: 0 0 0 12px; color: var(--muted); white-space: nowrap; font-size: 14px; }
+.handle-input input { border: 0; border-radius: 0; padding-left: 2px; }
+.handle-input:focus-within { outline: 2px solid var(--pink); outline-offset: -1px; }
+.handle-input input:focus { outline: none; }

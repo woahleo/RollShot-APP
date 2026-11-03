@@ -61,7 +61,6 @@ function Viewfinder() {
         <circle cx="232" cy="80" r="17" />
         <circle cx="232" cy="80" r="7" />
       </svg>
-      <div style={{ position: "absolute", top: 135, left: 180, width: 60, height: 60, border: `2px solid ${PINK}`, borderRadius: 4 }} />
       <div style={{ position: "absolute", bottom: 18, left: 22, right: 22, display: "flex", justifyContent: "space-between", fontSize: 20, color: MUTED }}>
         <div style={{ display: "flex" }}>f/2.8</div>
         <div style={{ display: "flex" }}>1/250</div>

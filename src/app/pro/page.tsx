@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getMe } from "@/lib/supabase/server";
-import type { Booking, Pro } from "@/lib/types";
+import { proPath, type Booking, type Pro } from "@/lib/types";
 import { prettyDate, today } from "@/lib/sun";
 import BookingRow from "@/components/BookingRow";
 import { lateCancels } from "@/lib/lateCancels";
@@ -43,7 +43,7 @@ export default async function Dashboard() {
       <div className="row" style={{ justifyContent: "space-between" }}>
         <h1>Hey {profile.name.split(" ")[0]}<em>.</em></h1>
         <div className="row">
-          <Link className="btn small" href={`/p/${user.id}`}>View my page</Link>
+          <Link className="btn small" href={proPath({ id: user.id, handle: pro?.handle })}>View my page</Link>
           <Link className="btn solid small" href="/pro/edit">Edit profile</Link>
         </div>
       </div>
@@ -92,7 +92,7 @@ export default async function Dashboard() {
       </div>
       <div className="row" style={{ justifyContent: "space-between", alignItems: "baseline" }}>
         <h2>Your shoots<em>.</em></h2>
-        {posts.length > 0 && <Link className="small" href={`/p/${user.id}`}>See your page</Link>}
+        {posts.length > 0 && <Link className="small" href={proPath({ id: user.id, handle: pro?.handle })}>See your page</Link>}
       </div>
       {toPost.length > 0 && (
         <div className="notice" style={{ display: "grid", gap: 10 }}>

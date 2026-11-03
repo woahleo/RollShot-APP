@@ -3,9 +3,15 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { compress } from "@/lib/photos";
-import { CITIES, KIND_LABEL, SHOOT_TYPES, photoUrl, type Kind, type Package, type Pro } from "@/lib/types";
+import { CITIES, HANDLE_RE, KIND_LABEL, SHOOT_TYPES, photoUrl, type Kind, type Package, type Pro } from "@/lib/types";
+import AvatarUpload from "@/components/AvatarUpload";
 
-export default function EditPro({ userId, pro, packages, contact }: { userId: string; pro: Pro; packages: Package[]; contact: { instagram: string | null; phone: string | null } | null }) {
+type Props = {
+  userId: string; name: string; avatar: string | null; site: string;
+  pro: Pro; packages: Package[]; contact: { instagram: string | null; phone: string | null } | null;
+};
+
+export default function EditPro({ userId, name, avatar, site, pro, packages, contact }: Props) {
   const router = useRouter();
   const supabase = createClient();
   const [info, setInfo] = useState({ city: pro.city, kind: pro.kind ?? "photo", about: pro.about ?? "", shoot_types: pro.shoot_types });
@@ -14,6 +20,19 @@ export default function EditPro({ userId, pro, packages, contact }: { userId: st
   const [pkgs, setPkgs] = useState(packages.map((p) => ({ ...p })));
   const [msg, setMsg] = useState("");
   const [uploading, setUploading] = useState(0);
+  const [handle, setHandle] = useState(pro.handle ?? "");
+  const [handleMsg, setHandleMsg] = useState("");
+
+  async function saveHandle(e: React.FormEvent) {
+    e.preventDefault();
+    const h = handle.trim().toLowerCase();
+    if (!HANDLE_RE.test(h)) return setHandleMsg("Use 3 to 30 lowercase letters, numbers or dashes, like vic-films.");
+    const { error } = await supabase.from("pros").update({ handle: h }).eq("id", userId);
+    if (error) return setHandleMsg(error.code === "23505" ? "That username is taken. Try another." : error.message);
+    setHandle(h);
+    setHandleMsg("Saved. Your new link works now.");
+    router.refresh();
+  }
 
   async function saveInfo(e: React.FormEvent) {
     e.preventDefault();
@@ -81,6 +100,25 @@ export default function EditPro({ userId, pro, packages, contact }: { userId: st
     <div style={{ display: "grid", gap: 24 }}>
       {msg && <p className="notice">{msg}</p>}
 
+      <div className="card" style={{ display: "grid", gap: 18 }}>
+        <h3 style={{ margin: 0 }}>Photo and link</h3>
+        <AvatarUpload userId={userId} name={name} avatar={avatar} />
+        <form onSubmit={saveHandle} style={{ display: "grid", gap: 8 }}>
+          <label className="field" style={{ margin: 0 }}><span>Your link</span>
+            <div className="handle-input">
+              <span>{site.replace(/^https?:\/\//, "")}/p/</span>
+              <input value={handle} maxLength={30} autoCapitalize="none" autoCorrect="off" spellCheck={false}
+                onChange={(e) => { setHandleMsg(""); setHandle(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-")); }} placeholder="your-name" />
+            </div>
+          </label>
+          <div className="row" style={{ gap: 10 }}>
+            <button className="btn small solid" disabled={handle === (pro.handle ?? "")}>Save link</button>
+            {handleMsg && <span className="small muted">{handleMsg}</span>}
+          </div>
+          <span className="small muted">This is the link to share on Instagram or text to clients. If you change it, the old one stops working.</span>
+        </form>
+      </div>
+
       <form className="card" onSubmit={saveInfo}>
         <h3>About you</h3>
         <label className="field"><span>City</span>
@@ -137,7 +175,7 @@ export default function EditPro({ userId, pro, packages, contact }: { userId: st
 
       <div className="card">
         <h3>Portfolio</h3>
-        <p className="small muted">Photos are resized and compressed on your phone before upload, so they load fast. The first photo is your cover.</p>
+        <p className="small muted">Photos are resized and compressed on your phone before upload, so they load fast. The first photo is your cover, and it&apos;s the one that shows in the home feed.</p>
         <label className="btn" style={{ marginBottom: 12 }}>
           {uploading ? `Uploading ${uploading}…` : "Add photos"}
           <input type="file" accept="image/*" multiple hidden onChange={(e) => upload(e.target.files)} />

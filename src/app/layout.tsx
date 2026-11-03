@@ -47,7 +47,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <NavLinks links={links} />
             <div className="top-right">
               {user ? (
-                <AccountMenu name={profile?.name ?? ""} label={label ?? ""} />
+                <AccountMenu name={profile?.name ?? ""} label={label ?? ""} avatar={profile?.avatar} />
               ) : (
                 <>
                   <ThemeToggle />

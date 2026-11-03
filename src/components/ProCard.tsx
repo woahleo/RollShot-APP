@@ -1,15 +1,15 @@
 import Link from "next/link";
 import { prettyDate, today } from "@/lib/sun";
-import { KIND_LABEL, photoUrl, type Kind, type Package, type Pro } from "@/lib/types";
+import { KIND_LABEL, photoUrl, type Kind, type Package, type Pro, proPath } from "@/lib/types";
 
-export type ProRow = Pro & { profiles: { name: string } | null; packages: Package[] };
+export type ProRow = Pro & { profiles: { name: string; avatar?: string | null } | null; packages: Package[] };
 
 /** Photo-first card for a photographer: cover, name, starting price, next open day. */
 export default function ProCard({ p, href }: { p: ProRow; href?: string }) {
   const from = p.packages.length ? Math.min(...p.packages.map((k) => k.price)) : null;
   const next = p.open_dates.filter((d) => d >= today()).sort()[0];
   return (
-    <Link href={href ?? `/p/${p.id}`} className="pro-card">
+    <Link href={href ?? proPath(p)} className="pro-card">
       <div className="media">
         {p.photos[0] ? (
           // eslint-disable-next-line @next/next/no-img-element

@@ -20,7 +20,7 @@ export default async function SettingsPage() {
       <p className="muted" style={{ marginTop: 0 }}>
         {profile.role === "pro" ? <Link href="/pro/edit">Edit your public profile</Link> : <><Link href="/shoots">Your shoots</Link> · <Link href="/me">Your garage</Link></>}
       </p>
-      <Settings userId={user.id} email={user.email ?? ""} name={profile.name} role={profile.role} label={label ?? ""} photos={photos} />
+      <Settings userId={user.id} email={user.email ?? ""} name={profile.name} role={profile.role} label={label ?? ""} photos={photos} avatar={profile.avatar ?? null} />
     </main>
   );
 }

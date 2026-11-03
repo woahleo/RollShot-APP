@@ -2,7 +2,7 @@ import Link from "next/link";
 import SignedInAs from "@/components/SignedInAs";
 import { accountLabel } from "@/lib/account";
 import { getMe } from "@/lib/supabase/server";
-import { photoUrl } from "@/lib/types";
+import { photoUrl, proPath } from "@/lib/types";
 import { type ProRow } from "@/components/ProCard";
 import Feed, { buildFeed, type FeedShot } from "@/components/Feed";
 
@@ -18,14 +18,14 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ d
   const label = await accountLabel(supabase, profile);
   const { data } = await supabase
     .from("pros")
-    .select("*, profiles(name), packages(*)")
+    .select("*, profiles(name, avatar), packages(*)")
     .neq("photos", "{}")
     .order("updated_at", { ascending: false })
-    .limit(8);
+    .limit(24);
   const featured = (data ?? []) as ProRow[];
   const { data: shotRows } = await supabase
     .from("shoot_posts")
-    .select("*, pro:pros(kind, profiles(name))")
+    .select("*, pro:pros(kind, handle, profiles(name, avatar))")
     .eq("hidden_by_owner", false)
     .order("created_at", { ascending: false })
     .limit(24);
@@ -69,10 +69,9 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ d
               <circle cx="232" cy="80" r="17" /><circle cx="232" cy="80" r="7" />
             </svg>
           )}
-          <div className="vf-focus" aria-hidden="true" />
           <div className="vf-hud vf-bottom" aria-hidden="true"><span>f/2.8</span><span>1/250</span><span>ISO 100</span></div>
           {cover && (
-            <figcaption><Link href={`/p/${cover.id}`}>Shot by {cover.profiles?.name} · {cover.city}</Link></figcaption>
+            <figcaption><Link href={proPath(cover)}>Shot by {cover.profiles?.name} · {cover.city}</Link></figcaption>
           )}
         </figure>
       </section>
@@ -84,7 +83,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ d
             <Link className="small" href="/book">See everyone</Link>
           </div>
           <p className="lede" style={{ margin: "8px 0 0" }}>
-            {shots.length ? "The latest shoots booked on Rollshot, and work from photographers near you." : "Recent work from photographers near you. Tap a photo to see their page."}
+            {shots.length ? "One post per photographer: their latest shoot on Rollshot, or the best shot from their portfolio." : "One photo per photographer, the best from their portfolio. Tap one to see the rest."}
           </p>
           <Feed items={feed} />
           <div className="row" style={{ justifyContent: "center", marginTop: 24 }}>
