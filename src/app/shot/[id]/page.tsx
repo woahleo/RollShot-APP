@@ -6,6 +6,7 @@ import { KIND_LABEL, photoUrl, type Kind, type ShootPost } from "@/lib/types";
 import { prettyDate } from "@/lib/sun";
 import { videoHost } from "@/lib/photos";
 import OwnerControls from "./OwnerControls";
+import PhotoGallery from "@/components/PhotoGallery";
 
 type Row = ShootPost & {
   pro: { city: string; kind: Kind; profiles: { name: string } | null } | null;
@@ -16,10 +17,17 @@ async function load(id: string) {
   const { supabase, user } = await getMe();
   const { data } = await supabase
     .from("shoot_posts")
-    .select("*, pro:pros(city, kind, profiles(name)), car_row:cars(id, public)")
+    .select("*, pro:pros(city, kind, profiles(name))")
     .eq("id", id)
     .maybeSingle();
-  return { supabase, user, s: data as Row | null };
+  const s = data as Row | null;
+  // The car is looked up on its own: if this visitor can't see it (a private car, or a signed-out
+  // visitor before 0012 runs), the shoot page still shows, just without the link to the car.
+  if (s?.car_id) {
+    const { data: car } = await supabase.from("cars").select("id, public").eq("id", s.car_id).maybeSingle();
+    s.car_row = (car as Row["car_row"]) ?? null;
+  } else if (s) s.car_row = null;
+  return { supabase, user, s };
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
@@ -55,12 +63,7 @@ export default async function Shot({ params }: { params: Promise<{ id: string }>
       {s.hidden_by_owner && <p className="notice">Hidden by the car&apos;s owner. Only you two can see this page.</p>}
 
       {s.photos.length > 0 && (
-        <div className="gallery feature" style={{ marginTop: 16 }}>
-          {s.photos.map((ph) => (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img key={ph} src={photoUrl(ph)} alt={`${s.car}, ${s.shoot_type}`} loading="lazy" />
-          ))}
-        </div>
+        <PhotoGallery photos={s.photos.map(photoUrl)} alt={`${s.car}, ${s.shoot_type}`} style={{ marginTop: 16 }} />
       )}
       {s.video_url && (
         <p style={{ marginTop: 20 }}>

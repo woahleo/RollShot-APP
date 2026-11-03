@@ -4,6 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import { getMe } from "@/lib/supabase/server";
 import { KIND_LABEL, carLabel, photoUrl, proKey, proPath, type Car, type Kind, type Package, type Pro } from "@/lib/types";
 import Avatar from "@/components/Avatar";
+import PhotoGallery from "@/components/PhotoGallery";
 import { today } from "@/lib/sun";
 import BookForm from "./BookForm";
 import { lateCancels, lateLabel } from "@/lib/lateCancels";
@@ -92,12 +93,7 @@ export default async function ProPage({ params }: { params: Promise<{ id: string
         <div>
           {pro.about && <p className="about">{pro.about}</p>}
           {pro.photos.length > 0 ? (
-            <div className="gallery feature">
-              {pro.photos.map((ph) => (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img key={ph} src={photoUrl(ph)} alt="" loading="lazy" />
-              ))}
-            </div>
+            <PhotoGallery photos={pro.photos.map(photoUrl)} alt={`Car shot by ${name}`} />
           ) : (
             <p className="notice">No portfolio photos yet.</p>
           )}
