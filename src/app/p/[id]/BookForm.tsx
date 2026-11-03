@@ -56,7 +56,7 @@ export default function BookForm({ packages, dates, cars, name }: { packages: Pa
       <p className="small" style={{ margin: "0 0 8px" }}><b>2.</b> Pick a date <span className="muted">(golden hour shown)</span></p>
       <MonthCalendar selected={new Set(date ? [date] : [])} onPick={setDate} isEnabled={(d) => openSet.has(d)} markEnabled startAt={dates[0]} />
       <p className="small" style={{ margin: "8px 0 14px" }}>
-        {date ? <>{prettyDate(date)} · golden hour {goldenHour(date)}</> : <span className="muted">{dates.length ? `Circled days are open (${dates.length}). Tap one to pick it.` : "No open dates yet."}</span>}
+        {date ? <>{prettyDate(date)} · golden hour {goldenHour(date)}</> : <span className="muted">{dates.length ? `Pink days are open (${dates.length}). Tap one to pick it.` : "No open dates yet."}</span>}
       </p>
       <label className="field">
         <span><b style={{ color: "var(--ink)" }}>3.</b> Your car</span>
@@ -71,7 +71,7 @@ export default function BookForm({ packages, dates, cars, name }: { packages: Pa
         )}
       </label>
       {blocked && <p className="notice small">{blocked}</p>}
-      <button className="btn pink" style={{ width: "100%" }} disabled={busy || !!blocked}>Book now</button>
+      <button className="btn solid" style={{ width: "100%" }} disabled={busy || !!blocked}>Book now</button>
       <p className="small muted">Free to request. The photographer confirms, then chat fully opens. If it rains, move it for free.</p>
       {error && <p className="error">{error}</p>}
     </form>

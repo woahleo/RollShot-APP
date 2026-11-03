@@ -4,6 +4,7 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { goldenHour, prettyDate, today } from "@/lib/sun";
 import type { Booking } from "@/lib/types";
+import DateTile from "./DateTile";
 
 const LABEL: Record<Booking["status"], string> = {
   requested: "Waiting for them to accept",
@@ -40,8 +41,10 @@ export default function BookingRow({ b, who, asPro, openDates, whoLate = 0 }: { 
   }
 
   return (
-    <div className="card" style={{ display: "grid", gap: 8 }}>
-      <div className="row" style={{ justifyContent: "space-between" }}>
+    <div className="card booking">
+      <DateTile day={b.shoot_date} dim={!upcoming} />
+      <div className="booking-main">
+      <div className="row" style={{ justifyContent: "space-between", alignItems: "flex-start" }}>
         <div>
           <h3 style={{ margin: 0 }}>{who}{whoLate > 0 && <span className="small muted" style={{ fontWeight: 300 }}> · {whoLate} late cancel{whoLate === 1 ? "" : "s"}</span>}</h3>
           <span className="small muted">
@@ -51,8 +54,8 @@ export default function BookingRow({ b, who, asPro, openDates, whoLate = 0 }: { 
         </div>
         <span className={`badge ${b.status}`}>{asPro && b.status === "requested" ? "New request" : LABEL[b.status]}{b.status === "cancelled" && b.late_cancel ? " late" : ""}</span>
       </div>
-      <span className="small">
-        {prettyDate(b.shoot_date)} · golden hour {goldenHour(b.shoot_date)}
+      <span className="golden small">
+        <span className="sun" aria-hidden="true" /> Golden hour {goldenHour(b.shoot_date)}
         {b.rain_from ? <span className="muted"> · moved from {prettyDate(b.rain_from)}</span> : null}
       </span>
       {upcoming && (
@@ -105,6 +108,7 @@ export default function BookingRow({ b, who, asPro, openDates, whoLate = 0 }: { 
         </div>
       )}
       {error && <p className="error">{error}</p>}
+      </div>
     </div>
   );
 }

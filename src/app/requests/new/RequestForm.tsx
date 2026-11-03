@@ -94,7 +94,7 @@ export default function RequestForm({ cars }: { cars: string[] }) {
         <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={3} maxLength={500} placeholder="Just got it wrapped, want rollers on the bridge at sunset." />
       </label>
       {error && <p className="error" style={{ margin: 0 }}>{error}</p>}
-      <button className="btn pink" disabled={busy}>Post request</button>
+      <button className="btn solid" disabled={busy}>Post request</button>
       <p className="small muted" style={{ margin: 0 }}>Phone numbers and handles aren&apos;t allowed here. You&apos;ll chat in Rollshot.</p>
     </form>
   );

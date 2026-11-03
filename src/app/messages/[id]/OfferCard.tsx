@@ -67,7 +67,7 @@ export default function OfferCard({ m, isPro, otherName, cars, onBooked }: {
               ) : (
                 <input value={car} onChange={(e) => setCar(e.target.value)} placeholder="Your car, e.g. 2021 Black BMW M3" maxLength={120} style={{ marginTop: 8 }} />
               )}
-              <button type="button" className="btn pink" style={{ width: "100%", marginTop: 8 }} disabled={busy} onClick={book}>
+              <button type="button" className="btn solid" style={{ width: "100%", marginTop: 8 }} disabled={busy} onClick={book}>
                 Book {prettyDate(date)} · ${m.offer_price}
               </button>
             </>

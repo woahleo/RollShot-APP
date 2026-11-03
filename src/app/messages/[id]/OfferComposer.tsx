@@ -77,12 +77,12 @@ export default function OfferComposer({ threadId, packages, openDates, context, 
           <input style={{ flex: 1 }} value={price} onChange={(e) => setPrice(e.target.value.replace(/\D/g, ""))} placeholder="$" inputMode="numeric" />
         </div>
       )}
-      <p className="small muted" style={{ margin: "0 0 6px" }}>Tap up to {MAX} days. Circled days are already open on your calendar.</p>
+      <p className="small muted" style={{ margin: "0 0 6px" }}>Tap up to {MAX} days. Pink days are already open on your calendar.</p>
       <MonthCalendar selected={dates} onPick={pick} isMarked={(d) => open.has(d)} startAt={openDates[0]} />
       {dates.size > 0 && <p className="small" style={{ margin: "8px 0 0" }}>{[...dates].sort().map(prettyDate).join(" · ")}</p>}
       <input style={{ marginTop: 10 }} value={note} onChange={(e) => setNote(e.target.value)} placeholder="Note (optional), e.g. Meet at the bridge" maxLength={300} />
       {error && <p className="error" style={{ margin: "8px 0 0" }}>{error}</p>}
-      <button type="button" className="btn pink" style={{ width: "100%", marginTop: 10 }} disabled={busy} onClick={send}>
+      <button type="button" className="btn solid" style={{ width: "100%", marginTop: 10 }} disabled={busy} onClick={send}>
         Send offer{dates.size ? ` (${dates.size} date${dates.size === 1 ? "" : "s"})` : ""}
       </button>
     </div>

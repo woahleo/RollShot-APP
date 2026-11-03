@@ -8,7 +8,7 @@ export default function Availability({ dates }: { dates: string[] }) {
     <>
       <MonthCalendar selected={new Set()} onPick={() => {}} isEnabled={(d) => open.has(d)} markEnabled startAt={dates[0]} />
       <p className="small muted" style={{ margin: "8px 0 0" }}>
-        {dates.length ? "Circled days are open." : "No open dates yet."}
+        {dates.length ? "Pink days are open." : "No open dates yet."}
       </p>
     </>
   );
