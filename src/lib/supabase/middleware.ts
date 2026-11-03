@@ -8,7 +8,8 @@ export async function updateSession(request: NextRequest) {
   // Send that code on to the callback so the sign-in still finishes on the first try.
   const sp = request.nextUrl.searchParams;
   const code = sp.get("code") ?? (sp.get("error_description") ? "" : null);
-  if (code !== null && request.nextUrl.pathname !== "/auth/callback") {
+  // Other sign-ins that bring their own code (Instagram connect) are left alone.
+  if (code !== null && request.nextUrl.pathname !== "/auth/callback" && !request.nextUrl.pathname.startsWith("/api/")) {
     const url = request.nextUrl.clone();
     url.pathname = "/auth/callback";
     url.searchParams.set("via", "site");

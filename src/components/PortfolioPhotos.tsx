@@ -10,7 +10,7 @@ import { photoUrl } from "@/lib/types";
  * A creator's portfolio: add photos, pick the cover, remove ones they don't want.
  * Used on the dashboard and on the profile editor, so uploading is never more than a tap away.
  */
-export default function PortfolioPhotos({ userId, photos: initial, pageHref }: { userId: string; photos: string[]; pageHref?: string }) {
+export default function PortfolioPhotos({ userId, photos: initial, pageHref, instagram = false }: { userId: string; photos: string[]; pageHref?: string; instagram?: boolean }) {
   const router = useRouter();
   const supabase = createClient();
   const [photos, setPhotos] = useState(initial);
@@ -61,7 +61,10 @@ export default function PortfolioPhotos({ userId, photos: initial, pageHref }: {
     <div className="card portfolio" id="photos">
       <div className="row" style={{ justifyContent: "space-between", alignItems: "center" }}>
         <h3 style={{ margin: 0 }}>Your photos {photos.length > 0 && <span className="muted small">· {photos.length}</span>}</h3>
-        {photos.length > 0 && picker("Add photos", "btn solid small")}
+        <div className="row" style={{ gap: 6 }}>
+          {instagram && <Link className="btn small" href="/pro/instagram">From Instagram</Link>}
+          {photos.length > 0 && picker("Add photos", "btn solid small")}
+        </div>
       </div>
       <p className="small muted" style={{ margin: "6px 0 14px" }}>
         Any car work you&apos;re proud of, old shoots too. The first photo is your cover and shows in the home feed.
