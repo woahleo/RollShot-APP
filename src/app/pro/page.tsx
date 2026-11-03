@@ -52,7 +52,7 @@ export default async function Dashboard() {
         {upcoming.map((b) => <BookingRow key={b.id} b={b} who={b.client?.name ?? "Client"} asPro openDates={p.open_dates} />)}
       </div>
       <h2>Open dates</h2>
-      <p className="small muted">Tap days you can shoot. Golden hour times show under each day.</p>
+      <p className="small muted">Tap the days you can shoot. Tap again to close a day. Clients only see these days.</p>
       <OpenDates userId={user.id} initial={p.open_dates} />
     </main>
   );

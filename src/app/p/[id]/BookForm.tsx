@@ -4,6 +4,7 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { goldenHour, prettyDate } from "@/lib/sun";
 import type { Package } from "@/lib/types";
+import MonthCalendar from "@/components/MonthCalendar";
 
 export default function BookForm({ packages, dates, cars }: { packages: Package[]; dates: string[]; cars: string[] }) {
   const router = useRouter();
@@ -12,6 +13,7 @@ export default function BookForm({ packages, dates, cars }: { packages: Package[
   const [car, setCar] = useState(cars[0] ?? "");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const openSet = new Set(dates);
 
   if (!packages.length || !dates.length) {
     return <p className="small muted">{!packages.length ? "No packages yet." : "No open dates right now."} Message them below to ask when they can shoot.</p>;
@@ -44,14 +46,10 @@ export default function BookForm({ packages, dates, cars }: { packages: Package[
         ))}
       </div>
       <p className="small" style={{ margin: "0 0 8px" }}><b>2.</b> Pick a date <span className="muted">(golden hour shown)</span></p>
-      <div className="dates" style={{ marginBottom: 14 }}>
-        {dates.map((d) => (
-          <button type="button" key={d} className="date" aria-pressed={date === d} onClick={() => setDate(d)}>
-            <b>{prettyDate(d)}</b>
-            <small>{goldenHour(d)}</small>
-          </button>
-        ))}
-      </div>
+      <MonthCalendar selected={new Set(date ? [date] : [])} onPick={setDate} isEnabled={(d) => openSet.has(d)} markEnabled />
+      <p className="small" style={{ margin: "8px 0 14px" }}>
+        {date ? <>{prettyDate(date)} · golden hour {goldenHour(date)}</> : <span className="muted">Circled days are open. Tap one to pick it.</span>}
+      </p>
       <label className="field">
         <span><b style={{ color: "var(--ink)" }}>3.</b> Your car</span>
         {cars.length > 1 ? (
