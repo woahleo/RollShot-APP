@@ -4,11 +4,11 @@ import { createClient } from "@/lib/supabase/client";
 
 type Role = "client" | "pro";
 
-export default function SignupForm({ initialRole, next, linkError, providers }: { initialRole: Role | null; next: string; linkError: boolean; providers: { google: boolean; apple: boolean } }) {
+export default function SignupForm({ initialRole, next, linkError, providers }: { initialRole: Role | null; next: string; linkError: string; providers: { google: boolean; apple: boolean } }) {
   const [role, setRole] = useState<Role | null>(initialRole);
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
-  const [error, setError] = useState(linkError ? "That sign-in link expired. Try again." : "");
+  const [error, setError] = useState(linkError);
   const [busy, setBusy] = useState(false);
 
   function callback() {
