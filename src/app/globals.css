@@ -412,10 +412,12 @@ button.link { background: none; border: 0; padding: 0; color: var(--ink); text-d
 
 /* Instagram reels on a creator's page */
 .reels-head { margin: 36px 0 14px; }
-.reels { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); align-items: start; }
-.reel { min-width: 0; }
-.reel .instagram-media, .reel iframe { margin: 0 !important; min-width: 0 !important; width: 100% !important; max-width: 100% !important; border-radius: 16px !important; }
-.reel blockquote.instagram-media { display: grid; place-items: center; min-height: 220px; background: var(--soft); border: 1px solid var(--line); }
+.reels { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+/* Instagram's player has a name bar on top (--ig-top) and likes and comments under the video. It's drawn
+   360px wide and scaled (--s) to the tile, which is the video's own 9:16 shape and hides everything else. */
+.reel { --ig-top: 55px; --s: .45; position: relative; aspect-ratio: 9 / 16; overflow: hidden; border-radius: 16px; background: #000; min-width: 0; }
+.reel iframe { position: absolute; top: 0; left: 0; width: 362px; height: calc(362px * 16 / 9 + var(--ig-top) + 320px); border: 0; transform-origin: 0 0; transform: scale(var(--s)) translate(-1px, calc(var(--ig-top) * -1)); }
+@media (min-width: 700px) { .reels { grid-template-columns: repeat(3, 1fr); gap: 14px; } }
 .reel-add { flex-wrap: nowrap; gap: 8px; }
 .reel-add input { flex: 1; min-width: 0; }
 .reel-list { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 8px; }
