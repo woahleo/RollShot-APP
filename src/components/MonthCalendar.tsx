@@ -13,12 +13,14 @@ type Props = {
   monthsAhead?: number;
   /** Ring the tappable days, for when only a few are open. */
   markEnabled?: boolean;
+  /** Ring these days too (e.g. a photographer's already-open days). */
+  isMarked?: (day: string) => boolean;
   /** Open on the month of this day (e.g. the first open date) instead of this month. */
   startAt?: string;
 };
 
 /** A compact month grid: tap days to pick them, arrows to change month. */
-export default function MonthCalendar({ selected, onPick, isEnabled = () => true, monthsAhead = 3, markEnabled = false, startAt }: Props) {
+export default function MonthCalendar({ selected, onPick, isEnabled = () => true, monthsAhead = 3, markEnabled = false, isMarked, startAt }: Props) {
   const now = today();
   const [y0, m0] = now.split("-").map(Number);
   const [offset, setOffset] = useState(() => {
@@ -51,7 +53,7 @@ export default function MonthCalendar({ selected, onPick, isEnabled = () => true
               aria-pressed={selected.has(d)}
               aria-label={d}
               data-today={d === now || undefined}
-              data-open={(markEnabled && d >= now && isEnabled(d)) || undefined}
+              data-open={(d >= now && ((markEnabled && isEnabled(d)) || isMarked?.(d))) || undefined}
               disabled={d < now || !isEnabled(d)}
               onClick={() => onPick(d)}
             >
