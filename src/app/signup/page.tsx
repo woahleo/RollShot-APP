@@ -2,6 +2,7 @@ import SignupForm from "./SignupForm";
 import SignedInAs from "@/components/SignedInAs";
 import { accountLabel } from "@/lib/account";
 import { getMe } from "@/lib/supabase/server";
+import { headers } from "next/headers";
 
 /** Which social sign-ins are switched on in Supabase, so we never show a button that errors. */
 async function enabledProviders(): Promise<{ google: boolean; apple: boolean }> {
@@ -17,7 +18,22 @@ async function enabledProviders(): Promise<{ google: boolean; apple: boolean }> 
   }
 }
 
-export default async function Signup({ searchParams }: { searchParams: Promise<{ role?: string; next?: string; error?: string }> }) {
+/** A plain-English reason the last sign-in didn't finish, with the code at the end so it can be looked up. */
+function signInProblem(reason: string, viaSiteUrl: boolean, host: string) {
+  const code = reason ? ` (${reason})` : "";
+  if (reason === "pkce_code_verifier_not_found") {
+    if (viaSiteUrl)
+      return `Sign-in came back to ${host}, which isn't the address you started on. Open Rollshot at ${host} and try again.${code}`;
+    return `Sign-in finished in a different browser from where it started. Open Rollshot in your normal browser (Safari or Chrome, not inside another app) and try again.${code}`;
+  }
+  if (reason === "flow_state_not_found" || reason === "flow_state_expired" || reason === "otp_expired")
+    return `That sign-in link expired or was already used. Try again.${code}`;
+  if (reason === "bad_code_verifier") return `Two sign-ins got mixed up. Close other Rollshot tabs and try once more.${code}`;
+  if (reason === "access_denied") return `Sign-in was cancelled. Try again when you're ready.${code}`;
+  return `Sign-in didn't finish. Try again.${code}`;
+}
+
+export default async function Signup({ searchParams }: { searchParams: Promise<{ role?: string; next?: string; error?: string; reason?: string; via?: string }> }) {
   const sp = await searchParams;
   const role = sp.role === "pro" ? "pro" : sp.role === "client" ? "client" : null;
   const { supabase, user, profile } = await getMe();
@@ -33,10 +49,12 @@ export default async function Signup({ searchParams }: { searchParams: Promise<{
     );
   }
   const providers = await enabledProviders();
+  const host = (await headers()).get("host") ?? "";
+  const linkError = sp.error === "link" ? signInProblem(sp.reason ?? "", sp.via === "site", host) : "";
   return (
     <main className="wrap">
       <div className="auth">
-        <SignupForm initialRole={role} next={sp.next ?? ""} linkError={sp.error === "link"} providers={providers} />
+        <SignupForm initialRole={role} next={sp.next ?? ""} linkError={linkError} providers={providers} />
       </div>
     </main>
   );

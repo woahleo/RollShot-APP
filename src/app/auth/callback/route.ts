@@ -9,9 +9,25 @@ export async function GET(request: NextRequest) {
   const next = url.searchParams.get("next") ?? "";
   const safeNext = next.startsWith("/") && !next.startsWith("//") ? next : "";
   const supabase = await createClient();
+  const back = (reason: string) => {
+    const q = new URLSearchParams({ error: "link", reason });
+    if (role === "pro" || role === "client") q.set("role", role);
+    if (url.searchParams.get("via") === "site") q.set("via", "site");
+    return NextResponse.redirect(new URL(`/signup?${q}`, url.origin));
+  };
+  // Google (or Supabase) said no before we ever got a code.
+  const providerError = url.searchParams.get("error_code") ?? url.searchParams.get("error");
+  if (!code && providerError) return back(providerError);
   if (code) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
-    if (error) return NextResponse.redirect(new URL("/signup?error=link", url.origin));
+    if (error) {
+      // The same link can be opened twice (double tap, browser retry). If the first one signed us in, just carry on.
+      const { data: { user: already } } = await supabase.auth.getUser();
+      if (!already) {
+        console.error("auth callback: code exchange failed", error.code, error.message);
+        return back(error.code ?? "unknown");
+      }
+    }
   }
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.redirect(new URL("/signup", url.origin));
