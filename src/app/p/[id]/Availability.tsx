@@ -3,7 +3,7 @@ import MonthCalendar from "@/components/MonthCalendar";
 import { prettyDate } from "@/lib/sun";
 import { isRange, prettyRange, type Hours } from "@/lib/hours";
 
-/** Read-only view of a photographer's open days, for people who can't book from this account. */
+/** Read-only view of a creator's open days, for people who can't book from this account. */
 export default function Availability({ dates, hours = {} }: { dates: string[]; hours?: Hours }) {
   const open = new Set(dates);
   return (

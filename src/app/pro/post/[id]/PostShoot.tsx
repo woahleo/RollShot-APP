@@ -7,7 +7,7 @@ import { photoUrl, type ShootPost } from "@/lib/types";
 
 const MAX = 12;
 
-/** The photographer picks the photos from a finished shoot and posts them. */
+/** The creator picks the photos from a finished shoot and posts them. */
 export default function PostShoot({ userId, bookingId, post }: { userId: string; bookingId: string; post: ShootPost | null }) {
   const router = useRouter();
   const supabase = createClient();

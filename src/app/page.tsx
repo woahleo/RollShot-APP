@@ -9,7 +9,7 @@ import ClientHome from "@/components/home/ClientHome";
 import ProHome from "@/components/home/ProHome";
 
 const STEPS = [
-  { n: "01", title: "Pick your photographer", body: "Browse local photographers and videographers by city, style and price." },
+  { n: "01", title: "Pick your creator", body: "Browse local photo and video creators by city, style and price." },
   { n: "02", title: "Pick an open day", body: "See the days they're free and book one. No back and forth." },
   { n: "03", title: "Shoot, then share", body: "Chat once you book. If it rains, move the shoot for free." },
 ];
@@ -17,7 +17,7 @@ const STEPS = [
 export default async function Home({ searchParams }: { searchParams: Promise<{ deleted?: string }> }) {
   const { deleted } = await searchParams;
   const { supabase, user, profile } = await getMe();
-  // Signed in: your own home feed, different for car owners and photographers.
+  // Signed in: your own home feed, different for car owners and creators.
   if (user && profile) {
     return profile.role === "pro"
       ? <ProHome supabase={supabase} userId={user.id} profile={profile} />
@@ -38,9 +38,9 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ d
     .order("created_at", { ascending: false })
     .limit(24);
   const shots = (shotRows ?? []) as unknown as FeedShot[];
-  // Real shoots first; until there are enough, photographers' portfolio shots fill the feed.
+  // Real shoots first; until there are enough, creators' portfolio shots fill the feed.
   const feed = buildFeed(shots, featured, 9);
-  // The hero shows real work from a photographer on Rollshot when there is some.
+  // The hero shows real work from a creator on Rollshot when there is some.
   const cover = featured.find((p) => p.photos.length > 0);
 
   return (
@@ -50,12 +50,12 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ d
           {deleted && <p className="notice">Your account was deleted.</p>}
           <p className="eyebrow">West Palm Beach · Boca · Fort Lauderdale · Miami</p>
           <h1 className="hero-title">Your car, shot <em>right.</em></h1>
-          <p className="lede">Book local car photographers and videographers by the shoot. Real portfolios, real open dates, no back and forth.</p>
+          <p className="lede">Book local car photo and video creators by the shoot. Real portfolios, real open dates, no back and forth.</p>
           {user ? (
             <SignedInAs profile={profile} label={label} email={user.email ?? ""} wanted={null} />
           ) : (
             <div className="row" style={{ marginTop: 8 }}>
-              <Link className="btn pink" href="/signup?role=client">Book a photographer</Link>
+              <Link className="btn pink" href="/signup?role=client">Book a creator</Link>
               <Link className="btn" href="/signup?role=pro">I shoot cars</Link>
             </div>
           )}
@@ -63,7 +63,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ d
         <figure className={`viewfinder${cover ? " has-photo" : ""}`}>
           {cover && (
             // eslint-disable-next-line @next/next/no-img-element
-            <img className="vf-photo" src={photoUrl(cover.photos[0])} alt={`Car shot by ${cover.profiles?.name ?? "a Rollshot photographer"}`} />
+            <img className="vf-photo" src={photoUrl(cover.photos[0])} alt={`Car shot by ${cover.profiles?.name ?? "a Rollshot creator"}`} />
           )}
           <span className="vf-c tl" /><span className="vf-c tr" /><span className="vf-c bl" /><span className="vf-c br" />
           <div className="vf-hud vf-top" aria-hidden="true"><span><i className="rec" /> REC</span><span>4K · 24</span></div>
@@ -91,11 +91,11 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ d
             <Link className="small" href="/book">See everyone</Link>
           </div>
           <p className="lede" style={{ margin: "8px 0 0" }}>
-            {shots.length ? "One post per photographer: their latest shoot on Rollshot, or the best shot from their portfolio." : "One photo per photographer, the best from their portfolio. Tap one to see the rest."}
+            {shots.length ? "One post per creator: their latest shoot on Rollshot, or the best shot from their portfolio." : "One photo per creator, the best from their portfolio. Tap one to see the rest."}
           </p>
           <Feed items={feed} />
           <div className="row" style={{ justifyContent: "center", marginTop: 24 }}>
-            <Link className="btn" href="/book">See all photographers</Link>
+            <Link className="btn" href="/book">See all creators</Link>
           </div>
         </section>
       )}
@@ -116,21 +116,21 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ d
       <section className="band">
         <div className="wrap band-inner">
           <div>
-            <p className="eyebrow" style={{ color: "inherit", opacity: 0.7 }}>For photographers and videographers</p>
+            <p className="eyebrow" style={{ color: "inherit", opacity: 0.7 }}>For photo and video creators</p>
             <h2 style={{ margin: "4px 0 8px" }}>Shoot cars. <em>Get booked.</em></h2>
             <p style={{ margin: 0, opacity: 0.8, maxWidth: "46ch" }}>Post your open days and packages once. Car owners near you book the date, and you only share your number after you accept.</p>
           </div>
-          {!user && <Link className="btn pink" href="/signup?role=pro">Join as a photographer</Link>}
+          {!user && <Link className="btn pink" href="/signup?role=pro">Join as a creator</Link>}
         </div>
       </section>
 
       <footer className="wrap foot small">
         <div>
           <span className="logo">Rollshot</span>
-          <p className="muted" style={{ margin: "6px 0 0" }}>Car photographers and videographers in South Florida.</p>
+          <p className="muted" style={{ margin: "6px 0 0" }}>Car photo and video creators in South Florida.</p>
         </div>
         <nav className="foot-links">
-          <Link href="/book">Photographers</Link>
+          <Link href="/book">Creators</Link>
           <Link href="/requests">Requests</Link>
           <Link href="/signup?role=pro">Shoot for Rollshot</Link>
         </nav>

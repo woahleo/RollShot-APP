@@ -181,6 +181,10 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--pink); outl
 .cal-day[data-open]:hover:not(:disabled) { background: color-mix(in srgb, var(--pink) 22%, transparent); }
 .cal-day[aria-pressed="true"], .cal-day[aria-pressed="true"]:hover:not(:disabled) { background: var(--pink); color: #fff; }
 .cal-day:disabled { color: var(--muted); opacity: .35; cursor: default; }
+.cal-day { position: relative; }
+.cal-day[data-focus] { box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--ink); }
+.cal-day[data-dot]::after { content: ""; position: absolute; left: 50%; bottom: 4px; width: 4px; height: 4px; margin-left: -2px; border-radius: 50%; background: var(--ink); }
+.cal-day[data-dot]:disabled { opacity: .6; }
 .picked { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
 .picked span { font-size: 13px; background: var(--chip); border-radius: 999px; padding: 4px 10px; }
 
@@ -370,3 +374,13 @@ button.link { background: none; border: 0; padding: 0; color: var(--ink); text-d
 .crew-reply:last-child { border-bottom: 0; }
 .crew-reply-go { display: flex; align-items: center; gap: 14px; margin-left: auto; }
 .crew-reply .error { margin: 0; }
+
+/* Creator calendar: quick buttons, calendar, and the panel for the picked day */
+.dates-editor { display: grid; gap: 16px; align-items: start; }
+.dates-editor .chips.quick { margin-bottom: 10px; }
+.dates-editor .hours-card { margin-top: 0; }
+@media (min-width: 760px) { .dates-editor { grid-template-columns: minmax(0, 380px) minmax(0, 1fr); } .dates-editor .hours-card { margin-top: 46px; } }
+
+/* Creator dashboard: even spacing between sections */
+.dash > section { margin-top: 36px; }
+.dash > section > h2:first-child, .dash > section > .row:first-child h2 { margin-top: 0; }

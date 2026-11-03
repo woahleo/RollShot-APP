@@ -14,7 +14,7 @@ type B = Booking & { client: { name: string } | null };
 const KIND: Record<string, string> = { photo: "Photos", video: "Video", either: "Photo or video" };
 
 /**
- * A photographer's home: what needs them today, car owners looking for a shoot (their city first),
+ * A creator's home: what needs them today, car owners looking for a shoot (their city first),
  * then what everyone else on Rollshot is shooting.
  */
 export default async function ProHome({ supabase, userId, profile }: { supabase: SupabaseClient; userId: string; profile: Profile }) {
@@ -26,7 +26,7 @@ export default async function ProHome({ supabase, userId, profile }: { supabase:
     supabase.from("shoot_posts").select("booking_id").eq("pro_id", userId),
     supabase.from("requests").select("id, car, city, shoot_type, kind, date_from, date_to, budget, note").eq("status", "open").gte("date_to", now).order("created_at", { ascending: false }).limit(30),
     supabase.from("request_replies").select("request_id, price").eq("pro_id", userId),
-    loadFeed(supabase, { skipPro: userId, size: 6 }),
+    loadFeed(supabase, { skipPro: userId, size: 4 }),
     // Crew: offers other creators sent me, and replies on jobs I posted.
     supabase.from("gigs").select("id, role, shoot_date, poster:pros!gigs_poster_id_fkey(profiles(name))").eq("target_id", userId).eq("status", "open").gte("shoot_date", now),
     supabase.from("gigs").select("id, role, gig_replies(pro_id)").eq("poster_id", userId).eq("status", "open").is("target_id", null).gte("shoot_date", now),
@@ -56,9 +56,7 @@ export default async function ProHome({ supabase, userId, profile }: { supabase:
       <section className="wrap home-head">
         <h1>Hey {first}<em>.</em></h1>
         <div className="row" style={{ gap: 8 }}>
-          <Link className="btn solid small" href="/pro">Dashboard</Link>
           <Link className="btn small" href={proPath({ id: userId, handle: pro.handle })}>View my page</Link>
-          <Link className="btn small" href="/crew">Crew</Link>
         </div>
       </section>
 
@@ -128,11 +126,19 @@ export default async function ProHome({ supabase, userId, profile }: { supabase:
               <span className="todo-go">Fix</span>
             </Link>
           ))}
-          {!asks.length && !nextShoot && !toPost.length && !missing.length && !hireMe.length && !replyCount && (
-            <p className="notice" style={{ margin: 0 }}>You&apos;re all caught up. {openDays} open day{openDays === 1 ? "" : "s"} on your calendar.</p>
-          )}
+
         </div>
       </section>
+
+      {feed.items.length > 0 && (
+        <section className="wrap section" style={{ paddingTop: 28 }}>
+          <div className="row" style={{ justifyContent: "space-between", alignItems: "baseline" }}>
+            <h2 style={{ margin: 0 }}>What others are shooting<em>.</em></h2>
+            <Link className="small" href="/book">See all creators</Link>
+          </div>
+          <Feed items={feed.items} forCreators />
+        </section>
+      )}
 
       <section className="wrap section" style={{ paddingTop: 28 }}>
         <div className="row" style={{ justifyContent: "space-between", alignItems: "baseline" }}>
@@ -168,13 +174,6 @@ export default async function ProHome({ supabase, userId, profile }: { supabase:
         )}
       </section>
 
-      {feed.items.length > 0 && (
-        <section className="wrap section">
-          <h2 style={{ margin: 0 }}>What others are shooting<em>.</em></h2>
-          <p className="lede" style={{ margin: "8px 0 0" }}>The latest from other photographers on Rollshot.</p>
-          <Feed items={feed.items} />
-        </section>
-      )}
       <HomeFoot />
     </main>
   );

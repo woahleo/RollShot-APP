@@ -12,7 +12,7 @@ import { accountLabel } from "@/lib/account";
 const outfit = Outfit({ subsets: ["latin"], weight: ["200", "300", "400", "500"], variable: "--font-outfit" });
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : "https://roll-shot-app.vercel.app");
-const DESCRIPTION = "Book car photographers and videographers in South Florida. Real portfolios, real open dates, no back and forth.";
+const DESCRIPTION = "Book car photo and video creators in South Florida. Real portfolios, real open dates, no back and forth.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -31,10 +31,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   // Two or three links at most; everything else lives in the account menu.
   const links =
     profile?.role === "pro"
-      ? [{ href: "/requests", label: "Requests" }, { href: "/crew", label: "Crew" }, { href: "/pro", label: "Dashboard" }]
+      ? [{ href: "/pro", label: "Dashboard" }, { href: "/crew", label: "Crew" }, { href: "/requests", label: "Requests" }]
       : profile?.role === "client"
-        ? [{ href: "/book", label: "Photographers" }, { href: "/requests", label: "Requests" }, { href: "/shoots", label: "Shoots" }, { href: "/me", label: "Garage" }]
-        : [{ href: "/book", label: "Photographers" }, { href: "/requests", label: "Requests" }];
+        ? [{ href: "/book", label: "Creators" }, { href: "/requests", label: "Requests" }, { href: "/shoots", label: "Shoots" }, { href: "/me", label: "Garage" }]
+        : [{ href: "/book", label: "Creators" }, { href: "/requests", label: "Requests" }];
   return (
     <html lang="en" data-rs="light" className={outfit.variable} suppressHydrationWarning>
       <head>

@@ -46,14 +46,14 @@ export default async function Requests({ searchParams }: { searchParams: Promise
         <div>
           <h1 style={{ marginBottom: 6 }}>Requests<em>.</em></h1>
           <p className="lede" style={{ margin: 0 }}>
-            {role === "pro" ? "Car owners looking for a shoot. Send an offer; they compare and choose." : "Post your date. Photographers send offers, you choose who shoots it."}
+            {role === "pro" ? "Car owners looking for a shoot. Send an offer; they compare and choose." : "Post your date. Creators send offers, you choose who shoots it."}
           </p>
         </div>
         {role !== "pro" && (
           <Link className="btn solid" href={user ? "/requests/new" : "/signup?role=client&next=/requests/new"}>Post a request</Link>
         )}
       </div>
-      {posted && <p className="notice" style={{ marginTop: 16 }}>Your request is up. You&apos;ll get a message when a photographer replies.</p>}
+      {posted && <p className="notice" style={{ marginTop: 16 }}>Your request is up. You&apos;ll get a message when a creator replies.</p>}
       <div className="chips scroll" style={{ margin: "20px 0" }}>
         <Link className="chip" aria-pressed={!city} href="/requests">All cities</Link>
         {CITIES.map((c) => (

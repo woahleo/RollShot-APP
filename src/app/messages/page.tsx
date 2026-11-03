@@ -23,7 +23,7 @@ export default async function Inbox() {
   return (
     <main className="wrap">
       <h1>Messages</h1>
-      {threads.length === 0 && <p className="muted">No conversations yet. Open a photographer&apos;s page to say hi.</p>}
+      {threads.length === 0 && <p className="muted">No conversations yet. Open a creator&apos;s page to say hi.</p>}
       <div style={{ display: "grid", gap: 10 }}>
         {threads.map((t) => {
           const other = t.pro_id === user.id ? t.client?.name : t.pro?.profiles?.name;

@@ -44,14 +44,14 @@ export default async function RequestOffers({ params }: { params: Promise<{ id: 
       ) : !open ? (
         <p className="notice">This request is closed.</p>
       ) : offers.length === 0 ? (
-        <p className="notice">No offers yet. Photographers in {r.city} can see your request. Their offers show up here.</p>
+        <p className="notice">No offers yet. Creators in {r.city} can see your request. Their offers show up here.</p>
       ) : (
         <p className="small muted">{offers.length} offer{offers.length === 1 ? "" : "s"}, cheapest first. Look at their work, ask questions, then choose one. Choosing books it right away.</p>
       )}
 
       <div className="offers" style={{ marginTop: 16 }}>
         {offers.map((o) => {
-          const name = o.pro?.profiles?.name ?? "Photographer";
+          const name = o.pro?.profiles?.name ?? "Creator";
           return (
             <article key={o.pro_id} className={`card offer-row ${o.status === "chosen" ? "chosen" : ""}`}>
               {o.pro?.photos[0] ? (

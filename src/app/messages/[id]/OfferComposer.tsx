@@ -7,7 +7,7 @@ import type { Message, Package } from "@/lib/types";
 
 const MAX = 5;
 
-/** Photographer picks a package (or a custom price) and up to 5 dates to offer in the chat. */
+/** Creator picks a package (or a custom price) and up to 5 dates to offer in the chat. */
 export default function OfferComposer({ threadId, packages, openDates, context, onClose, onSent }: {
   threadId: string;
   context?: string;

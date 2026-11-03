@@ -40,10 +40,10 @@ export default async function Dashboard() {
   const toPost = rows.filter((b) => (b.status === "confirmed" || b.status === "rescheduled") && b.shoot_date <= now && !posted.has(b.id));
 
   return (
-    <main className="wrap">
-      <div className="row" style={{ justifyContent: "space-between" }}>
-        <h1>Hey {profile.name.split(" ")[0]}<em>.</em></h1>
-        <div className="row">
+    <main className="wrap dash">
+      <div className="row" style={{ justifyContent: "space-between", alignItems: "flex-end" }}>
+        <h1 style={{ marginBottom: 0 }}>Dashboard<em>.</em></h1>
+        <div className="row" style={{ gap: 8 }}>
           <Link className="btn small" href={proPath({ id: user.id, handle: pro?.handle })}>View my page</Link>
           <Link className="btn solid small" href="/pro/edit">Edit profile</Link>
         </div>
@@ -58,69 +58,79 @@ export default async function Dashboard() {
           <b>Car owners can&apos;t book you yet.</b> Add{" "}
           {noPackages && <Link href="/pro/edit">a package with a price</Link>}
           {noPackages && noDates && " and "}
-          {noDates && <a href="#dates">open dates</a>} so they can pick a day and press Book now.
+          {noDates && <a href="#dates">open days</a>} so they can pick a day and press Book now.
         </p>
       ) : null}
-      <div style={{ marginTop: 24 }}>
+
+      <section>
+        <h2>Bookings</h2>
+        {requests.length === 0 && upcoming.length === 0 ? (
+          <p className="muted">No requests or shoots yet. Open some days below and car owners can book you.</p>
+        ) : (
+          <div style={{ display: "grid", gap: 10 }}>
+            {requests.map((b) => <BookingRow key={b.id} b={b} who={b.client?.name ?? "Client"} asPro openDates={p.open_dates} whoLate={late.get(b.client_id)} />)}
+            {upcoming.map((b) => <BookingRow key={b.id} b={b} who={b.client?.name ?? "Client"} asPro openDates={p.open_dates} whoLate={late.get(b.client_id)} />)}
+          </div>
+        )}
+      </section>
+
+      <section id="dates">
+        <h2>Open days</h2>
+        <OpenDates userId={user.id} initial={p.open_dates} initialHours={p.open_hours ?? {}} booked={upcoming.map((b) => b.shoot_date)} />
+      </section>
+
+      <section>
         <PortfolioPhotos userId={user.id} photos={p.photos} pageHref={proPath({ id: user.id, handle: p.handle })} />
-      </div>
-      <h2>Requests</h2>
-      {requests.length === 0 && <p className="muted">Nothing waiting. Open more dates below to get requests.</p>}
-      <div style={{ display: "grid", gap: 10 }}>
-        {requests.map((b) => <BookingRow key={b.id} b={b} who={b.client?.name ?? "Client"} asPro openDates={p.open_dates} whoLate={late.get(b.client_id)} />)}
-      </div>
-      <h2>Upcoming shoots</h2>
-      {upcoming.length === 0 && <p className="muted">No confirmed shoots yet.</p>}
-      <div style={{ display: "grid", gap: 10 }}>
-        {upcoming.map((b) => <BookingRow key={b.id} b={b} who={b.client?.name ?? "Client"} asPro openDates={p.open_dates} whoLate={late.get(b.client_id)} />)}
-      </div>
-      <div className="row" style={{ justifyContent: "space-between", alignItems: "baseline" }}>
-        <h2>Your offers</h2>
-        <Link className="small" href="/requests">Find requests</Link>
-      </div>
-      {myOffers.length === 0 && <p className="muted">No offers out. Car owners post dates on the <Link href="/requests">request board</Link>.</p>}
-      <div className="list">
-        {myOffers.map((o, i) => (
-          <div key={i} className="card" style={{ padding: "12px 16px" }}>
-            <span>{o.request!.shoot_type} · {o.request!.car} · {o.request!.city} · {prettyDate(o.request!.date_from)}</span>
-            <span className="row" style={{ gap: 8 }}>
-              <b style={{ fontWeight: 400 }}>${o.price}</b>
-              <span className={`badge ${o.status === "chosen" ? "confirmed" : o.status === "passed" ? "declined" : "requested"}`}>
-                {o.status === "chosen" ? "Chosen" : o.status === "passed" ? "Not chosen" : "Waiting"}
-              </span>
-            </span>
+      </section>
+
+      {(toPost.length > 0 || posts.length > 0) && (
+        <section>
+          <div className="row" style={{ justifyContent: "space-between", alignItems: "baseline" }}>
+            <h2>Your shoots</h2>
+            {posts.length > 0 && <Link className="small" href={proPath({ id: user.id, handle: pro?.handle })}>See your page</Link>}
           </div>
-        ))}
-      </div>
-      <div className="row" style={{ justifyContent: "space-between", alignItems: "baseline" }}>
-        <h2>Your shoots<em>.</em></h2>
-        {posts.length > 0 && <Link className="small" href={proPath({ id: user.id, handle: pro?.handle })}>See your page</Link>}
-      </div>
-      {toPost.length > 0 && (
-        <div className="notice" style={{ display: "grid", gap: 10 }}>
-          <b style={{ fontWeight: 400 }}>{toPost.length} shoot{toPost.length === 1 ? "" : "s"} waiting on photos</b>
-          <span className="muted">Posting them puts your work on your page and on the car&apos;s page, with a Book button on it.</span>
-          <div className="row" style={{ gap: 8 }}>
-            {toPost.slice(0, 4).map((b) => (
-              <Link key={b.id} className="btn small" href={`/pro/post/${b.id}`}>
-                Post {b.car ?? b.package_name} · {prettyDate(b.shoot_date)}
-              </Link>
-            ))}
-          </div>
-        </div>
-      )}
-      {posts.length === 0 && toPost.length === 0 && (
-        <p className="muted">Shoots booked through Rollshot show up here after the day so you can post them. For older work, use Your photos above.</p>
-      )}
-      {posts.length > 0 && (
-        <div className="grid pros" style={{ marginTop: 16 }}>
-          {posts.map((s) => <ShotCard key={s.id} s={s} showPro={false} />)}
-        </div>
+          {toPost.length > 0 && (
+            <div className="notice" style={{ display: "grid", gap: 10 }}>
+              <b style={{ fontWeight: 400 }}>{toPost.length} shoot{toPost.length === 1 ? "" : "s"} waiting on photos</b>
+              <span className="muted">Posting puts your work on your page and in the feed, with a Book button on it.</span>
+              <div className="row" style={{ gap: 8 }}>
+                {toPost.slice(0, 4).map((b) => (
+                  <Link key={b.id} className="btn small" href={`/pro/post/${b.id}`}>
+                    Post {b.car ?? b.package_name} · {prettyDate(b.shoot_date)}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+          {posts.length > 0 && (
+            <div className="grid pros" style={{ marginTop: 16 }}>
+              {posts.map((s) => <ShotCard key={s.id} s={s} showPro={false} />)}
+            </div>
+          )}
+        </section>
       )}
 
-      <h2 id="dates">Open dates</h2>
-      <p className="small muted">Tap the days you can shoot, then pick the hours if you want. Tap a day again to close it. Clients only see these days.</p>
-      <OpenDates userId={user.id} initial={p.open_dates} initialHours={p.open_hours ?? {}} />
+      {myOffers.length > 0 && (
+        <section>
+          <div className="row" style={{ justifyContent: "space-between", alignItems: "baseline" }}>
+            <h2>Your offers</h2>
+            <Link className="small" href="/requests">Find requests</Link>
+          </div>
+          <div className="list">
+            {myOffers.map((o, i) => (
+              <div key={i} className="card" style={{ padding: "12px 16px" }}>
+                <span>{o.request!.shoot_type} · {o.request!.car} · {o.request!.city} · {prettyDate(o.request!.date_from)}</span>
+                <span className="row" style={{ gap: 8 }}>
+                  <b style={{ fontWeight: 400 }}>${o.price}</b>
+                  <span className={`badge ${o.status === "chosen" ? "confirmed" : o.status === "passed" ? "declined" : "requested"}`}>
+                    {o.status === "chosen" ? "Chosen" : o.status === "passed" ? "Not chosen" : "Waiting"}
+                  </span>
+                </span>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
     </main>
   );
 }

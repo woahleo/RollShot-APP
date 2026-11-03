@@ -16,7 +16,7 @@ export default function Settings({ userId, email, name: initialName, role, label
   const [confirmDelete, setConfirmDelete] = useState("");
   const [busy, setBusy] = useState(false);
   const other: Role = role === "pro" ? "client" : "pro";
-  const otherLabel = other === "pro" ? "photographer or videographer" : "car owner";
+  const otherLabel = other === "pro" ? "creator" : "car owner";
 
   async function saveName(e: React.FormEvent) {
     e.preventDefault();
@@ -66,9 +66,9 @@ export default function Settings({ userId, email, name: initialName, role, label
         ) : (
           <div className="notice" style={{ display: "grid", gap: 10 }}>
             {other === "client" ? (
-              <span>Switching to a car owner removes your photographer profile, photos, packages, open dates, and the bookings and chats clients made with you. This can&apos;t be undone.</span>
+              <span>Switching to a car owner removes your creator profile, photos, packages, open dates, and the bookings and chats clients made with you. This can&apos;t be undone.</span>
             ) : (
-              <span>Switching to a photographer or videographer cancels any shoots you requested as a car owner. Your garage stays saved. You&apos;ll set up your photographer profile next.</span>
+              <span>Switching to a creator cancels any shoots you requested as a car owner. Your garage stays saved. You&apos;ll set up your creator profile next.</span>
             )}
             <div className="row">
               <button className="btn solid" disabled={busy} onClick={switchRole}>Yes, switch to {otherLabel}</button>

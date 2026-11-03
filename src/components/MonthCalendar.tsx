@@ -13,14 +13,18 @@ type Props = {
   monthsAhead?: number;
   /** Ring the tappable days, for when only a few are open. */
   markEnabled?: boolean;
-  /** Ring these days too (e.g. a photographer's already-open days). */
+  /** Ring these days too (e.g. a creator's already-open days). */
   isMarked?: (day: string) => boolean;
   /** Open on the month of this day (e.g. the first open date) instead of this month. */
   startAt?: string;
+  /** The day being edited right now, drawn with a ring. */
+  focus?: string | null;
+  /** Small dots under these days (e.g. a booked shoot). */
+  isDotted?: (day: string) => boolean;
 };
 
 /** A compact month grid: tap days to pick them, arrows to change month. */
-export default function MonthCalendar({ selected, onPick, isEnabled = () => true, monthsAhead = 3, markEnabled = false, isMarked, startAt }: Props) {
+export default function MonthCalendar({ selected, onPick, isEnabled = () => true, monthsAhead = 3, markEnabled = false, isMarked, startAt, focus, isDotted }: Props) {
   const now = today();
   const [y0, m0] = now.split("-").map(Number);
   const [offset, setOffset] = useState(() => {
@@ -53,6 +57,8 @@ export default function MonthCalendar({ selected, onPick, isEnabled = () => true
               aria-pressed={selected.has(d)}
               aria-label={d}
               data-today={d === now || undefined}
+              data-focus={d === focus || undefined}
+              data-dot={isDotted?.(d) || undefined}
               data-open={(d >= now && ((markEnabled && isEnabled(d)) || isMarked?.(d))) || undefined}
               disabled={d < now || !isEnabled(d)}
               onClick={() => onPick(d)}

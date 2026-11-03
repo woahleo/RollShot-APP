@@ -5,8 +5,8 @@ import ProCard, { type ProRow } from "@/components/ProCard";
 
 const KINDS: { key: string; label: string }[] = [
   { key: "", label: "Everyone" },
-  { key: "photo", label: "Photographers" },
-  { key: "video", label: "Videographers" },
+  { key: "photo", label: "Photo" },
+  { key: "video", label: "Video" },
 ];
 
 export default async function Book({ searchParams }: { searchParams: Promise<{ city?: string; kind?: string }> }) {
@@ -27,7 +27,7 @@ export default async function Book({ searchParams }: { searchParams: Promise<{ c
 
   return (
     <main className="wrap">
-      <h1>Find a photographer<em>.</em></h1>
+      <h1>Find a creator<em>.</em></h1>
       <p className="lede">Pick someone whose work you like and book an open day. Or <Link href="/requests">post a request</Link> and let them come to you.</p>
       <div className="filters">
         <div className="seg" role="group" aria-label="Who">
@@ -43,7 +43,7 @@ export default async function Book({ searchParams }: { searchParams: Promise<{ c
         </div>
       </div>
       {pros.length === 0 && (
-        <p className="notice">No one matches yet. Check back soon, or <Link href="/signup?role=pro">join as a photographer</Link>.</p>
+        <p className="notice">No one matches yet. Check back soon, or <Link href="/signup?role=pro">join as a creator</Link>.</p>
       )}
       <div className="grid pros">
         {pros.map((p) => <ProCard key={p.id} p={p} href={`${proPath(p)}#book`} />)}

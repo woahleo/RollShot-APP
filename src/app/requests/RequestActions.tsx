@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 
 type Mine = { price: number | null; note: string | null } | null;
 
-/** What a request card lets the viewer do: owners see their offers, photographers send or edit one. */
+/** What a request card lets the viewer do: owners see their offers, creators send or edit one. */
 export default function RequestActions({ id, role, signedIn, own, offers, mine, budget }: {
   id: string; role: "pro" | "client" | null; signedIn: boolean; own: boolean; offers: number; mine: Mine; budget: number | null;
 }) {

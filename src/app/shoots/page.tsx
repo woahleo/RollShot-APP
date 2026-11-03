@@ -25,7 +25,7 @@ export default async function Shoots({ searchParams }: { searchParams: Promise<{
   const upcoming = rows.filter((b) => b.shoot_date >= now && b.status !== "declined" && b.status !== "cancelled");
   const past = rows.filter((b) => !upcoming.includes(b)).reverse();
   const row = (b: Row) => (
-    <BookingRow key={b.id} b={b} who={b.pro?.profiles?.name ?? "Photographer"} asPro={false} openDates={b.pro?.open_dates ?? []} whoLate={late.get(b.pro_id)} />
+    <BookingRow key={b.id} b={b} who={b.pro?.profiles?.name ?? "Creator"} asPro={false} openDates={b.pro?.open_dates ?? []} whoLate={late.get(b.pro_id)} />
   );
 
   return (
@@ -35,7 +35,7 @@ export default async function Shoots({ searchParams }: { searchParams: Promise<{
       <h2>Coming up</h2>
       {upcoming.length === 0 ? (
         <p className="muted">
-          Nothing booked. <Link href="/book">Find a photographer</Link> or <Link href="/requests/new">post a request</Link>.
+          Nothing booked. <Link href="/book">Find a creator</Link> or <Link href="/requests/new">post a request</Link>.
         </p>
       ) : (
         <div className="list" style={{ display: "grid" }}>{upcoming.map(row)}</div>

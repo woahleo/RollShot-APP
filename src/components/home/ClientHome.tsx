@@ -39,7 +39,7 @@ export default async function ClientHome({ supabase, userId, profile }: { supaba
       <section className="wrap home-head">
         <h1>Hey {first}<em>.</em></h1>
         <div className="row" style={{ gap: 8 }}>
-          <Link className="btn solid small" href="/book">Find a photographer</Link>
+          <Link className="btn solid small" href="/book">Find a creator</Link>
           <Link className="btn small" href="/requests/new">Post a request</Link>
         </div>
       </section>
@@ -48,7 +48,7 @@ export default async function ClientHome({ supabase, userId, profile }: { supaba
         <section className="wrap">
           <div className="todo">
             {next.map((b) => {
-              const name = b.pro?.profiles?.name ?? "Photographer";
+              const name = b.pro?.profiles?.name ?? "Creator";
               return (
                 <Link key={b.id} href="/shoots" className="card todo-item">
                   <DateTile day={b.shoot_date} />
@@ -81,7 +81,7 @@ export default async function ClientHome({ supabase, userId, profile }: { supaba
 
       {next.length === 0 && reqs.length === 0 && (
         <section className="wrap">
-          <p className="notice">Nothing booked yet. Pick a photographer below, or post your date and let them send you offers.</p>
+          <p className="notice">Nothing booked yet. Pick a creator below, or post your date and let them send you offers.</p>
         </section>
       )}
 
@@ -90,7 +90,7 @@ export default async function ClientHome({ supabase, userId, profile }: { supaba
           <h2 style={{ margin: 0 }}>Fresh off the street<em>.</em></h2>
           <Link className="small" href="/book">See everyone</Link>
         </div>
-        <p className="lede" style={{ margin: "8px 0 0" }}>One post per photographer: their latest shoot, or their best shot. Tap Book on anyone.</p>
+        <p className="lede" style={{ margin: "8px 0 0" }}>One post per creator: their latest shoot, or their best shot. Tap Book on anyone.</p>
         {feed.items.length ? <Feed items={feed.items} /> : <p className="muted">No photos yet.</p>}
       </section>
       <HomeFoot />
@@ -103,10 +103,10 @@ export function HomeFoot() {
     <footer className="wrap foot small">
       <div>
         <span className="logo">Rollshot</span>
-        <p className="muted" style={{ margin: "6px 0 0" }}>Car photographers and videographers in South Florida.</p>
+        <p className="muted" style={{ margin: "6px 0 0" }}>Car photo and video creators in South Florida.</p>
       </div>
       <nav className="foot-links">
-        <Link href="/book">Photographers</Link>
+        <Link href="/book">Creators</Link>
         <Link href="/requests">Requests</Link>
         <Link href="/settings">Settings</Link>
       </nav>

@@ -26,7 +26,7 @@ export default async function NewCrewJob({ searchParams }: { searchParams: Promi
       <h1 style={{ marginBottom: 6 }}>{target ? <>Hire {target.name}<em>.</em></> : <>Post a crew job<em>.</em></>}</h1>
       <p className="lede">
         {target
-          ? "Send an offer for one shoot. Once they accept, chat fully opens between you two."
+          ? "Send an offer for one shoot. They accept or decline, and you can message each other any time."
           : "Need a second shooter, a videographer or a drone pilot? Post the day and the pay, creators say they're in, and you pick one."}
       </p>
       <CrewForm city={(me as { city: string } | null)?.city ?? target?.city ?? "Miami"} target={target} />

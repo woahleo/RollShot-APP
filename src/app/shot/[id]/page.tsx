@@ -14,7 +14,7 @@ type Row = ShootPost & {
 };
 
 async function load(id: string) {
-  const { supabase, user } = await getMe();
+  const { supabase, user, profile } = await getMe();
   const { data } = await supabase
     .from("shoot_posts")
     .select("*, pro:pros(city, kind, profiles(name))")
@@ -27,7 +27,7 @@ async function load(id: string) {
     const { data: car } = await supabase.from("cars").select("id, public").eq("id", s.car_id).maybeSingle();
     s.car_row = (car as Row["car_row"]) ?? null;
   } else if (s) s.car_row = null;
-  return { supabase, user, s };
+  return { supabase, user, profile, s };
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
@@ -35,25 +35,29 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const { s } = await load(id);
   if (!s || s.hidden_by_owner) return { title: "Shoot · Rollshot" };
   const title = `${s.car} · ${s.shoot_type} · Rollshot`;
-  const description = s.caption ?? `${s.shoot_type} in ${s.city}, shot by ${s.pro?.profiles?.name ?? "a Rollshot photographer"}.`;
+  const description = s.caption ?? `${s.shoot_type} in ${s.city}, shot by ${s.pro?.profiles?.name ?? "a Rollshot creator"}.`;
   return { title, description, openGraph: { title, description }, twitter: { title, description } };
 }
 
 export default async function Shot({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const { user, s } = await load(id);
+  const { user, profile, s } = await load(id);
   if (!s) notFound();
   const mine = user?.id === s.pro_id;
   const isOwner = user?.id === s.owner_id;
   if (s.hidden_by_owner && !mine && !isOwner) notFound();
-  const name = s.pro?.profiles?.name ?? "Photographer";
+  const name = s.pro?.profiles?.name ?? "Creator";
 
   return (
     <main className="wrap" style={{ maxWidth: 860 }}>
       <p className="eyebrow">{s.shoot_type} · {s.city} · {prettyDate(s.shoot_date)}</p>
       <div className="row" style={{ justifyContent: "space-between", alignItems: "flex-end" }}>
         <h1 style={{ marginBottom: 0 }}>{s.car}</h1>
-        <Link className="btn solid" href={`/p/${s.pro_id}#book`}>Book {name.split(" ")[0]}</Link>
+        {profile?.role === "pro" ? (
+          !mine && <Link className="btn solid" href={`/crew/new?to=${s.pro_id}`}>Hire {name.split(" ")[0]}</Link>
+        ) : (
+          <Link className="btn solid" href={`/p/${s.pro_id}#book`}>Book {name.split(" ")[0]}</Link>
+        )}
       </div>
       <p className="lede" style={{ margin: "12px 0 20px" }}>
         {s.shoot_type} by <Link href={`/p/${s.pro_id}`}>{name}</Link>

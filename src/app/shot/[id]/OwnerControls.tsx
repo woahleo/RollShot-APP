@@ -3,7 +3,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
-/** The photographer can take a post down; the car's owner can hide it. */
+/** The creator can take a post down; the car's owner can hide it. */
 export default function OwnerControls({ id, isPro, isOwner, hidden }: { id: string; isPro: boolean; isOwner: boolean; hidden: boolean }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
@@ -28,7 +28,7 @@ export default function OwnerControls({ id, isPro, isOwner, hidden }: { id: stri
           ? "Car owners can hide a post of their car. Taking it down removes it from your page too."
           : hidden
             ? "This post is hidden. Nobody else can see it."
-            : "This post shows on the photographer's page and your car's page. Your name is never on it."}
+            : "This post shows on the creator's page and your car's page. Your name is never on it."}
       </span>
       <div className="row" style={{ gap: 8 }}>
         {isPro && (

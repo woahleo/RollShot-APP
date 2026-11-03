@@ -1,7 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { KIND_LABEL, type Kind, type Profile } from "./types";
 
-/** "Car owner account", "Photographer account", "Videographer account" or "Photo + video account". */
+/** "Car owner account", "Photo creator account", "Video creator account" or "Photo + video creator account". */
 export async function accountLabel(supabase: SupabaseClient, profile: Profile | null) {
   if (!profile) return null;
   if (profile.role === "client") return "Car owner account";

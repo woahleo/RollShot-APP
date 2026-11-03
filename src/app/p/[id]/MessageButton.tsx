@@ -3,7 +3,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
-export default function MessageButton({ proId }: { proId: string }) {
+export default function MessageButton({ proId, label = "Message (3 before booking)" }: { proId: string; label?: string }) {
   const router = useRouter();
   const [error, setError] = useState("");
   async function open() {
@@ -13,7 +13,7 @@ export default function MessageButton({ proId }: { proId: string }) {
   }
   return (
     <>
-      <button className="btn" style={{ width: "100%" }} onClick={open}>Message (3 before booking)</button>
+      <button className="btn" style={{ width: "100%" }} onClick={open}>{label}</button>
       {error && <p className="error">{error}</p>}
     </>
   );

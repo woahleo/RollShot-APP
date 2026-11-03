@@ -2,7 +2,7 @@ import { loadPhoto, ogCard, OG_SIZE, publicClient } from "@/lib/og";
 import { KIND_LABEL, photoUrl, proKey, type Kind } from "@/lib/types";
 
 export const runtime = "nodejs";
-export const alt = "A car photographer on Rollshot";
+export const alt = "A car creator on Rollshot";
 export const size = OG_SIZE;
 export const contentType = "image/png";
 
@@ -20,7 +20,7 @@ export default async function Image({ params }: { params: Promise<{ id: string }
   const from = p.packages.length ? Math.min(...p.packages.map((k) => k.price)) : null;
   return ogCard({
     eyebrow: KIND_LABEL[(p.kind ?? "photo") as Kind],
-    title: p.profiles?.name ?? "Photographer",
+    title: p.profiles?.name ?? "Creator",
     lines: [`Car shoots in ${p.city}`, from ? `From $${from} · Book an open day` : "Book an open day"],
     photo,
   });

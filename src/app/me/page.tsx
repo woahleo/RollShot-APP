@@ -31,7 +31,7 @@ export default async function Me() {
         <Link className="small" href="/requests/new">Post a request</Link>
       </div>
       {myRequests.length === 0 ? (
-        <p className="muted">No open requests. Post a date and photographers send you offers to choose from.</p>
+        <p className="muted">No open requests. Post a date and creators send you offers to choose from.</p>
       ) : (
         <div className="list">
           {myRequests.map((r) => {
