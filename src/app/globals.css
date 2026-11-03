@@ -268,3 +268,28 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--pink); outl
 .shot-thumb { display: grid; gap: 6px; align-content: start; }
 .shot-thumb img { aspect-ratio: 1; object-fit: cover; border-radius: 12px; width: 100%; }
 .btn[aria-pressed="true"] { background: var(--solid); color: var(--solid-ink); border-color: var(--solid); }
+
+/* Landing page feed */
+.feed { display: grid; gap: 28px; margin-top: 20px; }
+@media (min-width: 700px) { .feed { grid-template-columns: repeat(2, 1fr); gap: 32px 24px; } }
+@media (min-width: 1040px) { .feed { grid-template-columns: repeat(3, 1fr); } }
+.post { display: grid; gap: 10px; align-content: start; min-width: 0; }
+.post-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.post-who { display: flex; align-items: center; gap: 10px; text-decoration: none; min-width: 0; }
+.post-who > span:last-child { display: grid; min-width: 0; line-height: 1.25; }
+.post-who b { font-weight: 400; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.post-who small { color: var(--muted); font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.avatar.sm { width: 32px; height: 32px; flex: none; display: grid; place-items: center; cursor: inherit; background: linear-gradient(135deg, var(--pink), var(--sky) 60%, var(--sun)); color: #fff; font-size: 13px; }
+.post-media { position: relative; display: block; border-radius: 16px; overflow: hidden; background: var(--chip); }
+.post-media img { display: block; color: transparent; width: 100%; aspect-ratio: 4 / 5; object-fit: cover; transition: transform .5s cubic-bezier(.2, .7, .2, 1); }
+@media (min-width: 700px) { .post-media img, .post-empty { aspect-ratio: 1; } }
+.post-media:hover img { transform: scale(1.03); }
+.post-empty { display: grid; place-items: center; aspect-ratio: 4 / 5; color: var(--muted); font-size: 14px; background: linear-gradient(135deg, var(--chip), var(--soft)); }
+.post-media .count, .post-media .tag { position: absolute; padding: 5px 11px; border-radius: 999px; background: rgb(255 255 255 / .92); color: #0a0a0a; font-size: 12.5px; backdrop-filter: blur(6px); }
+.post-media .count { right: 10px; top: 10px; }
+.post-media .tag { left: 10px; bottom: 10px; }
+.post-body { display: grid; gap: 4px; text-decoration: none; padding-inline: 2px; }
+.post-body .line { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.post-body .line b { font-weight: 400; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.post-body .line span { white-space: nowrap; }
+.post-body p { margin: 0; color: var(--muted); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getMe } from "@/lib/supabase/server";
 import { KIND_LABEL, carLabel, photoUrl, type Car, type Kind, type Package, type Pro } from "@/lib/types";
@@ -8,6 +9,17 @@ import { lateCancels, lateLabel } from "@/lib/lateCancels";
 import MessageButton from "./MessageButton";
 import Availability from "./Availability";
 import ShotCard, { type ShotRow } from "@/components/ShotCard";
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  const { supabase } = await getMe();
+  const { data } = await supabase.from("pros").select("city, kind, profiles(name)").eq("id", id).maybeSingle();
+  const p = data as unknown as { city: string; kind: Kind | null; profiles: { name: string } | null } | null;
+  if (!p) return { title: "Photographer · Rollshot" };
+  const title = `${p.profiles?.name ?? "Photographer"} · ${KIND_LABEL[(p.kind ?? "photo") as Kind]} in ${p.city} · Rollshot`;
+  const description = `See their car shoots and book an open day on Rollshot.`;
+  return { title, description, openGraph: { title, description }, twitter: { title, description } };
+}
 
 export default async function ProPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

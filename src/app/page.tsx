@@ -3,8 +3,8 @@ import SignedInAs from "@/components/SignedInAs";
 import { accountLabel } from "@/lib/account";
 import { getMe } from "@/lib/supabase/server";
 import { photoUrl } from "@/lib/types";
-import ProCard, { type ProRow } from "@/components/ProCard";
-import ShotCard, { type ShotRow } from "@/components/ShotCard";
+import { type ProRow } from "@/components/ProCard";
+import Feed, { buildFeed, type FeedShot } from "@/components/Feed";
 
 const STEPS = [
   { n: "01", title: "Pick your photographer", body: "Browse local photographers and videographers by city, style and price." },
@@ -21,15 +21,17 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ d
     .select("*, profiles(name), packages(*)")
     .neq("photos", "{}")
     .order("updated_at", { ascending: false })
-    .limit(3);
+    .limit(8);
   const featured = (data ?? []) as ProRow[];
   const { data: shotRows } = await supabase
     .from("shoot_posts")
-    .select("*, pro:pros(profiles(name))")
+    .select("*, pro:pros(kind, profiles(name))")
     .eq("hidden_by_owner", false)
     .order("created_at", { ascending: false })
-    .limit(6);
-  const shots = (shotRows ?? []) as unknown as ShotRow[];
+    .limit(24);
+  const shots = (shotRows ?? []) as unknown as FeedShot[];
+  // Real shoots first; until there are enough, photographers' portfolio shots fill the feed.
+  const feed = buildFeed(shots, featured, 9);
   // The hero shows real work from a photographer on Rollshot when there is some.
   const cover = featured.find((p) => p.photos.length > 0);
 
@@ -75,6 +77,22 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ d
         </figure>
       </section>
 
+      {feed.length > 0 && (
+        <section className="wrap section" id="feed">
+          <div className="row" style={{ justifyContent: "space-between", alignItems: "baseline" }}>
+            <h2 style={{ margin: 0 }}>Fresh off the street<em>.</em></h2>
+            <Link className="small" href="/book">See everyone</Link>
+          </div>
+          <p className="lede" style={{ margin: "8px 0 0" }}>
+            {shots.length ? "The latest shoots booked on Rollshot, and work from photographers near you." : "Recent work from photographers near you. Tap a photo to see their page."}
+          </p>
+          <Feed items={feed} />
+          <div className="row" style={{ justifyContent: "center", marginTop: 24 }}>
+            <Link className="btn" href="/book">See all photographers</Link>
+          </div>
+        </section>
+      )}
+
       <section className="wrap section">
         <h2 style={{ marginTop: 0 }}>How it works<em>.</em></h2>
         <div className="steps">
@@ -87,31 +105,6 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ d
           ))}
         </div>
       </section>
-
-      {featured.length > 0 && (
-        <section className="wrap section">
-          <div className="row" style={{ justifyContent: "space-between", alignItems: "baseline" }}>
-            <h2 style={{ margin: 0 }}>Shooting this week<em>.</em></h2>
-            <Link className="small" href="/book">See everyone</Link>
-          </div>
-          <div className="grid pros" style={{ marginTop: 16 }}>
-            {featured.map((p) => <ProCard key={p.id} p={p} />)}
-          </div>
-        </section>
-      )}
-
-      {shots.length > 0 && (
-        <section className="wrap section">
-          <div className="row" style={{ justifyContent: "space-between", alignItems: "baseline" }}>
-            <h2 style={{ margin: 0 }}>Shot on Rollshot<em>.</em></h2>
-            <Link className="small" href="/book">Book one of them</Link>
-          </div>
-          <p className="lede" style={{ margin: "8px 0 0" }}>Every one of these was a real booking. Tap a car to see the shoot and what it cost.</p>
-          <div className="grid pros" style={{ marginTop: 16 }}>
-            {shots.map((s) => <ShotCard key={s.id} s={s} />)}
-          </div>
-        </section>
-      )}
 
       <section className="band">
         <div className="wrap band-inner">

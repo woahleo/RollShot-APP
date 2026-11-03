@@ -25,8 +25,10 @@ async function load(id: string) {
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
   const { s } = await load(id);
-  if (!s) return { title: "Shoot" };
-  return { title: `${s.car} · ${s.shoot_type} · Rollshot`, description: s.caption ?? `${s.shoot_type} in ${s.city}, shot by ${s.pro?.profiles?.name ?? "a Rollshot photographer"}.` };
+  if (!s || s.hidden_by_owner) return { title: "Shoot · Rollshot" };
+  const title = `${s.car} · ${s.shoot_type} · Rollshot`;
+  const description = s.caption ?? `${s.shoot_type} in ${s.city}, shot by ${s.pro?.profiles?.name ?? "a Rollshot photographer"}.`;
+  return { title, description, openGraph: { title, description }, twitter: { title, description } };
 }
 
 export default async function Shot({ params }: { params: Promise<{ id: string }> }) {
