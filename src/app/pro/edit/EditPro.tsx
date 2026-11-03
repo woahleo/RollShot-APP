@@ -2,7 +2,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { CITIES, SHOOT_TYPES, photoUrl, type Package, type Pro } from "@/lib/types";
+import { CITIES, KIND_LABEL, SHOOT_TYPES, photoUrl, type Kind, type Package, type Pro } from "@/lib/types";
 
 /** Shrinks a photo to at most 2000px on the long side and re-encodes it as WebP (about 300 to 600 KB). */
 async function compress(file: File): Promise<Blob> {
@@ -18,7 +18,7 @@ async function compress(file: File): Promise<Blob> {
 export default function EditPro({ userId, pro, packages, contact }: { userId: string; pro: Pro; packages: Package[]; contact: { instagram: string | null; phone: string | null } | null }) {
   const router = useRouter();
   const supabase = createClient();
-  const [info, setInfo] = useState({ city: pro.city, about: pro.about ?? "", shoot_types: pro.shoot_types });
+  const [info, setInfo] = useState({ city: pro.city, kind: pro.kind ?? "photo", about: pro.about ?? "", shoot_types: pro.shoot_types });
   const [reach, setReach] = useState({ instagram: contact?.instagram ?? "", phone: contact?.phone ?? "" });
   const [photos, setPhotos] = useState(pro.photos);
   const [pkgs, setPkgs] = useState(packages.map((p) => ({ ...p })));
@@ -98,6 +98,13 @@ export default function EditPro({ userId, pro, packages, contact }: { userId: st
             {CITIES.map((c) => <option key={c}>{c}</option>)}
           </select>
         </label>
+        <div className="field"><span>What you do</span>
+          <div className="chips">
+            {(Object.keys(KIND_LABEL) as Kind[]).map((k) => (
+              <button type="button" key={k} className="chip" aria-pressed={info.kind === k} onClick={() => setInfo({ ...info, kind: k })}>{KIND_LABEL[k]}</button>
+            ))}
+          </div>
+        </div>
         <div className="field"><span>What you shoot</span>
           <div className="chips">
             {SHOOT_TYPES.map((t) => (

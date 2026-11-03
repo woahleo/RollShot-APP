@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getMe } from "@/lib/supabase/server";
-import { carLabel, photoUrl, type Car, type Package, type Pro } from "@/lib/types";
+import { KIND_LABEL, carLabel, photoUrl, type Car, type Kind, type Package, type Pro } from "@/lib/types";
 import { today } from "@/lib/sun";
 import BookForm from "./BookForm";
 import MessageButton from "./MessageButton";
@@ -26,12 +26,22 @@ export default async function ProPage({ params }: { params: Promise<{ id: string
     contact = k;
   }
   const canBook = profile?.role === "client";
+  const isMe = user?.id === pro.id;
+  const name = pro.profiles?.name ?? "this shooter";
+  const missing = [
+    packages.length === 0 && "a package with a price",
+    dates.length === 0 && "open dates",
+    pro.photos.length === 0 && "portfolio photos",
+  ].filter(Boolean) as string[];
 
   return (
     <main className="wrap">
-      <p className="eyebrow">{pro.city}</p>
-      <h1>{pro.profiles?.name}</h1>
-      <div className="row" style={{ marginBottom: 16 }}>
+      <p className="eyebrow">{KIND_LABEL[(pro.kind ?? "photo") as Kind]} · {pro.city}</p>
+      <div className="row" style={{ justifyContent: "space-between", alignItems: "flex-end" }}>
+        <h1 style={{ marginBottom: 0 }}>{pro.profiles?.name}</h1>
+        {!isMe && <a className="btn pink" href="#book">Book now</a>}
+      </div>
+      <div className="row" style={{ margin: "12px 0 20px" }}>
         {pro.shoot_types.map((t) => (
           <span key={t} className="badge">{t}</span>
         ))}
@@ -40,6 +50,12 @@ export default async function ProPage({ params }: { params: Promise<{ id: string
         )}
         {contact?.phone && <a className="small" href={`tel:${contact.phone}`}>{contact.phone}</a>}
       </div>
+      {isMe && (
+        <div className="notice" style={{ marginBottom: 20 }}>
+          <b>This is your public page.</b> Car owners see a Book now button and the booking form on the right.
+          {missing.length > 0 && <> Before anyone can book you, add {missing.join(", ")}. <Link href="/pro/edit">Edit profile</Link> · <Link href="/pro">Open dates</Link></>}
+        </div>
+      )}
       <div className="split">
         <div>
           {pro.about && <p style={{ marginTop: 0 }}>{pro.about}</p>}
@@ -54,21 +70,23 @@ export default async function ProPage({ params }: { params: Promise<{ id: string
             <p className="notice">No portfolio photos yet.</p>
           )}
         </div>
-        <aside className="card" style={{ alignSelf: "start" }}>
-          <h3>Book a shoot</h3>
-          {!user && (
-            <p className="small muted">
-              <Link href={`/signup?role=client&next=/p/${pro.id}`}>Sign up</Link> to request a date.
-            </p>
-          )}
-          {user && !canBook && user.id !== pro.id && <p className="small muted">Bookings are made from a car owner account.</p>}
-          {user?.id === pro.id && <p className="small muted">This is how clients see your page.</p>}
+        <aside id="book" className="card" style={{ alignSelf: "start", scrollMarginTop: 16 }}>
+          <h3>Book {name}</h3>
           {canBook && (
             <>
               <BookForm packages={packages} dates={dates} cars={cars.map(carLabel).filter(Boolean)} />
               <div className="divider">questions first?</div>
               <MessageButton proId={pro.id} />
             </>
+          )}
+          {!user && (
+            <>
+              <p className="small muted">Create a free car owner account to pick a package and a date. It takes a minute.</p>
+              <Link className="btn pink" style={{ width: "100%" }} href={`/signup?role=client&next=/p/${pro.id}%23book`}>Sign up to book</Link>
+            </>
+          )}
+          {user && !canBook && !isMe && (
+            <p className="small muted">You&apos;re signed in with a shooter account. To book a shoot, sign in with a car owner account.</p>
           )}
           {!canBook && packages.length > 0 && (
             <div className="list small" style={{ marginTop: 12 }}>

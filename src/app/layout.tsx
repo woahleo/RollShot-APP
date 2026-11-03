@@ -32,6 +32,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               {profile?.role === "pro" && <Link href="/pro">Dashboard</Link>}
               {profile?.role === "client" && <Link href="/me">My shoots</Link>}
               {user && <Link href="/messages">Messages</Link>}
+              {profile && <span className="badge">{profile.role === "pro" ? "Shooter account" : "Car owner account"}</span>}
               {!user && <Link href="/signup">Sign up</Link>}
               {user && (
                 <form action="/auth/signout" method="post">
