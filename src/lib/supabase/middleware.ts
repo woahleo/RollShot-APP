@@ -4,6 +4,14 @@ import { NextResponse, type NextRequest } from "next/server";
 const PRIVATE = ["/me", "/pro", "/messages", "/onboarding"];
 
 export async function updateSession(request: NextRequest) {
+  // If Supabase didn't recognise our callback URL it falls back to the Site URL (usually "/?code=...").
+  // Send that code on to the callback so the sign-in still finishes on the first try.
+  const code = request.nextUrl.searchParams.get("code");
+  if (code && request.nextUrl.pathname !== "/auth/callback") {
+    const url = request.nextUrl.clone();
+    url.pathname = "/auth/callback";
+    return NextResponse.redirect(url);
+  }
   let response = NextResponse.next({ request });
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
