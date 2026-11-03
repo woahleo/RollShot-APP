@@ -20,7 +20,7 @@ Built with Next.js (App Router) and Supabase (sign-in, Postgres, photo storage, 
 ## Run it
 
 1. Create a free project at [supabase.com](https://supabase.com).
-2. In the Supabase SQL editor, paste and run `supabase/migrations/0001_init.sql`.
+2. In the Supabase SQL editor, run each file in `supabase/migrations/` in order (0001, 0002, 0003), each in its own new query.
 3. Copy `.env.example` to `.env.local` and fill in the project URL and anon key (Project Settings > API).
 4. In Supabase > Authentication > URL Configuration, set the Site URL to `http://localhost:3000` (and later your real domain), and add `http://localhost:3000/**` to the redirect URLs (the `/**` matters: sign-in links carry extra details after `/auth/callback`).
 5. `npm install` then `npm run dev`, and open http://localhost:3000.
