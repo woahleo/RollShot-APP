@@ -119,8 +119,8 @@ export default async function Dashboard() {
       )}
 
       <h2 id="dates">Open dates</h2>
-      <p className="small muted">Tap the days you can shoot. Tap again to close a day. Clients only see these days.</p>
-      <OpenDates userId={user.id} initial={p.open_dates} />
+      <p className="small muted">Tap the days you can shoot, then pick the hours if you want. Tap a day again to close it. Clients only see these days.</p>
+      <OpenDates userId={user.id} initial={p.open_dates} initialHours={p.open_hours ?? {}} />
     </main>
   );
 }
