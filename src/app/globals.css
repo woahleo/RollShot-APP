@@ -422,3 +422,19 @@ button.link { background: none; border: 0; padding: 0; color: var(--ink); text-d
 .reel-list li { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; justify-content: space-between; padding: 8px 12px; border: 1px solid var(--line); border-radius: 12px; }
 .reel-list li a { min-width: 0; overflow-wrap: anywhere; }
 .reel-list .btn { padding: 4px 10px; font-size: 12.5px; }
+
+/* Instagram connect */
+.ig-connect { display: grid; gap: 12px; justify-items: start; max-width: 560px; }
+.ig-picker { display: grid; gap: 14px; }
+.ig-tabs { justify-self: start; }
+.ig-grid { display: grid; gap: 6px; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
+.ig-item { position: relative; aspect-ratio: 1; padding: 0; border: 0; border-radius: 10px; overflow: hidden; background: var(--chip); cursor: pointer; }
+.ig-item img { width: 100%; height: 100%; object-fit: cover; display: block; transition: opacity .15s; }
+.ig-item[aria-pressed="true"] { outline: 3px solid var(--pink); outline-offset: -3px; }
+.ig-item[aria-pressed="true"] img { opacity: .82; }
+.ig-blank { display: grid; place-items: center; height: 100%; color: var(--muted); font-size: 12px; }
+.ig-play, .ig-count { position: absolute; top: 6px; right: 6px; padding: 2px 7px; border-radius: 999px; background: rgba(0, 0, 0, .55); color: #fff; font-size: 11px; }
+.ig-pick { position: absolute; top: 6px; left: 6px; width: 24px; height: 24px; border-radius: 50%; background: var(--pink); color: #fff; font-size: 13px; display: grid; place-items: center; }
+.ig-bar { position: sticky; bottom: 0; display: flex; gap: 12px; align-items: center; justify-content: space-between; padding: 12px 72px 12px 0; background: var(--bg); border-top: 1px solid var(--line); }
+.prose h2 { margin-top: 32px; }
+.prose p { line-height: 1.6; }

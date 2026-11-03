@@ -4,6 +4,7 @@ import { getMe } from "@/lib/supabase/server";
 import { proPath, type Booking, type Pro } from "@/lib/types";
 import PortfolioPhotos from "@/components/PortfolioPhotos";
 import ReelPicker from "@/components/ReelPicker";
+import { igReady } from "@/lib/instagram";
 import { prettyDate, today } from "@/lib/sun";
 import BookingRow from "@/components/BookingRow";
 import { lateCancels } from "@/lib/lateCancels";
@@ -81,11 +82,11 @@ export default async function Dashboard() {
       </section>
 
       <section>
-        <PortfolioPhotos userId={user.id} photos={p.photos} pageHref={proPath({ id: user.id, handle: p.handle })} />
+        <PortfolioPhotos userId={user.id} photos={p.photos} pageHref={proPath({ id: user.id, handle: p.handle })} instagram={igReady()} />
       </section>
 
       <section>
-        <ReelPicker userId={user.id} reels={p.reels ?? []} pageHref={proPath({ id: user.id, handle: p.handle })} />
+        <ReelPicker userId={user.id} reels={p.reels ?? []} pageHref={proPath({ id: user.id, handle: p.handle })} instagram={igReady()} />
       </section>
 
       {(toPost.length > 0 || posts.length > 0) && (

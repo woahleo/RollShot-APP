@@ -109,6 +109,7 @@ export function HomeFoot() {
         <Link href="/book">Creators</Link>
         <Link href="/requests">Requests</Link>
         <Link href="/settings">Settings</Link>
+        <Link href="/privacy">Privacy</Link>
       </nav>
     </footer>
   );

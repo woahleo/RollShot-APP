@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { MAX_REELS, cleanReelLink } from "@/lib/reels";
 
 /** Up to 6 Instagram reels for the creator's page: paste a link, move them around, remove them. */
-export default function ReelPicker({ userId, reels: initial, pageHref }: { userId: string; reels: string[]; pageHref?: string }) {
+export default function ReelPicker({ userId, reels: initial, pageHref, instagram = false }: { userId: string; reels: string[]; pageHref?: string; instagram?: boolean }) {
   const router = useRouter();
   const [reels, setReels] = useState(initial);
   const [link, setLink] = useState("");
@@ -43,9 +43,11 @@ export default function ReelPicker({ userId, reels: initial, pageHref }: { userI
     <div className="card portfolio" id="videos">
       <div className="row" style={{ justifyContent: "space-between", alignItems: "center" }}>
         <h3 style={{ margin: 0 }}>Your videos {reels.length > 0 && <span className="muted small">· {reels.length} of {MAX_REELS}</span>}</h3>
+        {instagram && <Link className="btn solid small" href="/pro/instagram">Pick from Instagram</Link>}
       </div>
       <p className="small muted" style={{ margin: "6px 0 14px" }}>
-        Pick up to {MAX_REELS} reels from your Instagram to play on your page. In Instagram, tap Share on a reel, then Copy link, and paste it here.
+        Pick up to {MAX_REELS} reels from your Instagram to play on your page.{" "}
+        {instagram ? "Connect Instagram to tap them from your posts, or paste a link from Share, then Copy link." : "In Instagram, tap Share on a reel, then Copy link, and paste it here."}
         {pageHref && reels.length > 0 && <> <Link href={pageHref}>See them on your page</Link>.</>}
       </p>
       {reels.length < MAX_REELS && (

@@ -9,10 +9,10 @@ import ReelPicker from "@/components/ReelPicker";
 
 type Props = {
   userId: string; name: string; avatar: string | null; site: string;
-  pro: Pro; packages: Package[]; contact: { instagram: string | null; phone: string | null } | null;
+  pro: Pro; packages: Package[]; contact: { instagram: string | null; phone: string | null } | null; instagram?: boolean;
 };
 
-export default function EditPro({ userId, name, avatar, site, pro, packages, contact }: Props) {
+export default function EditPro({ userId, name, avatar, site, pro, packages, contact, instagram = false }: Props) {
   const router = useRouter();
   const supabase = createClient();
   const [info, setInfo] = useState({ city: pro.city, kind: pro.kind ?? "photo", about: pro.about ?? "", shoot_types: pro.shoot_types });
@@ -84,8 +84,8 @@ export default function EditPro({ userId, name, avatar, site, pro, packages, con
         </form>
       </div>
 
-      <PortfolioPhotos userId={userId} photos={pro.photos} pageHref={proPath(pro)} />
-      <ReelPicker userId={userId} reels={pro.reels ?? []} pageHref={proPath(pro)} />
+      <PortfolioPhotos userId={userId} photos={pro.photos} pageHref={proPath(pro)} instagram={instagram} />
+      <ReelPicker userId={userId} reels={pro.reels ?? []} pageHref={proPath(pro)} instagram={instagram} />
 
       <form className="card" onSubmit={saveInfo}>
         <h3>About you</h3>
