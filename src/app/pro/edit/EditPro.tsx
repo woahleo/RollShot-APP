@@ -2,9 +2,9 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { compress } from "@/lib/photos";
-import { CITIES, HANDLE_RE, KIND_LABEL, SHOOT_TYPES, photoUrl, type Kind, type Package, type Pro } from "@/lib/types";
+import { CITIES, HANDLE_RE, KIND_LABEL, proPath, SHOOT_TYPES, type Kind, type Package, type Pro } from "@/lib/types";
 import AvatarUpload from "@/components/AvatarUpload";
+import PortfolioPhotos from "@/components/PortfolioPhotos";
 
 type Props = {
   userId: string; name: string; avatar: string | null; site: string;
@@ -16,10 +16,8 @@ export default function EditPro({ userId, name, avatar, site, pro, packages, con
   const supabase = createClient();
   const [info, setInfo] = useState({ city: pro.city, kind: pro.kind ?? "photo", about: pro.about ?? "", shoot_types: pro.shoot_types });
   const [reach, setReach] = useState({ instagram: contact?.instagram ?? "", phone: contact?.phone ?? "" });
-  const [photos, setPhotos] = useState(pro.photos);
   const [pkgs, setPkgs] = useState(packages.map((p) => ({ ...p })));
   const [msg, setMsg] = useState("");
-  const [uploading, setUploading] = useState(0);
   const [handle, setHandle] = useState(pro.handle ?? "");
   const [handleMsg, setHandleMsg] = useState("");
 
@@ -45,40 +43,6 @@ export default function EditPro({ userId, name, avatar, site, pro, packages, con
   function toggleType(t: string) {
     const has = info.shoot_types.includes(t);
     setInfo({ ...info, shoot_types: has ? info.shoot_types.filter((x) => x !== t) : [...info.shoot_types, t] });
-  }
-
-  async function savePhotos(next: string[]) {
-    setPhotos(next);
-    const { error } = await supabase.from("pros").update({ photos: next, updated_at: new Date().toISOString() }).eq("id", userId);
-    if (error) setMsg(error.message);
-  }
-
-  async function upload(files: FileList | null) {
-    if (!files?.length) return;
-    const added: string[] = [];
-    setUploading(files.length);
-    for (const f of Array.from(files).slice(0, 24)) {
-      try {
-        const blob = await compress(f);
-        const path = `${userId}/${crypto.randomUUID()}.webp`;
-        const { error } = await supabase.storage.from("portfolio").upload(path, blob, { contentType: "image/webp", cacheControl: "31536000" });
-        if (error) throw error;
-        added.push(path);
-      } catch (err) {
-        setMsg(err instanceof Error ? err.message : "Upload failed");
-      }
-      setUploading((n) => n - 1);
-    }
-    await savePhotos([...photos, ...added]);
-  }
-
-  async function removePhoto(path: string) {
-    await supabase.storage.from("portfolio").remove([path]);
-    await savePhotos(photos.filter((p) => p !== path));
-  }
-
-  async function makeCover(path: string) {
-    await savePhotos([path, ...photos.filter((p) => p !== path)]);
   }
 
   async function savePackages() {
@@ -118,6 +82,8 @@ export default function EditPro({ userId, name, avatar, site, pro, packages, con
           <span className="small muted">This is the link to share on Instagram or text to clients. If you change it, the old one stops working.</span>
         </form>
       </div>
+
+      <PortfolioPhotos userId={userId} photos={pro.photos} pageHref={proPath(pro)} />
 
       <form className="card" onSubmit={saveInfo}>
         <h3>About you</h3>
@@ -173,26 +139,6 @@ export default function EditPro({ userId, name, avatar, site, pro, packages, con
         </div>
       </div>
 
-      <div className="card">
-        <h3>Portfolio</h3>
-        <p className="small muted">Photos are resized and compressed on your phone before upload, so they load fast. The first photo is your cover, and it&apos;s the one that shows in the home feed.</p>
-        <label className="btn" style={{ marginBottom: 12 }}>
-          {uploading ? `Uploading ${uploading}…` : "Add photos"}
-          <input type="file" accept="image/*" multiple hidden onChange={(e) => upload(e.target.files)} />
-        </label>
-        <div className="gallery">
-          {photos.map((ph, i) => (
-            <div key={ph} style={{ display: "grid", gap: 6 }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={photoUrl(ph)} alt="" />
-              <div className="row" style={{ gap: 6 }}>
-                {i > 0 && <button className="btn small" onClick={() => makeCover(ph)}>Cover</button>}
-                <button className="btn small" onClick={() => removePhoto(ph)}>Remove</button>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
     </div>
   );
 }

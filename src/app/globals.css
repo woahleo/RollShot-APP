@@ -306,3 +306,11 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--pink); outl
 .handle-input input { border: 0; border-radius: 0; padding-left: 2px; }
 .handle-input:focus-within { outline: 2px solid var(--pink); outline-offset: -1px; }
 .handle-input input:focus { outline: none; }
+
+/* Portfolio uploader */
+.portfolio .drop { display: grid; place-items: center; text-align: center; min-height: 150px; padding: 24px; border: 1.5px dashed var(--line); border-radius: 14px; color: var(--muted); background: var(--soft); transition: border-color .15s, color .15s; }
+.portfolio .drop:hover { border-color: var(--pink); color: var(--ink); }
+.portfolio .gallery { grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 10px; }
+.portfolio .shot-thumb .row { flex-wrap: wrap; gap: 4px !important; }
+.portfolio .shot-thumb .btn { padding: 4px 10px; font-size: 12.5px; }
+.cover-tag { position: absolute; left: 6px; top: 6px; padding: 2px 8px; border-radius: 999px; background: rgb(255 255 255 / .92); color: #0a0a0a; font-size: 12px; }
