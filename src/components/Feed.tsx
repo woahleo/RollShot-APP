@@ -1,17 +1,20 @@
 import Link from "next/link";
-import { KIND_LABEL, photoUrl, type Kind, type Package, type Pro, type ShootPost } from "@/lib/types";
+import { KIND_LABEL, photoUrl, proPath, type Kind, type Package, type Pro, type ShootPost } from "@/lib/types";
 import { prettyDate } from "@/lib/sun";
 import { videoHost } from "@/lib/photos";
+import Avatar from "./Avatar";
 
-export type FeedShot = ShootPost & { pro: { kind: Kind; profiles: { name: string } | null } | null };
-export type FeedPro = Pro & { profiles: { name: string } | null; packages: Package[] };
+type Who = { name: string; avatar?: string | null } | null;
+export type FeedShot = ShootPost & { pro: { kind: Kind; handle: string | null; profiles: Who } | null };
+export type FeedPro = Pro & { profiles: Who; packages: Package[] };
 
 type Item = {
   key: string;
   href: string;
   img: string | null;
-  proId: string;
+  proHref: string;
   name: string;
+  avatar: string | null;
   meta: string;
   title: string;
   note: string | null;
@@ -20,69 +23,71 @@ type Item = {
   more: number;
 };
 
-/** Finished shoots first, newest first. Until there are enough, photographers' portfolio shots fill in. */
-export function buildFeed(shots: FeedShot[], pros: FeedPro[], size = 12): Item[] {
-  // At most two shoots per photographer, so one busy person never fills the feed.
-  const perPro = new Map<string, number>();
-  const picked = shots.filter((s) => {
-    const n = (perPro.get(s.pro_id) ?? 0) + 1;
-    perPro.set(s.pro_id, n);
-    return n <= 2;
-  });
-  const items: Item[] = picked.slice(0, size).map((s) => ({
-    key: `s-${s.id}`,
-    href: `/shot/${s.id}`,
-    img: s.photos[0] ? photoUrl(s.photos[0]) : null,
-    proId: s.pro_id,
-    name: s.pro?.profiles?.name ?? "Photographer",
-    meta: `${s.city} · ${prettyDate(s.shoot_date)}`,
-    title: s.car,
-    note: s.caption,
-    price: `${s.shoot_type} · $${s.price}`,
-    badge: s.video_url ? videoHost(s.video_url) : null,
-    more: Math.max(0, s.photos.length - 1),
-  }));
-  // Take one portfolio photo per photographer per round, so one person never fills the feed.
-  const queue = pros.filter((p) => p.photos.length > 0);
-  for (let round = 0; items.length < size && round < 4; round++) {
-    for (const p of queue) {
-      if (items.length >= size) break;
-      const ph = p.photos[round];
-      if (!ph) continue;
-      const from = p.packages.length ? Math.min(...p.packages.map((k) => k.price)) : null;
-      items.push({
-        key: `p-${p.id}-${round}`,
-        href: `/p/${p.id}`,
-        img: photoUrl(ph),
-        proId: p.id,
-        name: p.profiles?.name ?? "Photographer",
-        meta: `${KIND_LABEL[(p.kind ?? "photo") as Kind]} · ${p.city}`,
-        title: p.shoot_types.slice(0, 2).join(" · ") || "Portfolio",
-        note: round === 0 ? p.about : null,
-        price: from ? `From $${from}` : null,
-        badge: null,
-        more: 0,
-      });
-    }
+/**
+ * One post per photographer, so the feed reads as a lineup instead of a photo dump.
+ * Each one shows their newest finished shoot, or, until they have one, the cover photo
+ * they picked for their portfolio. Photographers with recent shoots come first.
+ */
+export function buildFeed(shots: FeedShot[], pros: FeedPro[], size = 9): Item[] {
+  const items: Item[] = [];
+  const seen = new Set<string>();
+  for (const s of shots) {
+    if (seen.has(s.pro_id) || items.length >= size) continue;
+    seen.add(s.pro_id);
+    const name = s.pro?.profiles?.name ?? "Photographer";
+    items.push({
+      key: `s-${s.id}`,
+      href: `/shot/${s.id}`,
+      img: s.photos[0] ? photoUrl(s.photos[0]) : null,
+      proHref: proPath({ id: s.pro_id, handle: s.pro?.handle }),
+      name,
+      avatar: s.pro?.profiles?.avatar ?? null,
+      meta: `${s.city} · ${prettyDate(s.shoot_date)}`,
+      title: s.car,
+      note: s.caption,
+      price: `${s.shoot_type} · $${s.price}`,
+      badge: s.video_url ? videoHost(s.video_url) : null,
+      more: Math.max(0, s.photos.length - 1),
+    });
+  }
+  for (const p of pros) {
+    if (seen.has(p.id) || !p.photos[0] || items.length >= size) continue;
+    seen.add(p.id);
+    const from = p.packages.length ? Math.min(...p.packages.map((k) => k.price)) : null;
+    const href = proPath(p);
+    items.push({
+      key: `p-${p.id}`,
+      href,
+      img: photoUrl(p.photos[0]),
+      proHref: href,
+      name: p.profiles?.name ?? "Photographer",
+      avatar: p.profiles?.avatar ?? null,
+      meta: `${KIND_LABEL[(p.kind ?? "photo") as Kind]} · ${p.city}`,
+      title: p.shoot_types.slice(0, 2).join(" · ") || "Portfolio",
+      note: p.about,
+      price: from ? `From $${from}` : null,
+      badge: null,
+      more: Math.max(0, p.photos.length - 1),
+    });
   }
   return items;
 }
 
-/** The landing page feed: big photos, who shot them, and a way to book. */
+/** The landing page feed: one big photo per photographer, who shot it, and a way to book. */
 export default function Feed({ items }: { items: Item[] }) {
   return (
     <div className="feed">
       {items.map((it) => (
         <article key={it.key} className="post">
           <header className="post-head">
-            <Link href={`/p/${it.proId}`} className="post-who">
-              <span className="avatar sm" aria-hidden="true">{it.name.slice(0, 1).toUpperCase()}</span>
+            <Link href={it.proHref} className="post-who">
+              <Avatar name={it.name} avatar={it.avatar} size={32} />
               <span>
                 <b>{it.name}</b>
                 <small>{it.meta}</small>
               </span>
             </Link>
-            <Link className="btn small" href={`/p/${it.proId}#book`}>Book</Link>
+            <Link className="btn small" href={`${it.proHref}#book`}>Book</Link>
           </header>
           <Link href={it.href} className="post-media">
             {it.img ? (

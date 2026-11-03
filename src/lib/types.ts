@@ -1,10 +1,10 @@
 export type Role = "client" | "pro";
 export type Kind = "photo" | "video" | "both";
 export const KIND_LABEL: Record<Kind, string> = { photo: "Photographer", video: "Videographer", both: "Photo + video" };
-export type Profile = { id: string; role: Role; name: string; created_at: string };
+export type Profile = { id: string; role: Role; name: string; created_at: string; avatar?: string | null };
 export type Car = { id: string; owner_id: string; year: string | null; make: string | null; model: string | null; color: string | null; mods: string | null };
 export type Pro = {
-  id: string; city: string; kind: Kind; about: string | null;
+  id: string; city: string; kind: Kind; about: string | null; handle?: string | null;
   shoot_types: string[]; open_dates: string[]; photos: string[];
 };
 export type Package = { id: string; pro_id: string; name: string; price: number; position: number };
@@ -27,6 +27,19 @@ export const SHOOT_TYPES = ["Rolling shots", "Static", "Night", "Reels", "Track 
 export function carLabel(c: Partial<Car>) {
   return [c.year, c.color, c.make, c.model].filter(Boolean).join(" ");
 }
+
+/** A photographer's public page: /p/their-name once they have a username, else their id. */
+export function proPath(p: { id: string; handle?: string | null }) {
+  return `/p/${p.handle || p.id}`;
+}
+
+/** /p/<key> takes a username or, for old links, an id. This says which column to look it up by. */
+export function proKey(key: string): "id" | "handle" {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(key) ? "id" : "handle";
+}
+
+/** Usernames: 3 to 30 lowercase letters, numbers or dashes, not starting or ending with a dash. */
+export const HANDLE_RE = /^[a-z0-9][a-z0-9-]{1,28}[a-z0-9]$/;
 
 export function photoUrl(path: string) {
   return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/portfolio/${path}`;

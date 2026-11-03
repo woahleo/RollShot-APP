@@ -9,6 +9,16 @@ export async function compress(file: File): Promise<Blob> {
   return new Promise((ok, fail) => canvas.toBlob((b) => (b ? ok(b) : fail(new Error("Could not read that image"))), "image/webp", 0.82));
 }
 
+/** A square profile picture: center-cropped to 400x400 WebP (about 20 to 40 KB). */
+export async function squareAvatar(file: File): Promise<Blob> {
+  const bmp = await createImageBitmap(file);
+  const side = Math.min(bmp.width, bmp.height);
+  const canvas = document.createElement("canvas");
+  canvas.width = canvas.height = 400;
+  canvas.getContext("2d")!.drawImage(bmp, (bmp.width - side) / 2, (bmp.height - side) / 2, side, side, 0, 0, 400, 400);
+  return new Promise((ok, fail) => canvas.toBlob((b) => (b ? ok(b) : fail(new Error("Could not read that image"))), "image/webp", 0.85));
+}
+
 /** Where a video link points, for the label on a post. */
 export function videoHost(url: string) {
   const host = url.replace(/^https?:\/\//, "").split("/")[0].replace(/^www\./, "").toLowerCase();

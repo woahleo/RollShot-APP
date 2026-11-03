@@ -1,8 +1,9 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { getMe } from "@/lib/supabase/server";
-import { KIND_LABEL, carLabel, photoUrl, type Car, type Kind, type Package, type Pro } from "@/lib/types";
+import { KIND_LABEL, carLabel, photoUrl, proKey, proPath, type Car, type Kind, type Package, type Pro } from "@/lib/types";
+import Avatar from "@/components/Avatar";
 import { today } from "@/lib/sun";
 import BookForm from "./BookForm";
 import { lateCancels, lateLabel } from "@/lib/lateCancels";
@@ -13,7 +14,8 @@ import ShotCard, { type ShotRow } from "@/components/ShotCard";
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
   const { supabase } = await getMe();
-  const { data } = await supabase.from("pros").select("city, kind, profiles(name)").eq("id", id).maybeSingle();
+  const key = decodeURIComponent(id).toLowerCase();
+  const { data } = await supabase.from("pros").select("city, kind, profiles(name)").eq(proKey(key), key).maybeSingle();
   const p = data as unknown as { city: string; kind: Kind | null; profiles: { name: string } | null } | null;
   if (!p) return { title: "Photographer · Rollshot" };
   const title = `${p.profiles?.name ?? "Photographer"} · ${KIND_LABEL[(p.kind ?? "photo") as Kind]} in ${p.city} · Rollshot`;
@@ -24,9 +26,12 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 export default async function ProPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const { supabase, user, profile } = await getMe();
-  const { data } = await supabase.from("pros").select("*, profiles(name), packages(*)").eq("id", id).maybeSingle();
+  const key = decodeURIComponent(id).toLowerCase();
+  const { data } = await supabase.from("pros").select("*, profiles(name, avatar), packages(*)").eq(proKey(key), key).maybeSingle();
   if (!data) notFound();
-  const pro = data as Pro & { profiles: { name: string } | null; packages: Package[] };
+  const pro = data as Pro & { profiles: { name: string; avatar: string | null } | null; packages: Package[] };
+  // Old links use the long id; send them to the readable one (a #book on the link carries over).
+  if (proKey(key) === "id" && pro.handle) redirect(proPath(pro));
   const packages = [...pro.packages].sort((a, b) => a.position - b.position || a.price - b.price);
   const dates = pro.open_dates.filter((d) => d >= today()).sort();
   let cars: Car[] = [];
@@ -35,7 +40,7 @@ export default async function ProPage({ params }: { params: Promise<{ id: string
     const [{ data: c }, { data: k }] = await Promise.all([
       supabase.from("cars").select("*").eq("owner_id", user.id),
       // Only returns a row once this client has a confirmed shoot with the photographer.
-      supabase.from("pro_contacts").select("instagram, phone").eq("pro_id", id).maybeSingle(),
+      supabase.from("pro_contacts").select("instagram, phone").eq("pro_id", pro.id).maybeSingle(),
     ]);
     cars = (c ?? []) as Car[];
     contact = k;
@@ -45,7 +50,7 @@ export default async function ProPage({ params }: { params: Promise<{ id: string
   const { data: shotRows } = await supabase
     .from("shoot_posts")
     .select("*")
-    .eq("pro_id", id)
+    .eq("pro_id", pro.id)
     .eq("hidden_by_owner", false)
     .order("shoot_date", { ascending: false })
     .limit(6);
@@ -62,7 +67,10 @@ export default async function ProPage({ params }: { params: Promise<{ id: string
     <main className="wrap">
       <p className="eyebrow">{KIND_LABEL[(pro.kind ?? "photo") as Kind]} · {pro.city}{late ? <span className="late"> · {lateLabel(late)}</span> : null}</p>
       <div className="row" style={{ justifyContent: "space-between", alignItems: "flex-end" }}>
-        <h1 style={{ marginBottom: 0 }}>{pro.profiles?.name}</h1>
+        <div className="pro-head">
+          <Avatar name={name} avatar={pro.profiles?.avatar} size={72} />
+          <h1>{pro.profiles?.name}</h1>
+        </div>
         {!isMe && <a className="btn solid book-jump" href="#book">Book now</a>}
       </div>
       <div className="row" style={{ margin: "12px 0 20px" }}>
@@ -107,7 +115,7 @@ export default async function ProPage({ params }: { params: Promise<{ id: string
           {!user && (
             <>
               <p className="small muted">Create a free car owner account to pick a package and a date. It takes a minute.</p>
-              <Link className="btn solid" style={{ width: "100%" }} href={`/signup?role=client&next=/p/${pro.id}%23book`}>Sign up to book</Link>
+              <Link className="btn solid" style={{ width: "100%" }} href={`/signup?role=client&next=${proPath(pro)}%23book`}>Sign up to book</Link>
             </>
           )}
           {user && !canBook && !isMe && (

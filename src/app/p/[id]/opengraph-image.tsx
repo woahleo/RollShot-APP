@@ -1,5 +1,5 @@
 import { ogCard, OG_SIZE, publicClient } from "@/lib/og";
-import { KIND_LABEL, type Kind } from "@/lib/types";
+import { KIND_LABEL, proKey, type Kind } from "@/lib/types";
 
 export const runtime = "nodejs";
 export const alt = "A car photographer on Rollshot";
@@ -10,7 +10,8 @@ type Row = { city: string; kind: Kind | null; profiles: { name: string } | null;
 
 export default async function Image({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const { data } = await publicClient().from("pros").select("city, kind, profiles(name), packages(price)").eq("id", id).maybeSingle();
+  const key = decodeURIComponent(id).toLowerCase();
+  const { data } = await publicClient().from("pros").select("city, kind, profiles(name), packages(price)").eq(proKey(key), key).maybeSingle();
   const p = data as unknown as Row | null;
   if (!p) return ogCard();
   const from = p.packages.length ? Math.min(...p.packages.map((k) => k.price)) : null;

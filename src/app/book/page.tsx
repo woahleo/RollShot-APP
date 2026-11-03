@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { CITIES } from "@/lib/types";
+import { CITIES, proPath } from "@/lib/types";
 import ProCard, { type ProRow } from "@/components/ProCard";
 
 const KINDS: { key: string; label: string }[] = [
@@ -46,7 +46,7 @@ export default async function Book({ searchParams }: { searchParams: Promise<{ c
         <p className="notice">No one matches yet. Check back soon, or <Link href="/signup?role=pro">join as a photographer</Link>.</p>
       )}
       <div className="grid pros">
-        {pros.map((p) => <ProCard key={p.id} p={p} href={`/p/${p.id}#book`} />)}
+        {pros.map((p) => <ProCard key={p.id} p={p} href={`${proPath(p)}#book`} />)}
       </div>
     </main>
   );

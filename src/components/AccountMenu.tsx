@@ -2,9 +2,10 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { photoUrl } from "@/lib/types";
 
 /** A round initial that opens a small menu: messages, settings, light/dark and sign out. */
-export default function AccountMenu({ name, label }: { name: string; label: string }) {
+export default function AccountMenu({ name, label, avatar }: { name: string; label: string; avatar?: string | null }) {
   const [open, setOpen] = useState(false);
   const [dark, setDark] = useState(false);
   const box = useRef<HTMLDivElement>(null);
@@ -35,7 +36,12 @@ export default function AccountMenu({ name, label }: { name: string; label: stri
   return (
     <div className="acct" ref={box}>
       <button type="button" className="avatar" aria-label="Account menu" aria-expanded={open} onClick={() => setOpen(!open)}>
-        {(name.trim()[0] ?? "R").toUpperCase()}
+        {avatar ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={photoUrl(avatar)} alt="" />
+        ) : (
+          (name.trim()[0] ?? "R").toUpperCase()
+        )}
       </button>
       {open && (
         <div className="menu" role="menu">
