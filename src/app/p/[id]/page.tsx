@@ -5,6 +5,7 @@ import { KIND_LABEL, carLabel, photoUrl, type Car, type Kind, type Package, type
 import { today } from "@/lib/sun";
 import BookForm from "./BookForm";
 import MessageButton from "./MessageButton";
+import Availability from "./Availability";
 
 export default async function ProPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -74,11 +75,12 @@ export default async function ProPage({ params }: { params: Promise<{ id: string
           <h3>Book {name}</h3>
           {canBook && (
             <>
-              <BookForm packages={packages} dates={dates} cars={cars.map(carLabel).filter(Boolean)} />
+              <BookForm packages={packages} dates={dates} cars={cars.map(carLabel).filter(Boolean)} name={name} />
               <div className="divider">questions first?</div>
               <MessageButton proId={pro.id} />
             </>
           )}
+          {!canBook && <Availability dates={dates} />}
           {!user && (
             <>
               <p className="small muted">Create a free car owner account to pick a package and a date. It takes a minute.</p>
