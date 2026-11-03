@@ -2,7 +2,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { goldenHour, prettyDate, today } from "@/lib/sun";
+import { prettyDate, today } from "@/lib/sun";
 import type { Booking } from "@/lib/types";
 import DateTile from "./DateTile";
 
@@ -54,10 +54,7 @@ export default function BookingRow({ b, who, asPro, openDates, whoLate = 0 }: { 
         </div>
         <span className={`badge ${b.status}`}>{asPro && b.status === "requested" ? "New request" : LABEL[b.status]}{b.status === "cancelled" && b.late_cancel ? " late" : ""}</span>
       </div>
-      <span className="golden small">
-        <span className="sun" aria-hidden="true" /> Golden hour {goldenHour(b.shoot_date)}
-        {b.rain_from ? <span className="muted"> · moved from {prettyDate(b.rain_from)}</span> : null}
-      </span>
+      {b.rain_from ? <span className="small muted">Moved from {prettyDate(b.rain_from)}</span> : null}
       {upcoming && (
         <div className="row">
           {asPro && b.status === "requested" && (
@@ -100,7 +97,6 @@ export default function BookingRow({ b, who, asPro, openDates, whoLate = 0 }: { 
               {options.map((d) => (
                 <button key={d} className="date" disabled={busy} onClick={() => call("rain_check", { p_booking: b.id, p_new_date: d })}>
                   <b>{prettyDate(d)}</b>
-                  <small>{goldenHour(d)}</small>
                 </button>
               ))}
             </div>

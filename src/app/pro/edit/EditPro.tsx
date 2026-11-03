@@ -113,7 +113,7 @@ export default function EditPro({ userId, pro, packages, contact }: { userId: st
           </div>
         </div>
         <label className="field"><span>Bio (400 characters)</span>
-          <textarea maxLength={400} value={info.about} onChange={(e) => setInfo({ ...info, about: e.target.value })} placeholder="Rolling shots on I-95 at golden hour, night shoots downtown…" />
+          <textarea maxLength={400} value={info.about} onChange={(e) => setInfo({ ...info, about: e.target.value })} placeholder="Rolling shots on I-95, night shoots downtown…" />
         </label>
         <p className="small muted">Your Instagram and phone are shown only to clients with a confirmed shoot.</p>
         <div className="row" style={{ flexWrap: "nowrap" }}>

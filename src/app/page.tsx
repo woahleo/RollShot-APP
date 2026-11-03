@@ -1,14 +1,13 @@
 import Link from "next/link";
 import SignedInAs from "@/components/SignedInAs";
 import { accountLabel } from "@/lib/account";
-import { goldenHour, today } from "@/lib/sun";
 import { getMe } from "@/lib/supabase/server";
 import { photoUrl } from "@/lib/types";
 import ProCard, { type ProRow } from "@/components/ProCard";
 
 const STEPS = [
   { n: "01", title: "Pick your photographer", body: "Browse local photographers and videographers by city, style and price." },
-  { n: "02", title: "Choose a golden hour date", body: "Every open day shows its golden hour, so your paint looks its best." },
+  { n: "02", title: "Pick an open day", body: "See the days they're free and book one. No back and forth." },
   { n: "03", title: "Shoot, then share", body: "Chat once you book. If it rains, move the shoot for free." },
 ];
 
@@ -23,7 +22,6 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ d
     .order("updated_at", { ascending: false })
     .limit(3);
   const featured = (data ?? []) as ProRow[];
-  const day = today();
   // The hero shows real work from a photographer on Rollshot when there is some.
   const cover = featured.find((p) => p.photos.length > 0);
 
@@ -34,8 +32,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ d
           {deleted && <p className="notice">Your account was deleted.</p>}
           <p className="eyebrow">West Palm Beach · Boca · Fort Lauderdale · Miami</p>
           <h1 className="hero-title">Your car, shot <em>right.</em></h1>
-          <p className="lede">Book local car photographers and videographers by the shoot. Real portfolios, golden hour dates, no back and forth.</p>
-          <p className="golden"><span className="sun" aria-hidden="true" /> Golden hour today in West Palm · {goldenHour(day)}</p>
+          <p className="lede">Book local car photographers and videographers by the shoot. Real portfolios, real open dates, no back and forth.</p>
           {user ? (
             <SignedInAs profile={profile} label={label} email={user.email ?? ""} wanted={null} />
           ) : (

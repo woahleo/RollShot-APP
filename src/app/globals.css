@@ -109,8 +109,7 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--pink); outl
 .pro-card .cover { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; transition: transform .5s cubic-bezier(.2, .7, .2, 1); }
 .pro-card:hover .cover { transform: scale(1.035); }
 .pro-card .cover.empty { display: grid; place-items: center; color: var(--muted); font-size: 13px; background: linear-gradient(135deg, var(--chip), var(--soft)); }
-.pro-card .tag { position: absolute; left: 10px; bottom: 10px; display: inline-flex; align-items: center; gap: 7px; padding: 5px 11px 5px 9px; border-radius: 999px; background: rgb(255 255 255 / .92); color: #0a0a0a; font-size: 12.5px; backdrop-filter: blur(6px); }
-.pro-card .tag .sun { width: 7px; height: 7px; box-shadow: 0 0 0 3px color-mix(in srgb, var(--sun) 30%, transparent); }
+.pro-card .tag { position: absolute; left: 10px; bottom: 10px; display: inline-flex; align-items: center; gap: 7px; padding: 5px 11px; border-radius: 999px; background: rgb(255 255 255 / .92); color: #0a0a0a; font-size: 12.5px; backdrop-filter: blur(6px); }
 .pro-card .body { display: grid; gap: 2px; padding-inline: 2px; }
 .pro-card h3 { margin: 0; font-size: 17px; }
 .pro-card .from { font-size: 14px; color: var(--muted); white-space: nowrap; }
@@ -190,8 +189,6 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--pink); outl
 @media (min-width: 900px) { .hero { grid-template-columns: 1.05fr 1fr; padding-block: 64px 80px; } }
 .hero-text { display: grid; gap: 14px; align-content: start; }
 .hero-title { font-size: clamp(44px, 8vw, 84px); margin: 0; }
-.golden { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: var(--muted); margin: 0; }
-.sun { width: 10px; height: 10px; border-radius: 50%; background: var(--sun); box-shadow: 0 0 0 4px color-mix(in srgb, var(--sun) 25%, transparent); }
 .viewfinder { position: relative; aspect-ratio: 4 / 3; border-radius: 20px; overflow: hidden; color: var(--ink);
   background:
     radial-gradient(120% 80% at 50% 115%, color-mix(in srgb, var(--sun) 55%, transparent) 0%, transparent 55%),
@@ -235,7 +232,6 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--pink); outl
 .req { display: flex; flex-direction: column; }
 .req h3 { margin: 2px 0 2px; }
 .req-top { display: flex; gap: 14px; align-items: flex-start; }
-.req .golden { margin: 14px 0 0; }
 .req-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-top: auto; padding-top: 14px; border-top: 1px solid var(--line); }
 .req-note { margin: 10px 0 0; }
 .req-late { margin: 6px 0 0; }
@@ -248,7 +244,6 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--pink); outl
 .datetile.dim small:first-child { color: var(--muted); }
 .booking { display: flex; gap: 16px; align-items: flex-start; }
 .booking-main { flex: 1; min-width: 0; display: grid; gap: 8px; }
-.booking-main .golden { flex-wrap: wrap; }
 .stats { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; margin-top: 8px; }
 .stats > div { display: grid; gap: 2px; padding: 16px 18px; }
 .stats > div + div { border-left: 1px solid var(--line); }

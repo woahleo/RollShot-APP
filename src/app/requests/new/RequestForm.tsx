@@ -3,7 +3,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { CITIES, SHOOT_TYPES } from "@/lib/types";
-import { goldenHour, prettyDate, today } from "@/lib/sun";
+import { prettyDate, today } from "@/lib/sun";
 
 const KINDS = [
   { key: "either", label: "Either" },
@@ -83,7 +83,7 @@ export default function RequestForm({ cars }: { cars: string[] }) {
       <label className="field">
         <span>Shoot date</span>
         <input type="date" value={date} min={now} onChange={(e) => setDate(e.target.value)} />
-        {date && <small className="muted">{prettyDate(date)} · golden hour {goldenHour(date)}</small>}
+        {date && <small className="muted">{prettyDate(date)}</small>}
       </label>
       <label className="field">
         <span>Budget (optional)</span>

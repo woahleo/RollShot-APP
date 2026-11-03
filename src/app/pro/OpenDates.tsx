@@ -2,7 +2,7 @@
 import { useRef, useState } from "react";
 import MonthCalendar from "@/components/MonthCalendar";
 import { createClient } from "@/lib/supabase/client";
-import { goldenHour, prettyDate, today } from "@/lib/sun";
+import { prettyDate, today } from "@/lib/sun";
 
 export default function OpenDates({ userId, initial }: { userId: string; initial: string[] }) {
   const [open, setOpen] = useState(() => new Set(initial.filter((d) => d >= today())));
@@ -34,7 +34,7 @@ export default function OpenDates({ userId, initial }: { userId: string; initial
       {upcoming.length > 0 && (
         <div className="picked">
           {upcoming.slice(0, 8).map((d) => (
-            <span key={d}>{prettyDate(d)} · golden hour {goldenHour(d)}</span>
+            <span key={d}>{prettyDate(d)}</span>
           ))}
           {upcoming.length > 8 && <span>+{upcoming.length - 8} more</span>}
         </div>

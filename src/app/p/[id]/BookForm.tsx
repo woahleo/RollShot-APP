@@ -2,7 +2,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { goldenHour, prettyDate } from "@/lib/sun";
+import { prettyDate } from "@/lib/sun";
 import type { Package } from "@/lib/types";
 import MonthCalendar from "@/components/MonthCalendar";
 
@@ -53,10 +53,10 @@ export default function BookForm({ packages, dates, cars, name }: { packages: Pa
           </label>
         ))}
       </div>
-      <p className="small" style={{ margin: "0 0 8px" }}><b>2.</b> Pick a date <span className="muted">(golden hour shown)</span></p>
+      <p className="small" style={{ margin: "0 0 8px" }}><b>2.</b> Pick a date</p>
       <MonthCalendar selected={new Set(date ? [date] : [])} onPick={setDate} isEnabled={(d) => openSet.has(d)} markEnabled startAt={dates[0]} />
       <p className="small" style={{ margin: "8px 0 14px" }}>
-        {date ? <>{prettyDate(date)} · golden hour {goldenHour(date)}</> : <span className="muted">{dates.length ? `Pink days are open (${dates.length}). Tap one to pick it.` : "No open dates yet."}</span>}
+        {date ? <>{prettyDate(date)}</> : <span className="muted">{dates.length ? `Pink days are open (${dates.length}). Tap one to pick it.` : "No open dates yet."}</span>}
       </p>
       <label className="field">
         <span><b style={{ color: "var(--ink)" }}>3.</b> Your car</span>
