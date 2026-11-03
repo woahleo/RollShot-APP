@@ -43,7 +43,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body>
         <header className="top">
           <div className="wrap">
-            <Link href={profile?.role === "pro" ? "/pro" : "/"} className="logo">Rollshot</Link>
+            <Link href="/" className="logo" aria-label="Rollshot home">Rollshot</Link>
             <NavLinks links={links} />
             <div className="top-right">
               {user ? (
