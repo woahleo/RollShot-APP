@@ -1,0 +1,44 @@
+import Link from "next/link";
+import { notFound, redirect } from "next/navigation";
+import { getMe } from "@/lib/supabase/server";
+import type { Message, Thread } from "@/lib/types";
+import Chat from "./Chat";
+
+export default async function ChatPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const { supabase, user } = await getMe();
+  if (!user) redirect("/signup");
+  const { data } = await supabase
+    .from("threads")
+    .select("*, pro:pros(profiles(name)), client:profiles!threads_client_id_fkey(name)")
+    .eq("id", id)
+    .maybeSingle();
+  if (!data) notFound();
+  const t = data as Thread & { pro: { profiles: { name: string } | null } | null; client: { name: string } | null };
+  const [{ data: messages }, { data: bookings }] = await Promise.all([
+    supabase.from("messages").select("*").eq("thread_id", id).order("created_at"),
+    supabase.from("bookings").select("status").eq("pro_id", t.pro_id).eq("client_id", t.client_id),
+  ]);
+  const statuses = (bookings ?? []).map((b) => b.status as string);
+  const confirmed = statuses.some((s) => s === "confirmed" || s === "rescheduled");
+  const requested = statuses.some((s) => s !== "declined");
+  const isPro = t.pro_id === user.id;
+  const other = isPro ? t.client?.name : t.pro?.profiles?.name;
+
+  return (
+    <main className="wrap" style={{ paddingBottom: 16 }}>
+      <div className="row" style={{ justifyContent: "space-between" }}>
+        <h2 style={{ margin: 0 }}>{other ?? "Chat"}</h2>
+        {!isPro && <Link className="btn small" href={`/p/${t.pro_id}`}>{requested ? "View shooter" : "Book a date"}</Link>}
+      </div>
+      <Chat
+        threadId={id}
+        userId={user.id}
+        isPro={isPro}
+        initial={(messages ?? []) as Message[]}
+        confirmed={confirmed}
+        requested={requested}
+      />
+    </main>
+  );
+}
