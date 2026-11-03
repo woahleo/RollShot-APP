@@ -314,3 +314,13 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--pink); outl
 .portfolio .shot-thumb .row { flex-wrap: wrap; gap: 4px !important; }
 .portfolio .shot-thumb .btn { padding: 4px 10px; font-size: 12.5px; }
 .cover-tag { position: absolute; left: 6px; top: 6px; padding: 2px 8px; border-radius: 999px; background: rgb(255 255 255 / .92); color: #0a0a0a; font-size: 12px; }
+
+/* Open day hours */
+.picked button { font: inherit; font-size: 13px; color: var(--ink); background: var(--chip); border: 1px solid transparent; border-radius: 12px; padding: 5px 11px; display: grid; text-align: left; line-height: 1.25; cursor: pointer; }
+.picked button small, .picked span small { color: var(--muted); font-size: 11.5px; }
+.picked button[aria-pressed="true"] { border-color: var(--ink); background: var(--surface); }
+.hours-card { display: grid; gap: 12px; margin-top: 12px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.hours-card .chip .muted { font-size: 12.5px; margin-left: 4px; }
+.chips.times { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 6px; }
+.chips.times .chip { justify-content: center; }
+button.link { background: none; border: 0; padding: 0; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; font: inherit; font-size: 14px; }
