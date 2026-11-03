@@ -38,10 +38,14 @@ export default async function ChatPage({ params, searchParams }: { params: Promi
   return (
     <main className="wrap" style={{ paddingBottom: 16 }}>
       <div className="row" style={{ justifyContent: "space-between" }}>
-        <h2 style={{ margin: 0 }}>{other ?? "Chat"}</h2>
+        <h2 style={{ margin: 0 }}>
+          {isPro ? <Link className="who-link" href={`/u/${t.client_id}`}>{other ?? "Chat"}</Link> : other ?? "Chat"}
+        </h2>
         {crew ? (
           <Link className="btn small" href="/crew">Crew jobs</Link>
-        ) : !isPro && <Link className="btn small" href={`/p/${t.pro_id}`}>{requested ? "View profile" : "Book a date"}</Link>}
+        ) : isPro ? (
+          <Link className="btn small" href={`/u/${t.client_id}`}>Their cars</Link>
+        ) : <Link className="btn small" href={`/p/${t.pro_id}`}>{requested ? "View profile" : "Book a date"}</Link>}
       </div>
       <Chat
         threadId={id}

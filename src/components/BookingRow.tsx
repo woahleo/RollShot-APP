@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -47,7 +48,7 @@ export default function BookingRow({ b, who, asPro, openDates, whoLate = 0 }: { 
       <div className="booking-main">
       <div className="row" style={{ justifyContent: "space-between", alignItems: "flex-start" }}>
         <div>
-          <h3 style={{ margin: 0 }}>{who}{whoLate > 0 && <span className="small muted" style={{ fontWeight: 300 }}> · {whoLate} late cancel{whoLate === 1 ? "" : "s"}</span>}</h3>
+          <h3 style={{ margin: 0 }}>{asPro ? <Link className="who-link" href={`/u/${b.client_id}`}>{who}</Link> : who}{whoLate > 0 && <span className="small muted" style={{ fontWeight: 300 }}> · {whoLate} late cancel{whoLate === 1 ? "" : "s"}</span>}</h3>
           <span className="small muted">
             {b.shoot_time ? `${prettyTime(b.shoot_time)} · ` : ""}
             {b.package_name} · ${b.price}

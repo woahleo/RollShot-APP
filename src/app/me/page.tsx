@@ -4,6 +4,7 @@ import { getMe } from "@/lib/supabase/server";
 import type { Car } from "@/lib/types";
 import { prettyDate, today } from "@/lib/sun";
 import Garage from "./Garage";
+import AvatarUpload from "@/components/AvatarUpload";
 
 export default async function Me() {
   const { supabase, user, profile } = await getMe();
@@ -18,11 +19,21 @@ export default async function Me() {
 
   return (
     <main className="wrap">
-      <h1>Garage<em>.</em></h1>
+      <div className="row" style={{ justifyContent: "space-between", alignItems: "flex-end" }}>
+        <h1 style={{ marginBottom: 0 }}>Garage<em>.</em></h1>
+        <Link className="small" href={`/u/${user.id}`}>See your profile</Link>
+      </div>
+      <div className="card me-card">
+        <AvatarUpload userId={user.id} name={profile.name} avatar={profile.avatar ?? null} />
+        <p className="small muted" style={{ margin: 0 }}>
+          Creators see your photo, your name and your shared cars when they open your profile. Add photos of each car below so they know what they&apos;d be shooting.
+        </p>
+      </div>
       <Garage
         userId={user.id}
-        cars={((cars ?? []) as unknown as (Car & { public: boolean; shoot_posts: { count: number }[] })[]).map((c) => ({
+        cars={((cars ?? []) as unknown as (Car & { public: boolean; photos: string[]; shoot_posts: { count: number }[] })[]).map((c) => ({
           ...c,
+          photos: c.photos ?? [],
           shots: c.shoot_posts?.[0]?.count ?? 0,
         }))}
       />

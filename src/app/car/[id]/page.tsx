@@ -2,8 +2,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getMe } from "@/lib/supabase/server";
-import { carLabel, type Car } from "@/lib/types";
+import { carLabel, photoUrl, type Car } from "@/lib/types";
 import ShotCard, { type ShotRow } from "@/components/ShotCard";
+import PhotoGallery from "@/components/PhotoGallery";
 
 async function load(id: string) {
   const { supabase, user } = await getMe();
@@ -39,8 +40,15 @@ export default async function CarPage({ params }: { params: Promise<{ id: string
       {car.mods && <p className="lede">{car.mods}</p>}
       {mine && !car.public && <p className="notice">This page is off. Turn it on in your <Link href="/me">garage</Link> to share it.</p>}
 
+      {(car.photos?.length ?? 0) > 0 && (
+        <>
+          <p className="eyebrow owner-sub">From the owner</p>
+          <PhotoGallery photos={car.photos!.map(photoUrl)} alt={carLabel(car)} />
+        </>
+      )}
+      {shots.length > 0 && (car.photos?.length ?? 0) > 0 && <p className="eyebrow owner-sub">Shot by creators on Rollshot</p>}
       {shots.length === 0 ? (
-        <p className="notice">
+        <p className="notice" style={{ marginTop: 20 }}>
           No shoots yet.{" "}
           {mine ? <>Once a creator posts the photos from a shoot, they show up here. <Link href="/book">Book one</Link>.</> : "Check back after its next shoot."}
         </p>

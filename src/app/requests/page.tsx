@@ -38,7 +38,13 @@ export default async function Requests({ searchParams }: { searchParams: Promise
   const replies = new Map(((counts ?? []) as { request_id: string; replies: number }[]).map((c) => [c.request_id, Number(c.replies)]));
   const myOffers = new Map(((mine ?? []) as { request_id: string; price: number | null; note: string | null }[]).map((r) => [r.request_id, r]));
   const role = profile?.role ?? null;
-  const late = role === "pro" ? await lateCancels(supabase, rows.map((r) => r.client_id)) : new Map<string, number>();
+  const [late, { data: owners }] = role === "pro"
+    ? await Promise.all([
+        lateCancels(supabase, rows.map((r) => r.client_id)),
+        rows.length ? supabase.from("profiles").select("id, name").in("id", [...new Set(rows.map((r) => r.client_id))]) : Promise.resolve({ data: [] }),
+      ])
+    : [new Map<string, number>(), { data: [] }];
+  const ownerName = new Map(((owners ?? []) as { id: string; name: string }[]).map((o) => [o.id, o.name.split(" ")[0] || o.name]));
 
   return (
     <main className="wrap">
@@ -81,7 +87,13 @@ export default async function Requests({ searchParams }: { searchParams: Promise
                   </span>
                 </div>
               </div>
-              {late.get(r.client_id) ? <p className="small late req-late">Owner: {lateLabel(late.get(r.client_id))}</p> : null}
+              {ownerName.has(r.client_id) && (
+                <p className="small muted req-late">
+                  Posted by <Link className="who-link" href={`/u/${r.client_id}`}>{ownerName.get(r.client_id)}</Link>
+                  {late.get(r.client_id) ? <span className="late"> · {lateLabel(late.get(r.client_id))}</span> : null}
+                </p>
+              )}
+              {!ownerName.has(r.client_id) && late.get(r.client_id) ? <p className="small late req-late">Owner: {lateLabel(late.get(r.client_id))}</p> : null}
               {r.note && <p className="small req-note">{r.note}</p>}
               <div className="req-foot">
                 <span className="small muted">{own ? "Yours · " : ""}{n} {n === 1 ? "offer" : "offers"} · {ago(r.created_at)}</span>

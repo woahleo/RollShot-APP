@@ -2,7 +2,7 @@ export type Role = "client" | "pro";
 export type Kind = "photo" | "video" | "both";
 export const KIND_LABEL: Record<Kind, string> = { photo: "Photo creator", video: "Video creator", both: "Photo + video creator" };
 export type Profile = { id: string; role: Role; name: string; created_at: string; avatar?: string | null };
-export type Car = { id: string; owner_id: string; year: string | null; make: string | null; model: string | null; color: string | null; mods: string | null };
+export type Car = { id: string; owner_id: string; year: string | null; make: string | null; model: string | null; color: string | null; mods: string | null; photos?: string[]; public?: boolean };
 export type Pro = {
   id: string; city: string; kind: Kind; about: string | null; handle?: string | null;
   shoot_types: string[]; open_dates: string[]; photos: string[]; open_hours?: Record<string, string>;
