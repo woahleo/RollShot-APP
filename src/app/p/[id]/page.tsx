@@ -72,7 +72,9 @@ export default async function ProPage({ params }: { params: Promise<{ id: string
           <Avatar name={name} avatar={pro.profiles?.avatar} size={72} />
           <h1>{pro.profiles?.name}</h1>
         </div>
-        {!isMe && <a className="btn solid book-jump" href="#book">Book now</a>}
+        {!isMe && (profile?.role === "pro"
+          ? <Link className="btn solid book-jump" href={`/crew/new?to=${pro.handle ?? pro.id}`}>Hire for a shoot</Link>
+          : <a className="btn solid book-jump" href="#book">Book now</a>)}
       </div>
       <div className="row" style={{ margin: "12px 0 20px" }}>
         {pro.shoot_types.map((t) => (
@@ -115,7 +117,7 @@ export default async function ProPage({ params }: { params: Promise<{ id: string
             </>
           )}
           {user && !canBook && !isMe && (
-            <p className="small muted">You&apos;re signed in with a photographer account. To book a shoot, sign out and sign in with a different account as a car owner account.</p>
+            <p className="small muted">Need {name.split(" ")[0]} on one of your shoots? <Link href={`/crew/new?to=${pro.handle ?? pro.id}`}>Hire them as crew</Link>. To book a shoot as a car owner, use a car owner account.</p>
           )}
           {!canBook && packages.length > 0 && (
             <div className="pkgs" style={{ marginTop: 16 }}>

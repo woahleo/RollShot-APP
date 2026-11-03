@@ -31,7 +31,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   // Two or three links at most; everything else lives in the account menu.
   const links =
     profile?.role === "pro"
-      ? [{ href: "/requests", label: "Requests" }, { href: "/pro", label: "Dashboard" }]
+      ? [{ href: "/requests", label: "Requests" }, { href: "/crew", label: "Crew" }, { href: "/pro", label: "Dashboard" }]
       : profile?.role === "client"
         ? [{ href: "/book", label: "Photographers" }, { href: "/requests", label: "Requests" }, { href: "/shoots", label: "Shoots" }, { href: "/me", label: "Garage" }]
         : [{ href: "/book", label: "Photographers" }, { href: "/requests", label: "Requests" }];
