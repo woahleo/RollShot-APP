@@ -29,7 +29,7 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
     <main className="wrap" style={{ paddingBottom: 16 }}>
       <div className="row" style={{ justifyContent: "space-between" }}>
         <h2 style={{ margin: 0 }}>{other ?? "Chat"}</h2>
-        {!isPro && <Link className="btn small" href={`/p/${t.pro_id}`}>{requested ? "View shooter" : "Book a date"}</Link>}
+        {!isPro && <Link className="btn small" href={`/p/${t.pro_id}`}>{requested ? "View profile" : "Book a date"}</Link>}
       </div>
       <Chat
         threadId={id}

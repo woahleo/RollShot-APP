@@ -1,4 +1,7 @@
 import SignupForm from "./SignupForm";
+import SignedInAs from "@/components/SignedInAs";
+import { accountLabel } from "@/lib/account";
+import { getMe } from "@/lib/supabase/server";
 
 /** Which social sign-ins are switched on in Supabase, so we never show a button that errors. */
 async function enabledProviders(): Promise<{ google: boolean; apple: boolean }> {
@@ -17,6 +20,18 @@ async function enabledProviders(): Promise<{ google: boolean; apple: boolean }> 
 export default async function Signup({ searchParams }: { searchParams: Promise<{ role?: string; next?: string; error?: string }> }) {
   const sp = await searchParams;
   const role = sp.role === "pro" ? "pro" : sp.role === "client" ? "client" : null;
+  const { supabase, user, profile } = await getMe();
+  if (user) {
+    // Already signed in: say which account this is instead of a sign-in form that would ignore the choice.
+    const label = await accountLabel(supabase, profile);
+    return (
+      <main className="wrap">
+        <div className="auth">
+          <SignedInAs profile={profile} label={label} email={user.email ?? ""} wanted={role} />
+        </div>
+      </main>
+    );
+  }
   const providers = await enabledProviders();
   return (
     <main className="wrap">

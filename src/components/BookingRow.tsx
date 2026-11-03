@@ -6,7 +6,7 @@ import { goldenHour, prettyDate, today } from "@/lib/sun";
 import type { Booking } from "@/lib/types";
 
 const LABEL: Record<Booking["status"], string> = {
-  requested: "Waiting on shooter",
+  requested: "Waiting for them to accept",
   confirmed: "Confirmed",
   declined: "Declined",
   rescheduled: "Rain checked",

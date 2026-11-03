@@ -41,7 +41,7 @@ export default function Onboarding({ userId, defaultName, initialRole }: { userI
       <h1 style={{ fontSize: 40 }}>Almost there.</h1>
       <div className="chips" style={{ marginBottom: 20 }}>
         <button type="button" className="chip" aria-pressed={role === "client"} onClick={() => setRole("client")}>I own a car</button>
-        <button type="button" className="chip" aria-pressed={role === "pro"} onClick={() => setRole("pro")}>I shoot cars</button>
+        <button type="button" className="chip" aria-pressed={role === "pro"} onClick={() => setRole("pro")}>I&apos;m a photographer or videographer</button>
       </div>
       <label className="field"><span>Your name</span><input required maxLength={80} value={name} onChange={(e) => setName(e.target.value)} /></label>
       {role === "pro" && (
@@ -60,7 +60,7 @@ export default function Onboarding({ userId, defaultName, initialRole }: { userI
       )}
       {role === "client" && (
         <>
-          <p className="small muted">Add your car so shooters know what they&apos;re working with. You can skip this.</p>
+          <p className="small muted">Add your car so photographers know what they&apos;re working with. You can skip this.</p>
           <div className="row" style={{ flexWrap: "nowrap" }}>
             <label className="field" style={{ flex: "0 0 90px" }}><span>Year</span><input value={car.year} onChange={set("year")} inputMode="numeric" /></label>
             <label className="field" style={{ flex: 1 }}><span>Make</span><input value={car.make} onChange={set("make")} placeholder="BMW" /></label>
