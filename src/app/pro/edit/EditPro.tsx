@@ -2,18 +2,8 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { compress } from "@/lib/photos";
 import { CITIES, KIND_LABEL, SHOOT_TYPES, photoUrl, type Kind, type Package, type Pro } from "@/lib/types";
-
-/** Shrinks a photo to at most 2000px on the long side and re-encodes it as WebP (about 300 to 600 KB). */
-async function compress(file: File): Promise<Blob> {
-  const bmp = await createImageBitmap(file);
-  const scale = Math.min(1, 2000 / Math.max(bmp.width, bmp.height));
-  const canvas = document.createElement("canvas");
-  canvas.width = Math.round(bmp.width * scale);
-  canvas.height = Math.round(bmp.height * scale);
-  canvas.getContext("2d")!.drawImage(bmp, 0, 0, canvas.width, canvas.height);
-  return new Promise((ok, fail) => canvas.toBlob((b) => (b ? ok(b) : fail(new Error("Could not read that image"))), "image/webp", 0.82));
-}
 
 export default function EditPro({ userId, pro, packages, contact }: { userId: string; pro: Pro; packages: Package[]; contact: { instagram: string | null; phone: string | null } | null }) {
   const router = useRouter();
