@@ -324,3 +324,20 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--pink); outl
 .chips.times { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 6px; }
 .chips.times .chip { justify-content: center; }
 button.link { background: none; border: 0; padding: 0; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; font: inherit; font-size: 14px; }
+
+/* Signed-in home */
+.home-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px 20px; flex-wrap: wrap; padding-block: 32px 18px; }
+.home-head h1 { margin: 0; }
+.todo { display: grid; gap: 10px; }
+@media (min-width: 800px) { .todo { grid-template-columns: repeat(2, 1fr); } }
+.todo-item { display: flex; align-items: center; gap: 14px; text-decoration: none; padding: 14px 16px; transition: border-color .15s; }
+.todo-item:hover { border-color: color-mix(in srgb, var(--ink) 30%, var(--line)); }
+.todo-item > div { display: grid; gap: 2px; flex: 1; }
+.todo-item b { font-weight: 400; overflow: hidden; text-overflow: ellipsis; }
+.todo-item.hot { border-color: color-mix(in srgb, var(--pink) 55%, var(--line)); }
+.todo-n { flex: none; width: 46px; height: 46px; border-radius: 12px; display: grid; place-items: center; background: var(--chip); font-size: 20px; }
+.todo-item.hot .todo-n { background: var(--pink); color: #fff; }
+.todo-go { flex: none; font-size: 13.5px; color: var(--ink); white-space: nowrap; }
+.todo-go::after { content: " \2192"; }
+.req-link { text-decoration: none; transition: border-color .15s; }
+.req-link:hover { border-color: color-mix(in srgb, var(--ink) 30%, var(--line)); }

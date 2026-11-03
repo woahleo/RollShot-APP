@@ -5,6 +5,8 @@ import { getMe } from "@/lib/supabase/server";
 import { photoUrl, proPath } from "@/lib/types";
 import { type ProRow } from "@/components/ProCard";
 import Feed, { buildFeed, type FeedShot } from "@/components/Feed";
+import ClientHome from "@/components/home/ClientHome";
+import ProHome from "@/components/home/ProHome";
 
 const STEPS = [
   { n: "01", title: "Pick your photographer", body: "Browse local photographers and videographers by city, style and price." },
@@ -15,6 +17,12 @@ const STEPS = [
 export default async function Home({ searchParams }: { searchParams: Promise<{ deleted?: string }> }) {
   const { deleted } = await searchParams;
   const { supabase, user, profile } = await getMe();
+  // Signed in: your own home feed, different for car owners and photographers.
+  if (user && profile) {
+    return profile.role === "pro"
+      ? <ProHome supabase={supabase} userId={user.id} profile={profile} />
+      : <ClientHome supabase={supabase} userId={user.id} profile={profile} />;
+  }
   const label = await accountLabel(supabase, profile);
   const { data } = await supabase
     .from("pros")
