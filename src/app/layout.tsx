@@ -11,9 +11,15 @@ import { accountLabel } from "@/lib/account";
 
 const outfit = Outfit({ subsets: ["latin"], weight: ["200", "300", "400", "500"], variable: "--font-outfit" });
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : "https://roll-shot-app.vercel.app");
+const DESCRIPTION = "Book car photographers and videographers in South Florida. Real portfolios, real open dates, no back and forth.";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: "Rollshot",
-  description: "Book car photographers and videographers in South Florida.",
+  description: DESCRIPTION,
+  openGraph: { siteName: "Rollshot", type: "website", title: "Rollshot · Your car, shot right.", description: DESCRIPTION },
+  twitter: { card: "summary_large_image", title: "Rollshot · Your car, shot right.", description: DESCRIPTION },
 };
 export const viewport: Viewport = { width: "device-width", initialScale: 1 };
 
