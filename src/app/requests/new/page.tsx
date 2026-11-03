@@ -12,7 +12,7 @@ export default async function NewRequest() {
   return (
     <main className="wrap" style={{ maxWidth: 640 }}>
       <h1 style={{ marginBottom: 6 }}>Post a request<em>.</em></h1>
-      <p className="lede">Photographers in your city see it and reply with dates and a price. Only your city shows, never your name or address.</p>
+      <p className="lede">Pick a date. Photographers send you offers, you compare their work and prices, and choose one. Only your city shows, never your name or address.</p>
       <RequestForm cars={((data ?? []) as Car[]).map(carLabel).filter(Boolean)} />
     </main>
   );

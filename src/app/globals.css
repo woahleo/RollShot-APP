@@ -176,3 +176,10 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--pink); outl
 .req-meta { display: flex; flex-wrap: wrap; gap: 6px; }
 .req-meta span { font-size: 13px; background: var(--chip); border-radius: 999px; padding: 3px 10px; }
 .req-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); }
+.offer-inline { display: grid; gap: 8px; width: 100%; }
+.offers { display: grid; gap: 14px; }
+.offer-row { display: grid; grid-template-columns: 96px 1fr; gap: 14px; align-items: start; }
+.offer-row img, .offer-row .ph { width: 96px; height: 96px; border-radius: 12px; object-fit: cover; background: linear-gradient(135deg, var(--chip), var(--soft)); }
+.offer-row h3 { margin: 0; }
+.offer-row .price { font-size: 26px; font-weight: 300; }
+.offer-row.chosen { border-color: var(--pink); box-shadow: 0 0 0 1px var(--pink); }

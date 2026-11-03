@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getMe } from "@/lib/supabase/server";
 import type { Booking, Pro } from "@/lib/types";
-import { today } from "@/lib/sun";
+import { prettyDate, today } from "@/lib/sun";
 import BookingRow from "@/components/BookingRow";
 import OpenDates from "./OpenDates";
 
@@ -13,11 +13,14 @@ export default async function Dashboard() {
   if (!user) redirect("/signup");
   if (!profile) redirect("/onboarding");
   if (profile.role !== "pro") redirect("/me");
-  const [{ data: pro }, { data: bookings }, { count: packages }] = await Promise.all([
+  const [{ data: pro }, { data: bookings }, { count: packages }, { data: offerRows }] = await Promise.all([
     supabase.from("pros").select("*").eq("id", user.id).single(),
     supabase.from("bookings").select("*, client:profiles!bookings_client_id_fkey(name)").eq("pro_id", user.id).order("shoot_date"),
     supabase.from("packages").select("id", { count: "exact", head: true }).eq("pro_id", user.id),
+    supabase.from("request_replies").select("price, status, request:requests(car, shoot_type, city, date_from)").eq("pro_id", user.id).order("created_at", { ascending: false }).limit(20),
   ]);
+  type MyOffer = { price: number; status: "waiting" | "chosen" | "passed"; request: { car: string; shoot_type: string; city: string; date_from: string } | null };
+  const myOffers = ((offerRows ?? []) as unknown as MyOffer[]).filter((o) => o.request && o.request.date_from >= today());
   const p = pro as Pro;
   const rows = (bookings ?? []) as Row[];
   const now = today();
@@ -60,6 +63,24 @@ export default async function Dashboard() {
       {upcoming.length === 0 && <p className="muted">No confirmed shoots yet.</p>}
       <div style={{ display: "grid", gap: 10 }}>
         {upcoming.map((b) => <BookingRow key={b.id} b={b} who={b.client?.name ?? "Client"} asPro openDates={p.open_dates} />)}
+      </div>
+      <div className="row" style={{ justifyContent: "space-between", alignItems: "baseline" }}>
+        <h2>Your offers</h2>
+        <Link className="small" href="/requests">Find requests</Link>
+      </div>
+      {myOffers.length === 0 && <p className="muted">No offers out. Car owners post dates on the <Link href="/requests">request board</Link>.</p>}
+      <div className="list">
+        {myOffers.map((o, i) => (
+          <div key={i} className="card" style={{ padding: "12px 16px" }}>
+            <span>{o.request!.shoot_type} · {o.request!.car} · {o.request!.city} · {prettyDate(o.request!.date_from)}</span>
+            <span className="row" style={{ gap: 8 }}>
+              <b style={{ fontWeight: 400 }}>${o.price}</b>
+              <span className={`badge ${o.status === "chosen" ? "confirmed" : o.status === "passed" ? "declined" : "requested"}`}>
+                {o.status === "chosen" ? "Chosen" : o.status === "passed" ? "Not chosen" : "Waiting"}
+              </span>
+            </span>
+          </div>
+        ))}
       </div>
       <h2 id="dates">Open dates</h2>
       <p className="small muted">Tap the days you can shoot. Tap again to close a day. Clients only see these days.</p>

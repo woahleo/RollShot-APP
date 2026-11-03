@@ -3,7 +3,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { CITIES, SHOOT_TYPES } from "@/lib/types";
-import { today } from "@/lib/sun";
+import { goldenHour, prettyDate, today } from "@/lib/sun";
 
 const KINDS = [
   { key: "either", label: "Either" },
@@ -24,8 +24,7 @@ export default function RequestForm({ cars }: { cars: string[] }) {
   const [shoot, setShoot] = useState<string>(SHOOT_TYPES[0]);
   const [kind, setKind] = useState<string>("either");
   const [city, setCity] = useState<string>(CITIES[0]);
-  const [from, setFrom] = useState(plus(now, 1));
-  const [to, setTo] = useState(plus(now, 14));
+  const [date, setDate] = useState(plus(now, 7));
   const [budget, setBudget] = useState("");
   const [note, setNote] = useState("");
   const [error, setError] = useState("");
@@ -34,11 +33,11 @@ export default function RequestForm({ cars }: { cars: string[] }) {
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (car.trim().length < 2) return setError("Add your car.");
-    if (to < from) return setError("The last day is before the first day.");
+    if (!date || date < now) return setError("Pick a date from today on.");
     setBusy(true);
     setError("");
     const { error } = await createClient().from("requests").insert({
-      car: car.trim(), shoot_type: shoot, kind, city, date_from: from, date_to: to,
+      car: car.trim(), shoot_type: shoot, kind, city, date_from: date, date_to: date,
       budget: budget ? Number(budget) : null, note: note.trim() || null,
     });
     setBusy(false);
@@ -81,16 +80,11 @@ export default function RequestForm({ cars }: { cars: string[] }) {
           {CITIES.map((c) => <option key={c}>{c}</option>)}
         </select>
       </label>
-      <div className="row" style={{ gap: 12, flexWrap: "nowrap" }}>
-        <label className="field" style={{ flex: 1 }}>
-          <span>Any day from</span>
-          <input type="date" value={from} min={now} onChange={(e) => { setFrom(e.target.value); if (to < e.target.value) setTo(e.target.value); }} />
-        </label>
-        <label className="field" style={{ flex: 1 }}>
-          <span>to</span>
-          <input type="date" value={to} min={from} max={plus(from, 60)} onChange={(e) => setTo(e.target.value)} />
-        </label>
-      </div>
+      <label className="field">
+        <span>Shoot date</span>
+        <input type="date" value={date} min={now} onChange={(e) => setDate(e.target.value)} />
+        {date && <small className="muted">{prettyDate(date)} · golden hour {goldenHour(date)}</small>}
+      </label>
       <label className="field">
         <span>Budget (optional)</span>
         <input value={budget} onChange={(e) => setBudget(e.target.value.replace(/\D/g, ""))} placeholder="$" inputMode="numeric" />
