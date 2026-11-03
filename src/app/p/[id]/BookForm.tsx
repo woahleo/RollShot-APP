@@ -34,7 +34,7 @@ export default function BookForm({ packages, dates, cars, name }: { packages: Pa
     const { error } = await createClient().rpc("request_booking", { p_package: pkg, p_date: date, p_car: car });
     setBusy(false);
     if (error) return setError(error.message);
-    router.push("/me?requested=1");
+    router.push("/shoots?requested=1");
     router.refresh();
   }
 

@@ -27,7 +27,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     profile?.role === "pro"
       ? [{ href: "/requests", label: "Requests" }, { href: "/pro", label: "Dashboard" }]
       : profile?.role === "client"
-        ? [{ href: "/book", label: "Photographers" }, { href: "/requests", label: "Requests" }, { href: "/me", label: "Garage" }]
+        ? [{ href: "/book", label: "Photographers" }, { href: "/requests", label: "Requests" }, { href: "/shoots", label: "Shoots" }, { href: "/me", label: "Garage" }]
         : [{ href: "/book", label: "Photographers" }, { href: "/requests", label: "Requests" }];
   return (
     <html lang="en" data-rs="light" className={outfit.variable} suppressHydrationWarning>

@@ -40,7 +40,7 @@ export default async function RequestOffers({ params }: { params: Promise<{ id: 
       {r.note && <p className="muted" style={{ marginTop: 0 }}>{r.note}</p>}
 
       {chosen ? (
-        <p className="notice">You chose <b>{chosen.pro?.profiles?.name}</b> for ${chosen.price}. It&apos;s booked and confirmed. <Link href="/me">See your shoots</Link></p>
+        <p className="notice">You chose <b>{chosen.pro?.profiles?.name}</b> for ${chosen.price}. It&apos;s booked and confirmed. <Link href="/shoots">See your shoots</Link></p>
       ) : !open ? (
         <p className="notice">This request is closed.</p>
       ) : offers.length === 0 ? (
