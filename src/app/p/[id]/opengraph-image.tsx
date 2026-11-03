@@ -14,7 +14,7 @@ export default async function Image({ params }: { params: Promise<{ id: string }
   const { data } = await publicClient().from("pros").select("city, kind, photos, profiles(name, avatar), packages(price)").eq(proKey(key), key).maybeSingle();
   const p = data as unknown as Row | null;
   if (!p) return ogCard();
-  // Their profile photo; without one, their cover photo; without either, the car sketch.
+  // Their profile photo; without one, their cover photo; without either, the first letter of their name.
   const pic = p.profiles?.avatar ?? p.photos[0];
   const photo = await loadPhoto(pic ? photoUrl(pic) : null);
   const from = p.packages.length ? Math.min(...p.packages.map((k) => k.price)) : null;

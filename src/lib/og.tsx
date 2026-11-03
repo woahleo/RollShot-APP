@@ -36,41 +36,58 @@ function Corner({ pos }: { pos: "tl" | "tr" | "bl" | "br" }) {
   return <div style={{ position: "absolute", width: s, height: s, ...v, ...h }} />;
 }
 
-/** The camera viewfinder with the line-art car, the same one as the home page. */
-function Viewfinder() {
+/** When there's no photo: the viewfinder corners around the first letter on the brand gradient. */
+function Monogram({ letter }: { letter: string }) {
   return (
-    <div style={{ position: "relative", display: "flex", width: 420, height: 330, alignItems: "center", justifyContent: "center" }}>
+    <div style={{ position: "relative", display: "flex", width: 430, height: 430, alignItems: "center", justifyContent: "center" }}>
       <Corner pos="tl" />
       <Corner pos="tr" />
       <Corner pos="bl" />
       <Corner pos="br" />
-      <div style={{ position: "absolute", top: 18, left: 22, right: 22, display: "flex", justifyContent: "space-between", fontSize: 20, color: MUTED }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <div style={{ width: 12, height: 12, borderRadius: 6, background: PINK }} />
-          REC
-        </div>
-        <div style={{ display: "flex" }}>4K · 24</div>
-      </div>
-      <svg width="340" height="125" viewBox="0 0 300 110" fill="none" stroke={INK} strokeWidth="1.6" strokeLinejoin="round" strokeLinecap="round">
-        <path d="M18 80 L24 66 Q30 60 62 56 L102 38 Q116 32 146 32 L180 33 Q204 35 222 49 L252 55 Q276 59 283 70 L285 80" />
-        <path d="M18 80 H62 M98 80 H214 M250 80 H285" />
-        <path d="M108 54 L124 40 Q132 37 146 37 L176 38 Q194 40 206 52 Z" />
-        <path d="M156 38 L154 53" />
-        <circle cx="80" cy="80" r="17" />
-        <circle cx="80" cy="80" r="7" />
-        <circle cx="232" cy="80" r="17" />
-        <circle cx="232" cy="80" r="7" />
-      </svg>
-      <div style={{ position: "absolute", bottom: 18, left: 22, right: 22, display: "flex", justifyContent: "space-between", fontSize: 20, color: MUTED }}>
-        <div style={{ display: "flex" }}>f/2.8</div>
-        <div style={{ display: "flex" }}>1/250</div>
-        <div style={{ display: "flex" }}>ISO 100</div>
+      <div style={{ display: "flex", width: 260, height: 260, borderRadius: 130, alignItems: "center", justifyContent: "center", backgroundImage: `linear-gradient(135deg, ${PINK}, ${SKY} 60%, ${SUN})`, color: "#fff", fontSize: 130, fontWeight: 400 }}>
+        {letter}
       </div>
     </div>
   );
 }
 
-/** A person's photo framed by the viewfinder corners, in place of the car sketch. */
+/** The Rollshot card itself: the whole card is the viewfinder, with the name in the middle. */
+function BrandCard() {
+  const label = { display: "flex", fontSize: 22, color: MUTED, letterSpacing: 1 } as const;
+  return (
+    <div style={{ position: "relative", flex: 1, display: "flex", margin: 48 }}>
+      <Corner pos="tl" />
+      <Corner pos="tr" />
+      <Corner pos="bl" />
+      <Corner pos="br" />
+      <div style={{ position: "absolute", top: 22, left: 30, right: 30, display: "flex", justifyContent: "space-between" }}>
+        <div style={{ ...label, alignItems: "center", gap: 10 }}>
+          <div style={{ width: 14, height: 14, borderRadius: 7, background: PINK }} />
+          REC
+        </div>
+        <div style={label}>4K · 24</div>
+      </div>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ display: "flex", alignItems: "flex-end", fontSize: 170, fontWeight: 200, letterSpacing: -7, lineHeight: 1 }}>
+          Rollshot
+          <div style={{ width: 34, height: 34, borderRadius: 17, background: PINK, marginLeft: 10, marginBottom: 24 }} />
+        </div>
+        <div style={{ display: "flex", fontSize: 46, fontWeight: 200, lineHeight: 1.2, marginTop: 24 }}>
+          Your car, shot&nbsp;<span style={{ color: PINK }}>right.</span>
+        </div>
+        <div style={{ display: "flex", fontSize: 26, color: MUTED, marginTop: 16 }}>
+          Car photo and video creators in South Florida
+        </div>
+      </div>
+      <div style={{ position: "absolute", bottom: 22, left: 30, right: 30, display: "flex", justifyContent: "space-between" }}>
+        <div style={label}>West Palm Beach · Boca · Fort Lauderdale · Miami</div>
+        <div style={label}>f/2.8 · 1/250</div>
+      </div>
+    </div>
+  );
+}
+
+/** A person's photo framed by the viewfinder corners. */
 function PhotoFrame({ src }: { src: string }) {
   return (
     <div style={{ position: "relative", display: "flex", width: 430, height: 430, alignItems: "center", justifyContent: "center" }}>
@@ -91,7 +108,7 @@ function PhotoFrame({ src }: { src: string }) {
 /**
  * Load a public image for the card as a data URL. The card renderer reads PNG and JPEG reliably,
  * and uploads here are usually WebP, so anything else is turned into a JPEG first.
- * Returns null when there's nothing usable, so the card falls back to the car sketch.
+ * Returns null when there's nothing usable, so the card falls back to the first letter.
  */
 export async function loadPhoto(url: string | null | undefined) {
   if (!url) return null;
@@ -121,42 +138,28 @@ export async function ogCard(opts: { eyebrow?: string; title?: string; lines?: s
     (
       <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", background: "#ffffff", fontFamily: "Outfit", color: INK }}>
         <div style={{ height: 10, width: "100%", display: "flex", backgroundImage: `linear-gradient(90deg, ${PINK}, ${SKY} 55%, ${SUN})` }} />
-        <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 80px" }}>
-          <div style={{ display: "flex", flexDirection: "column", maxWidth: 620 }}>
-            {brand ? (
-              <div style={{ display: "flex", flexDirection: "column" }}>
-                <div style={{ display: "flex", fontSize: 26, color: MUTED, letterSpacing: 1 }}>West Palm Beach · Boca · Fort Lauderdale · Miami</div>
-                <div style={{ display: "flex", alignItems: "flex-end", fontSize: 150, fontWeight: 200, letterSpacing: -6, lineHeight: 1, marginTop: 22 }}>
-                  Rollshot
-                  <div style={{ width: 30, height: 30, borderRadius: 15, background: PINK, marginLeft: 8, marginBottom: 22 }} />
-                </div>
-                <div style={{ display: "flex", fontSize: 44, fontWeight: 200, lineHeight: 1.2, marginTop: 26 }}>
-                  Your car, shot&nbsp;<span style={{ color: PINK }}>right.</span>
-                </div>
-                <div style={{ display: "flex", fontSize: 28, color: MUTED, lineHeight: 1.35, marginTop: 14 }}>
-                  Book car photo and video creators by the shoot.
-                </div>
+        {brand ? (
+          <BrandCard />
+        ) : (
+          <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 80px" }}>
+            <div style={{ display: "flex", flexDirection: "column", maxWidth: 620 }}>
+              <div style={{ display: "flex", alignItems: "center", fontSize: 30, fontWeight: 400 }}>
+                Rollshot
+                <div style={{ width: 8, height: 8, borderRadius: 4, background: PINK, marginLeft: 3, marginTop: 10 }} />
+                {opts.eyebrow && <span style={{ color: MUTED, fontWeight: 200, marginLeft: 16 }}>{opts.eyebrow}</span>}
               </div>
-            ) : (
-              <div style={{ display: "flex", flexDirection: "column" }}>
-                <div style={{ display: "flex", alignItems: "center", fontSize: 30, fontWeight: 400 }}>
-                  Rollshot
-                  <div style={{ width: 8, height: 8, borderRadius: 4, background: PINK, marginLeft: 3, marginTop: 10 }} />
-                  {opts.eyebrow && <span style={{ color: MUTED, fontWeight: 200, marginLeft: 16 }}>{opts.eyebrow}</span>}
-                </div>
-                <div style={{ display: "flex", fontSize: (opts.title ?? "").length > 22 ? 72 : 92, fontWeight: 200, letterSpacing: -3, lineHeight: 1.05, marginTop: 28 }}>
-                  {opts.title}
-                </div>
-                {(opts.lines ?? []).map((l, i) => (
-                  <div key={i} style={{ display: "flex", fontSize: 32, color: i === 0 ? INK : MUTED, lineHeight: 1.3, marginTop: i === 0 ? 24 : 6 }}>
-                    {l}
-                  </div>
-                ))}
+              <div style={{ display: "flex", fontSize: (opts.title ?? "").length > 22 ? 72 : 92, fontWeight: 200, letterSpacing: -3, lineHeight: 1.05, marginTop: 28 }}>
+                {opts.title}
               </div>
-            )}
+              {(opts.lines ?? []).map((l, i) => (
+                <div key={i} style={{ display: "flex", fontSize: 32, color: i === 0 ? INK : MUTED, lineHeight: 1.3, marginTop: i === 0 ? 24 : 6 }}>
+                  {l}
+                </div>
+              ))}
+            </div>
+            {opts.photo ? <PhotoFrame src={opts.photo} /> : <Monogram letter={/^[a-z]/i.test((opts.title ?? "").trim()) ? (opts.title ?? "").trim()[0].toUpperCase() : "R"} />}
           </div>
-          {opts.photo ? <PhotoFrame src={opts.photo} /> : <Viewfinder />}
-        </div>
+        )}
       </div>
     ),
     { ...OG_SIZE, fonts: await fonts() },
