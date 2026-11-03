@@ -14,13 +14,15 @@ export default async function SettingsPage() {
     const { data } = await supabase.from("pros").select("photos").eq("id", user.id).maybeSingle();
     photos = (data?.photos as string[] | undefined) ?? [];
   }
+  const { data: cars } = await supabase.from("cars").select("photos").eq("owner_id", user.id);
+  const carPhotos = ((cars ?? []) as { photos: string[] | null }[]).flatMap((c) => c.photos ?? []);
   return (
     <main className="wrap" style={{ maxWidth: 640 }}>
       <h1>Settings</h1>
       <p className="muted" style={{ marginTop: 0 }}>
         {profile.role === "pro" ? <Link href="/pro/edit">Edit your public profile</Link> : <><Link href="/shoots">Your shoots</Link> · <Link href="/me">Your garage</Link></>}
       </p>
-      <Settings userId={user.id} email={user.email ?? ""} name={profile.name} role={profile.role} label={label ?? ""} photos={photos} avatar={profile.avatar ?? null} />
+      <Settings userId={user.id} email={user.email ?? ""} name={profile.name} role={profile.role} label={label ?? ""} photos={photos} avatar={profile.avatar ?? null} carPhotos={carPhotos} />
     </main>
   );
 }

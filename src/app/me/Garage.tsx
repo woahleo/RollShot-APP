@@ -4,10 +4,11 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import { carLabel, type Car } from "@/lib/types";
+import CarPhotos from "./CarPhotos";
 
 const EMPTY = { year: "", make: "", model: "", color: "", mods: "" };
 
-export default function Garage({ userId, cars }: { userId: string; cars: (Car & { public: boolean; shots: number })[] }) {
+export default function Garage({ userId, cars }: { userId: string; cars: (Car & { public: boolean; shots: number; photos: string[] })[] }) {
   const router = useRouter();
   const [form, setForm] = useState(EMPTY);
   const [error, setError] = useState("");
@@ -23,8 +24,11 @@ export default function Garage({ userId, cars }: { userId: string; cars: (Car & 
     await createClient().from("cars").update({ public: on }).eq("id", id);
     router.refresh();
   }
-  async function remove(id: string) {
-    await createClient().from("cars").delete().eq("id", id);
+  async function remove(c: { id: string; photos: string[] }) {
+    const supabase = createClient();
+    const { error } = await supabase.from("cars").delete().eq("id", c.id);
+    if (error) return setError(error.message);
+    if (c.photos.length) await supabase.storage.from("portfolio").remove(c.photos);
     router.refresh();
   }
   const set = (k: keyof typeof EMPTY) => (e: React.ChangeEvent<HTMLInputElement>) => setForm({ ...form, [k]: e.target.value });
@@ -32,9 +36,9 @@ export default function Garage({ userId, cars }: { userId: string; cars: (Car & 
   return (
     <div className="split">
       <div className="list" style={{ alignContent: "start" }}>
-        {cars.length === 0 && <p className="muted">Add your car so creators can plan the shot.</p>}
+        {cars.length === 0 && <p className="muted">Add your car so creators can see what they&apos;d be shooting.</p>}
         {cars.map((c) => (
-          <div key={c.id} className="card">
+          <div key={c.id} className="card garage-car">
             <div style={{ minWidth: 0 }}>
               <h3 style={{ margin: 0 }}>{carLabel(c)}</h3>
               <span className="small muted">
@@ -47,8 +51,9 @@ export default function Garage({ userId, cars }: { userId: string; cars: (Car & 
               <button className="btn small" aria-pressed={c.public} onClick={() => setPublic(c.id, !c.public)}>
                 {c.public ? "Shared" : "Private"}
               </button>
-              <button className="btn small" onClick={() => remove(c.id)}>Remove</button>
+              <button className="btn small" onClick={() => remove(c)}>Remove</button>
             </div>
+            <CarPhotos userId={userId} carId={c.id} photos={c.photos ?? []} />
           </div>
         ))}
       </div>

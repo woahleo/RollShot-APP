@@ -389,3 +389,23 @@ button.link { background: none; border: 0; padding: 0; color: var(--ink); text-d
 /* Creator dashboard: even spacing between sections */
 .dash > section { margin-top: 36px; }
 .dash > section > h2:first-child, .dash > section > .row:first-child h2 { margin-top: 0; }
+
+/* Car owner profiles and garage photos */
+.who-link { color: inherit; text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: 3px; }
+.who-link:hover { text-decoration-color: var(--pink); }
+.me-card { display: grid; gap: 12px; margin: 20px 0 28px; }
+.list > .garage-car { display: grid; gap: 12px; grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
+.garage-car .car-photos { grid-column: 1 / -1; }
+@media (max-width: 560px) { .list > .garage-car { grid-template-columns: 1fr; } }
+.car-photos { display: grid; gap: 6px; }
+.car-photos .drop { display: grid; place-items: center; text-align: center; min-height: 84px; padding: 16px; border: 1.5px dashed var(--line); border-radius: 14px; color: var(--muted); background: var(--soft); font-size: 14px; transition: border-color .15s, color .15s; }
+.car-photos .drop:hover { border-color: var(--pink); color: var(--ink); }
+.car-strip { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: thin; }
+.car-thumb { position: relative; flex: 0 0 72px; height: 72px; border-radius: 12px; overflow: hidden; background: var(--chip); }
+.car-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.car-thumb button { position: absolute; top: 4px; right: 4px; width: 24px; height: 24px; border-radius: 50%; border: 0; background: rgba(0, 0, 0, .55); color: #fff; font-size: 11px; line-height: 24px; padding: 0; cursor: pointer; }
+.car-add { display: grid; place-items: center; border: 1.5px dashed var(--line); background: var(--soft); color: var(--muted); font-size: 14px; }
+.car-add:hover { border-color: var(--pink); color: var(--ink); }
+.owner-page .pro-head { margin-top: 8px; }
+.owner-car { margin-top: 40px; }
+.owner-sub { margin: 18px 0 10px; }
