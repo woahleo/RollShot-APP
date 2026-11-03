@@ -46,7 +46,7 @@ export default function SignupForm({ initialRole, next, linkError, providers }: 
       <h1 style={{ fontSize: 40 }}>{role === "pro" ? "Get booked." : role === "client" ? "Book a shoot." : "Join Rollshot."}</h1>
       <div className="chips" style={{ marginBottom: 20 }}>
         <button className="chip" aria-pressed={role === "client"} onClick={() => setRole("client")}>I own a car</button>
-        <button className="chip" aria-pressed={role === "pro"} onClick={() => setRole("pro")}>I shoot cars</button>
+        <button className="chip" aria-pressed={role === "pro"} onClick={() => setRole("pro")}>I&apos;m a photographer or videographer</button>
       </div>
       {(providers.google || providers.apple) && (
         <>

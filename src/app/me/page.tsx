@@ -23,10 +23,10 @@ export default async function Me({ searchParams }: { searchParams: Promise<{ req
       <h1>Hey {profile.name.split(" ")[0]}.</h1>
       {sp.requested && <p className="notice">Request sent. You&apos;ll see it here when they answer, and chat is open with them now.</p>}
       <h2>Your shoots</h2>
-      {rows.length === 0 && <p className="muted">No shoots yet. <a href="/book">Find a shooter</a>.</p>}
+      {rows.length === 0 && <p className="muted">No shoots yet. <a href="/book">Find a photographer</a>.</p>}
       <div className="list" style={{ display: "grid" }}>
         {rows.map((b) => (
-          <BookingRow key={b.id} b={b} who={b.pro?.profiles?.name ?? "Shooter"} asPro={false} openDates={b.pro?.open_dates ?? []} />
+          <BookingRow key={b.id} b={b} who={b.pro?.profiles?.name ?? "Photographer"} asPro={false} openDates={b.pro?.open_dates ?? []} />
         ))}
       </div>
       <h2>My garage</h2>

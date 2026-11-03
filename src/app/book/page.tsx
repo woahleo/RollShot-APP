@@ -30,7 +30,7 @@ export default async function Book({ searchParams }: { searchParams: Promise<{ c
 
   return (
     <main className="wrap">
-      <h1>Find a <em>shooter.</em></h1>
+      <h1>Find a <em>photographer.</em></h1>
       <p className="lede">Pick a photographer or videographer, then tap Book now on their page.</p>
       <div className="chips" style={{ marginBottom: 10 }}>
         {KINDS.map((k) => (
@@ -44,7 +44,7 @@ export default async function Book({ searchParams }: { searchParams: Promise<{ c
         ))}
       </div>
       {pros.length === 0 && (
-        <p className="notice">No one matches yet. Check back soon, or <Link href="/signup?role=pro">join as a shooter</Link>.</p>
+        <p className="notice">No one matches yet. Check back soon, or <Link href="/signup?role=pro">join as a photographer</Link>.</p>
       )}
       <div className="grid">
         {pros.map((p) => {
@@ -60,7 +60,7 @@ export default async function Book({ searchParams }: { searchParams: Promise<{ c
               )}
               <div className="body">
                 <span className="eyebrow">{KIND_LABEL[(p.kind ?? "photo") as Kind]} · {p.city}</span>
-                <h3>{p.profiles?.name ?? "Shooter"}</h3>
+                <h3>{p.profiles?.name ?? "Photographer"}</h3>
                 {p.shoot_types.length > 0 && <span className="muted small">{p.shoot_types.slice(0, 3).join(", ")}</span>}
                 <span className="small">
                   {from ? `From $${from}` : "No packages yet"}

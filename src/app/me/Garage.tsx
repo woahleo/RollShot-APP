@@ -27,7 +27,7 @@ export default function Garage({ userId, cars }: { userId: string; cars: Car[] }
   return (
     <div className="split">
       <div className="list" style={{ alignContent: "start" }}>
-        {cars.length === 0 && <p className="muted">Add your car so shooters can plan the shot.</p>}
+        {cars.length === 0 && <p className="muted">Add your car so photographers can plan the shot.</p>}
         {cars.map((c) => (
           <div key={c.id} className="card">
             <div>

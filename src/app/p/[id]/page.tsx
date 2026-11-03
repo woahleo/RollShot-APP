@@ -27,7 +27,7 @@ export default async function ProPage({ params }: { params: Promise<{ id: string
   }
   const canBook = profile?.role === "client";
   const isMe = user?.id === pro.id;
-  const name = pro.profiles?.name ?? "this shooter";
+  const name = pro.profiles?.name ?? "this photographer";
   const missing = [
     packages.length === 0 && "a package with a price",
     dates.length === 0 && "open dates",
@@ -86,7 +86,7 @@ export default async function ProPage({ params }: { params: Promise<{ id: string
             </>
           )}
           {user && !canBook && !isMe && (
-            <p className="small muted">You&apos;re signed in with a shooter account. To book a shoot, sign in with a car owner account.</p>
+            <p className="small muted">You&apos;re signed in with a photographer account. To book a shoot, sign out and sign in with a different account as a car owner account.</p>
           )}
           {!canBook && packages.length > 0 && (
             <div className="list small" style={{ marginTop: 12 }}>

@@ -20,5 +20,9 @@ export async function GET(request: NextRequest) {
     const q = role === "pro" || role === "client" ? `?role=${role}` : "";
     return NextResponse.redirect(new URL(`/onboarding${q}`, url.origin));
   }
+  if ((role === "pro" || role === "client") && role !== profile.role) {
+    // They picked the other side, but this account is already set up; explain instead of silently switching.
+    return NextResponse.redirect(new URL(`/signup?role=${role}`, url.origin));
+  }
   return NextResponse.redirect(new URL(safeNext || (profile.role === "pro" ? "/pro" : "/book"), url.origin));
 }

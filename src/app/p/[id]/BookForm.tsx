@@ -65,7 +65,7 @@ export default function BookForm({ packages, dates, cars }: { packages: Package[
         )}
       </label>
       <button className="btn pink" style={{ width: "100%" }} disabled={busy}>Book now</button>
-      <p className="small muted">Free to request. The shooter confirms, then chat fully opens. If it rains, move it for free.</p>
+      <p className="small muted">Free to request. The photographer confirms, then chat fully opens. If it rains, move it for free.</p>
       {error && <p className="error">{error}</p>}
     </form>
   );
