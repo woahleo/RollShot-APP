@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { getMe } from "@/lib/supabase/server";
 import type { Booking, Car } from "@/lib/types";
 import BookingRow from "@/components/BookingRow";
+import { lateCancels } from "@/lib/lateCancels";
 import { prettyDate, today } from "@/lib/sun";
 import Garage from "./Garage";
 
@@ -21,6 +22,7 @@ export default async function Me({ searchParams }: { searchParams: Promise<{ req
   ]);
   const myRequests = (requests ?? []) as { id: string; car: string; shoot_type: string; city: string; date_from: string; request_replies: { count: number }[] }[];
   const rows = (bookings ?? []) as Row[];
+  const late = await lateCancels(supabase, rows.map((b) => b.pro_id));
 
   return (
     <main className="wrap">
@@ -51,7 +53,7 @@ export default async function Me({ searchParams }: { searchParams: Promise<{ req
       {rows.length === 0 && <p className="muted">No shoots yet. <a href="/book">Find a photographer</a>.</p>}
       <div className="list" style={{ display: "grid" }}>
         {rows.map((b) => (
-          <BookingRow key={b.id} b={b} who={b.pro?.profiles?.name ?? "Photographer"} asPro={false} openDates={b.pro?.open_dates ?? []} />
+          <BookingRow key={b.id} b={b} who={b.pro?.profiles?.name ?? "Photographer"} asPro={false} openDates={b.pro?.open_dates ?? []} whoLate={late.get(b.pro_id)} />
         ))}
       </div>
     </main>
