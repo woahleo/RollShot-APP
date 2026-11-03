@@ -20,7 +20,7 @@ export default function SignupForm({ initialRole, next, linkError, providers }: 
 
   async function oauth(provider: "google" | "apple") {
     setBusy(true);
-    const { error } = await createClient().auth.signInWithOAuth({ provider, options: { redirectTo: callback() } });
+    const { error } = await createClient().auth.signInWithOAuth({ provider, options: { redirectTo: callback(), queryParams: { prompt: "select_account" } } });
     if (error) { setError(error.message); setBusy(false); }
   }
 
