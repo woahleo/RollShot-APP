@@ -13,13 +13,19 @@ type Props = {
   monthsAhead?: number;
   /** Ring the tappable days, for when only a few are open. */
   markEnabled?: boolean;
+  /** Open on the month of this day (e.g. the first open date) instead of this month. */
+  startAt?: string;
 };
 
 /** A compact month grid: tap days to pick them, arrows to change month. */
-export default function MonthCalendar({ selected, onPick, isEnabled = () => true, monthsAhead = 3, markEnabled = false }: Props) {
+export default function MonthCalendar({ selected, onPick, isEnabled = () => true, monthsAhead = 3, markEnabled = false, startAt }: Props) {
   const now = today();
   const [y0, m0] = now.split("-").map(Number);
-  const [offset, setOffset] = useState(0);
+  const [offset, setOffset] = useState(() => {
+    if (!startAt || startAt <= now) return 0;
+    const [y1, m1] = startAt.split("-").map(Number);
+    return Math.min((y1 - y0) * 12 + (m1 - m0), monthsAhead - 1);
+  });
   const first = new Date(y0, m0 - 1 + offset, 1);
   const y = first.getFullYear();
   const m = first.getMonth();
