@@ -42,7 +42,7 @@ export default async function CarPage({ params }: { params: Promise<{ id: string
       {shots.length === 0 ? (
         <p className="notice">
           No shoots yet.{" "}
-          {mine ? <>Once a photographer posts the photos from a shoot, they show up here. <Link href="/book">Book one</Link>.</> : "Check back after its next shoot."}
+          {mine ? <>Once a creator posts the photos from a shoot, they show up here. <Link href="/book">Book one</Link>.</> : "Check back after its next shoot."}
         </p>
       ) : (
         <div className="grid pros" style={{ marginTop: 20 }}>

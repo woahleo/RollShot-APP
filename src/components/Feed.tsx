@@ -24,9 +24,9 @@ type Item = {
 };
 
 /**
- * One post per photographer, so the feed reads as a lineup instead of a photo dump.
+ * One post per creator, so the feed reads as a lineup instead of a photo dump.
  * Each one shows their newest finished shoot, or, until they have one, the cover photo
- * they picked for their portfolio. Photographers with recent shoots come first.
+ * they picked for their portfolio. Creators with recent shoots come first.
  */
 export function buildFeed(shots: FeedShot[], pros: FeedPro[], size = 9): Item[] {
   const items: Item[] = [];
@@ -34,7 +34,7 @@ export function buildFeed(shots: FeedShot[], pros: FeedPro[], size = 9): Item[] 
   for (const s of shots) {
     if (seen.has(s.pro_id) || items.length >= size) continue;
     seen.add(s.pro_id);
-    const name = s.pro?.profiles?.name ?? "Photographer";
+    const name = s.pro?.profiles?.name ?? "Creator";
     items.push({
       key: `s-${s.id}`,
       href: `/shot/${s.id}`,
@@ -60,7 +60,7 @@ export function buildFeed(shots: FeedShot[], pros: FeedPro[], size = 9): Item[] 
       href,
       img: photoUrl(p.photos[0]),
       proHref: href,
-      name: p.profiles?.name ?? "Photographer",
+      name: p.profiles?.name ?? "Creator",
       avatar: p.profiles?.avatar ?? null,
       meta: `${KIND_LABEL[(p.kind ?? "photo") as Kind]} · ${p.city}`,
       title: p.shoot_types.slice(0, 2).join(" · ") || "Portfolio",
@@ -73,8 +73,9 @@ export function buildFeed(shots: FeedShot[], pros: FeedPro[], size = 9): Item[] 
   return items;
 }
 
-/** The landing page feed: one big photo per photographer, who shot it, and a way to book. */
-export default function Feed({ items }: { items: Item[] }) {
+/** The landing page feed: one big photo per creator, who shot it, and a way to book. */
+/** forCreators: shown to a creator, so the button opens the other creator's page instead of booking them. */
+export default function Feed({ items, forCreators = false }: { items: Item[]; forCreators?: boolean }) {
   return (
     <div className="feed">
       {items.map((it) => (
@@ -87,7 +88,11 @@ export default function Feed({ items }: { items: Item[] }) {
                 <small>{it.meta}</small>
               </span>
             </Link>
-            <Link className="btn small" href={`${it.proHref}#book`}>Book</Link>
+            {forCreators ? (
+              <Link className="btn small" href={it.proHref}>View</Link>
+            ) : (
+              <Link className="btn small" href={`${it.proHref}#book`}>Book</Link>
+            )}
           </header>
           <Link href={it.href} className="post-media">
             {it.img ? (

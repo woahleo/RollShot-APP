@@ -7,7 +7,7 @@ import { compress } from "@/lib/photos";
 import { photoUrl } from "@/lib/types";
 
 /**
- * A photographer's portfolio: add photos, pick the cover, remove ones they don't want.
+ * A creator's portfolio: add photos, pick the cover, remove ones they don't want.
  * Used on the dashboard and on the profile editor, so uploading is never more than a tap away.
  */
 export default function PortfolioPhotos({ userId, photos: initial, pageHref }: { userId: string; photos: string[]; pageHref?: string }) {

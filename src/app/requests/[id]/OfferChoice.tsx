@@ -3,7 +3,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
-/** Message a photographer about their offer, or choose them (which books the shoot). */
+/** Message a creator about their offer, or choose them (which books the shoot). */
 export default function OfferChoice({ requestId, proId, name, price, date }: { requestId: string; proId: string; name: string; price: number; date: string }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);

@@ -4,7 +4,7 @@ import { KIND_LABEL, photoUrl, type Kind, type Package, type Pro, proPath } from
 
 export type ProRow = Pro & { profiles: { name: string; avatar?: string | null } | null; packages: Package[] };
 
-/** Photo-first card for a photographer: cover, name, starting price, next open day. */
+/** Photo-first card for a creator: cover, name, starting price, next open day. */
 export default function ProCard({ p, href }: { p: ProRow; href?: string }) {
   const from = p.packages.length ? Math.min(...p.packages.map((k) => k.price)) : null;
   const next = p.open_dates.filter((d) => d >= today()).sort()[0];
@@ -21,7 +21,7 @@ export default function ProCard({ p, href }: { p: ProRow; href?: string }) {
       </div>
       <div className="body">
         <div className="line">
-          <h3>{p.profiles?.name ?? "Photographer"}</h3>
+          <h3>{p.profiles?.name ?? "Creator"}</h3>
           {from && <span className="from">From <b>${from}</b></span>}
         </div>
         <span className="muted small">{KIND_LABEL[(p.kind ?? "photo") as Kind]} · {p.city}</span>

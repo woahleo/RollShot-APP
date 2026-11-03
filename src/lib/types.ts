@@ -1,6 +1,6 @@
 export type Role = "client" | "pro";
 export type Kind = "photo" | "video" | "both";
-export const KIND_LABEL: Record<Kind, string> = { photo: "Photographer", video: "Videographer", both: "Photo + video" };
+export const KIND_LABEL: Record<Kind, string> = { photo: "Photo creator", video: "Video creator", both: "Photo + video creator" };
 export type Profile = { id: string; role: Role; name: string; created_at: string; avatar?: string | null };
 export type Car = { id: string; owner_id: string; year: string | null; make: string | null; model: string | null; color: string | null; mods: string | null };
 export type Pro = {
@@ -28,7 +28,7 @@ export function carLabel(c: Partial<Car>) {
   return [c.year, c.color, c.make, c.model].filter(Boolean).join(" ");
 }
 
-/** A photographer's public page: /p/their-name once they have a username, else their id. */
+/** A creator's public page: /p/their-name once they have a username, else their id. */
 export function proPath(p: { id: string; handle?: string | null }) {
   return `/p/${p.handle || p.id}`;
 }

@@ -18,8 +18,8 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const key = decodeURIComponent(id).toLowerCase();
   const { data } = await supabase.from("pros").select("city, kind, profiles(name)").eq(proKey(key), key).maybeSingle();
   const p = data as unknown as { city: string; kind: Kind | null; profiles: { name: string } | null } | null;
-  if (!p) return { title: "Photographer · Rollshot" };
-  const title = `${p.profiles?.name ?? "Photographer"} · ${KIND_LABEL[(p.kind ?? "photo") as Kind]} in ${p.city} · Rollshot`;
+  if (!p) return { title: "Creator · Rollshot" };
+  const title = `${p.profiles?.name ?? "Creator"} · ${KIND_LABEL[(p.kind ?? "photo") as Kind]} in ${p.city} · Rollshot`;
   const description = `See their car shoots and book an open day on Rollshot.`;
   return { title, description, openGraph: { title, description }, twitter: { title, description } };
 }
@@ -40,7 +40,7 @@ export default async function ProPage({ params }: { params: Promise<{ id: string
   if (user) {
     const [{ data: c }, { data: k }] = await Promise.all([
       supabase.from("cars").select("*").eq("owner_id", user.id),
-      // Only returns a row once this client has a confirmed shoot with the photographer.
+      // Only returns a row once this client has a confirmed shoot with the creator.
       supabase.from("pro_contacts").select("instagram, phone").eq("pro_id", pro.id).maybeSingle(),
     ]);
     cars = (c ?? []) as Car[];
@@ -57,7 +57,9 @@ export default async function ProPage({ params }: { params: Promise<{ id: string
     .limit(6);
   const shots = (shotRows ?? []) as unknown as ShotRow[];
   const isMe = user?.id === pro.id;
-  const name = pro.profiles?.name ?? "this photographer";
+  const name = pro.profiles?.name ?? "this creator";
+  const first = name.split(" ")[0];
+  const viewerIsCreator = profile?.role === "pro";
   const missing = [
     packages.length === 0 && "a package with a price",
     dates.length === 0 && "open dates",
@@ -101,7 +103,7 @@ export default async function ProPage({ params }: { params: Promise<{ id: string
           )}
         </div>
         <aside id="book" className="card book-card">
-          <h3>Book {name}</h3>
+          <h3>{viewerIsCreator && !isMe ? `Work with ${first}` : `Book ${name}`}</h3>
           {canBook && (
             <>
               <BookForm packages={packages} dates={dates} hours={pro.open_hours ?? {}} cars={cars.map(carLabel).filter(Boolean)} name={name} />
@@ -116,10 +118,13 @@ export default async function ProPage({ params }: { params: Promise<{ id: string
               <Link className="btn solid" style={{ width: "100%" }} href={`/signup?role=client&next=${proPath(pro)}%23book`}>Sign up to book</Link>
             </>
           )}
-          {user && !canBook && !isMe && (
-            <p className="small muted">Need {name.split(" ")[0]} on one of your shoots? <Link href={`/crew/new?to=${pro.handle ?? pro.id}`}>Hire them as crew</Link>. To book a shoot as a car owner, use a car owner account.</p>
+          {viewerIsCreator && !isMe && (
+            <div style={{ display: "grid", gap: 8, marginTop: 16 }}>
+              <Link className="btn solid" style={{ width: "100%" }} href={`/crew/new?to=${pro.handle ?? pro.id}`}>Hire {first} for a shoot</Link>
+              <MessageButton proId={pro.id} label={`Message ${first}`} />
+            </div>
           )}
-          {!canBook && packages.length > 0 && (
+          {!viewerIsCreator && !canBook && packages.length > 0 && (
             <div className="pkgs" style={{ marginTop: 16 }}>
               {packages.map((k) => (
                 <div key={k.id}>

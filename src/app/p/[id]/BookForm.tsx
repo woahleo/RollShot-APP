@@ -95,7 +95,7 @@ export default function BookForm({ packages, dates, hours = {}, cars, name }: { 
       </label>
       {blocked && <p className="notice small">{blocked}</p>}
       <button className="btn solid" style={{ width: "100%" }} disabled={busy || !!blocked}>Book now</button>
-      <p className="small muted">Free to request. The photographer confirms, then chat fully opens. If it rains, move it for free.</p>
+      <p className="small muted">Free to request. The creator confirms, then chat fully opens. If it rains, move it for free.</p>
       {error && <p className="error">{error}</p>}
     </form>
   );

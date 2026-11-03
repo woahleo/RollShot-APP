@@ -1,7 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { buildFeed, type FeedPro, type FeedShot } from "@/components/Feed";
 
-/** The shared feed: newest shoots, then photographers' cover photos. One post per photographer. */
+/** The shared feed: newest shoots, then creators' cover photos. One post per creator. */
 export async function loadFeed(supabase: SupabaseClient, { size = 9, skipPro }: { size?: number; skipPro?: string } = {}) {
   const [{ data: proRows }, { data: shotRows }] = await Promise.all([
     supabase

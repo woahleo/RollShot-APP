@@ -17,7 +17,7 @@ export default function SignedInAs({ profile, label, email, wanted }: { profile:
   }
   const home = profile.role === "pro" ? "/pro" : "/book";
   const mismatch = wanted && wanted !== profile.role;
-  const other = profile.role === "pro" ? "a car owner" : "a photographer or videographer";
+  const other = profile.role === "pro" ? "a car owner" : "a creator";
   return (
     <div className="card" style={{ display: "grid", gap: 10 }}>
       <span className="badge" style={{ justifySelf: "start" }}>{label}</span>
@@ -29,12 +29,12 @@ export default function SignedInAs({ profile, label, email, wanted }: { profile:
           : ""}
       </p>
       <div className="row">
-        <Link className="btn solid" href={home}>{profile.role === "pro" ? "Go to my dashboard" : "Find a photographer"}</Link>
+        <Link className="btn solid" href={home}>{profile.role === "pro" ? "Go to my dashboard" : "Find a creator"}</Link>
         {mismatch && (
-          <Link className="btn solid" href="/settings">Switch this account to {profile.role === "pro" ? "a car owner" : "a photographer"}</Link>
+          <Link className="btn solid" href="/settings">Switch this account to {profile.role === "pro" ? "a car owner" : "a creator"}</Link>
         )}
         <form action="/auth/signout" method="post">
-          <button className="btn" type="submit">Sign out{mismatch ? ` to join as ${profile.role === "pro" ? "a car owner" : "a photographer"}` : ""}</button>
+          <button className="btn" type="submit">Sign out{mismatch ? ` to join as ${profile.role === "pro" ? "a car owner" : "a creator"}` : ""}</button>
         </form>
       </div>
     </div>

@@ -113,7 +113,7 @@ export async function loadPhoto(url: string | null | undefined) {
 
 /**
  * The link preview card. With no title it is the Rollshot card itself;
- * with one it is a shoot or a photographer, still clearly from Rollshot.
+ * with one it is a shoot or a creator, still clearly from Rollshot.
  */
 export async function ogCard(opts: { eyebrow?: string; title?: string; lines?: string[]; photo?: string | null } = {}) {
   const brand = !opts.title;
@@ -134,7 +134,7 @@ export async function ogCard(opts: { eyebrow?: string; title?: string; lines?: s
                   Your car, shot&nbsp;<span style={{ color: PINK }}>right.</span>
                 </div>
                 <div style={{ display: "flex", fontSize: 28, color: MUTED, lineHeight: 1.35, marginTop: 14 }}>
-                  Book car photographers and videographers by the shoot.
+                  Book car photo and video creators by the shoot.
                 </div>
               </div>
             ) : (

@@ -22,6 +22,6 @@ export default async function Image({ params }: { params: Promise<{ id: string }
   return ogCard({
     eyebrow: "Shot on Rollshot",
     title: s.car,
-    lines: [`${s.shoot_type} · $${s.price} · ${s.city}`, `Shot by ${s.pro?.profiles?.name ?? "a Rollshot photographer"}`],
+    lines: [`${s.shoot_type} · $${s.price} · ${s.city}`, `Shot by ${s.pro?.profiles?.name ?? "a Rollshot creator"}`],
   });
 }
