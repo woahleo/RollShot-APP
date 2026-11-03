@@ -14,7 +14,7 @@ export default async function Page() {
   ]);
   return (
     <main className="wrap">
-      <h1>Your <em>profile.</em></h1>
+      <h1>Your profile<em>.</em></h1>
       <EditPro userId={user.id} pro={pro as Pro} packages={(packages ?? []) as Package[]} contact={contact} />
     </main>
   );

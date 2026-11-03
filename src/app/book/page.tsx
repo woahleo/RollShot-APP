@@ -1,9 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { CITIES, KIND_LABEL, photoUrl, type Kind, type Package, type Pro } from "@/lib/types";
-import { goldenHour, prettyDate, today } from "@/lib/sun";
-
-type Row = Pro & { profiles: { name: string } | null; packages: Package[] };
+import { CITIES } from "@/lib/types";
+import ProCard, { type ProRow } from "@/components/ProCard";
 
 const KINDS: { key: string; label: string }[] = [
   { key: "", label: "Everyone" },
@@ -18,8 +16,7 @@ export default async function Book({ searchParams }: { searchParams: Promise<{ c
   if (city && (CITIES as readonly string[]).includes(city)) q = q.eq("city", city);
   if (kind === "photo" || kind === "video") q = q.in("kind", [kind, "both"]);
   const { data } = await q;
-  const pros = (data ?? []) as Row[];
-  const now = today();
+  const pros = (data ?? []) as ProRow[];
   const href = (c?: string, k?: string) => {
     const p = new URLSearchParams();
     if (c) p.set("city", c);
@@ -30,47 +27,26 @@ export default async function Book({ searchParams }: { searchParams: Promise<{ c
 
   return (
     <main className="wrap">
-      <h1>Find a <em>photographer.</em></h1>
-      <p className="lede">Pick a photographer or videographer, then tap Book now on their page. Or <Link href="/requests">post a request</Link> and let them come to you.</p>
-      <div className="chips" style={{ marginBottom: 10 }}>
-        {KINDS.map((k) => (
-          <Link key={k.key} className="chip" aria-pressed={(kind ?? "") === k.key} href={href(city, k.key)}>{k.label}</Link>
-        ))}
-      </div>
-      <div className="chips" style={{ marginBottom: 20 }}>
-        <Link className="chip" aria-pressed={!city} href={href(undefined, kind)}>All cities</Link>
-        {CITIES.map((c) => (
-          <Link key={c} className="chip" aria-pressed={city === c} href={href(c, kind)}>{c}</Link>
-        ))}
+      <h1>Find a photographer<em>.</em></h1>
+      <p className="lede">Pick someone whose work you like and book an open day. Or <Link href="/requests">post a request</Link> and let them come to you.</p>
+      <div className="filters">
+        <div className="seg" role="group" aria-label="Who">
+          {KINDS.map((k) => (
+            <Link key={k.key} aria-pressed={(kind ?? "") === k.key} href={href(city, k.key)}>{k.label}</Link>
+          ))}
+        </div>
+        <div className="chips scroll" role="group" aria-label="City">
+          <Link className="chip" aria-pressed={!city} href={href(undefined, kind)}>All cities</Link>
+          {CITIES.map((c) => (
+            <Link key={c} className="chip" aria-pressed={city === c} href={href(c, kind)}>{c}</Link>
+          ))}
+        </div>
       </div>
       {pros.length === 0 && (
         <p className="notice">No one matches yet. Check back soon, or <Link href="/signup?role=pro">join as a photographer</Link>.</p>
       )}
-      <div className="grid">
-        {pros.map((p) => {
-          const from = p.packages.length ? Math.min(...p.packages.map((k) => k.price)) : null;
-          const next = p.open_dates.filter((d) => d >= now).sort()[0];
-          return (
-            <Link key={p.id} href={`/p/${p.id}#book`} className="card pro-card">
-              {p.photos[0] ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img className="cover" src={photoUrl(p.photos[0])} alt="" loading="lazy" />
-              ) : (
-                <div className="cover" />
-              )}
-              <div className="body">
-                <span className="eyebrow">{KIND_LABEL[(p.kind ?? "photo") as Kind]} · {p.city}</span>
-                <h3>{p.profiles?.name ?? "Photographer"}</h3>
-                {p.shoot_types.length > 0 && <span className="muted small">{p.shoot_types.slice(0, 3).join(", ")}</span>}
-                <span className="small">
-                  {from ? `From $${from}` : "No packages yet"}
-                  {next ? ` · Next open ${prettyDate(next)}, golden hour ${goldenHour(next)}` : " · No open dates yet"}
-                </span>
-                <span className="btn pink small" style={{ justifySelf: "start", marginTop: 8 }}>Book now</span>
-              </div>
-            </Link>
-          );
-        })}
+      <div className="grid pros">
+        {pros.map((p) => <ProCard key={p.id} p={p} href={`/p/${p.id}#book`} />)}
       </div>
     </main>
   );

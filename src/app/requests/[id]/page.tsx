@@ -60,24 +60,21 @@ export default async function RequestOffers({ params }: { params: Promise<{ id: 
               ) : (
                 <div className="ph" />
               )}
-              <div style={{ display: "grid", gap: 6 }}>
-                <div className="row" style={{ justifyContent: "space-between", alignItems: "baseline" }}>
-                  <div>
-                    <span className="eyebrow">{KIND_LABEL[(o.pro?.kind ?? "photo") as Kind]} · {o.pro?.city}{late.get(o.pro_id) ? <span className="late"> · {lateLabel(late.get(o.pro_id))}</span> : null}</span>
-                    <h3>{name}</h3>
-                  </div>
+              <div style={{ display: "grid", gap: 4, minWidth: 0 }}>
+                <div className="line">
+                  <h3>{name}</h3>
                   <span className="price">${o.price}</span>
                 </div>
-                {o.note && <p className="small" style={{ margin: 0 }}>{o.note}</p>}
-                {o.pro && o.pro.shoot_types.length > 0 && <span className="small muted">{o.pro.shoot_types.slice(0, 3).join(", ")}</span>}
-                <div className="row" style={{ gap: 8, marginTop: 4 }}>
-                  <Link className="btn small" href={`/p/${o.pro_id}`}>See their work</Link>
-                  {o.status === "chosen" ? (
-                    <span className="badge confirmed">Chosen</span>
-                  ) : (
-                    open && <OfferChoice requestId={r.id} proId={o.pro_id} name={name} price={o.price} date={prettyDate(r.date_from)} />
-                  )}
-                </div>
+                <span className="small muted">{KIND_LABEL[(o.pro?.kind ?? "photo") as Kind]} · {o.pro?.city}{late.get(o.pro_id) ? <span className="late"> · {lateLabel(late.get(o.pro_id))}</span> : null}</span>
+                {o.note && <p className="small" style={{ margin: "4px 0 0" }}>{o.note}</p>}
+              </div>
+              <div className="offer-actions">
+                <Link className="btn small" href={`/p/${o.pro_id}`}>Portfolio</Link>
+                {o.status === "chosen" ? (
+                  <span className="badge confirmed">Chosen</span>
+                ) : (
+                  open && <OfferChoice requestId={r.id} proId={o.pro_id} name={name} price={o.price} date={prettyDate(r.date_from)} />
+                )}
               </div>
             </article>
           );

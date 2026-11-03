@@ -3,9 +3,8 @@ import SignedInAs from "@/components/SignedInAs";
 import { accountLabel } from "@/lib/account";
 import { goldenHour, today } from "@/lib/sun";
 import { getMe } from "@/lib/supabase/server";
-import { KIND_LABEL, photoUrl, type Kind, type Package, type Pro } from "@/lib/types";
-
-type Featured = Pro & { profiles: { name: string } | null; packages: Package[] };
+import { photoUrl } from "@/lib/types";
+import ProCard, { type ProRow } from "@/components/ProCard";
 
 const STEPS = [
   { n: "01", title: "Pick your photographer", body: "Browse local photographers and videographers by city, style and price." },
@@ -23,8 +22,10 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ d
     .neq("photos", "{}")
     .order("updated_at", { ascending: false })
     .limit(3);
-  const featured = (data ?? []) as Featured[];
+  const featured = (data ?? []) as ProRow[];
   const day = today();
+  // The hero shows real work from a photographer on Rollshot when there is some.
+  const cover = featured.find((p) => p.photos.length > 0);
 
   return (
     <main>
@@ -44,24 +45,33 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ d
             </div>
           )}
         </div>
-        <div className="viewfinder" aria-hidden="true">
+        <figure className={`viewfinder${cover ? " has-photo" : ""}`}>
+          {cover && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img className="vf-photo" src={photoUrl(cover.photos[0])} alt={`Car shot by ${cover.profiles?.name ?? "a Rollshot photographer"}`} />
+          )}
           <span className="vf-c tl" /><span className="vf-c tr" /><span className="vf-c bl" /><span className="vf-c br" />
-          <div className="vf-hud vf-top"><span><i className="rec" /> REC</span><span>4K · 24</span></div>
-          <svg className="vf-car" viewBox="0 0 300 110" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" strokeLinecap="round">
-            <path d="M18 80 L24 66 Q30 60 62 56 L102 38 Q116 32 146 32 L180 33 Q204 35 222 49 L252 55 Q276 59 283 70 L285 80" />
-            <path d="M18 80 H62 M98 80 H214 M250 80 H285" />
-            <path d="M108 54 L124 40 Q132 37 146 37 L176 38 Q194 40 206 52 Z" />
-            <path d="M156 38 L154 53" />
-            <circle cx="80" cy="80" r="17" /><circle cx="80" cy="80" r="7" />
-            <circle cx="232" cy="80" r="17" /><circle cx="232" cy="80" r="7" />
-          </svg>
-          <div className="vf-focus" />
-          <div className="vf-hud vf-bottom"><span>f/2.8</span><span>1/250</span><span>ISO 100</span></div>
-        </div>
+          <div className="vf-hud vf-top" aria-hidden="true"><span><i className="rec" /> REC</span><span>4K · 24</span></div>
+          {!cover && (
+            <svg className="vf-car" aria-hidden="true" viewBox="0 0 300 110" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" strokeLinecap="round">
+              <path d="M18 80 L24 66 Q30 60 62 56 L102 38 Q116 32 146 32 L180 33 Q204 35 222 49 L252 55 Q276 59 283 70 L285 80" />
+              <path d="M18 80 H62 M98 80 H214 M250 80 H285" />
+              <path d="M108 54 L124 40 Q132 37 146 37 L176 38 Q194 40 206 52 Z" />
+              <path d="M156 38 L154 53" />
+              <circle cx="80" cy="80" r="17" /><circle cx="80" cy="80" r="7" />
+              <circle cx="232" cy="80" r="17" /><circle cx="232" cy="80" r="7" />
+            </svg>
+          )}
+          <div className="vf-focus" aria-hidden="true" />
+          <div className="vf-hud vf-bottom" aria-hidden="true"><span>f/2.8</span><span>1/250</span><span>ISO 100</span></div>
+          {cover && (
+            <figcaption><Link href={`/p/${cover.id}`}>Shot by {cover.profiles?.name} · {cover.city}</Link></figcaption>
+          )}
+        </figure>
       </section>
 
       <section className="wrap section">
-        <p className="eyebrow">How it works</p>
+        <h2 style={{ marginTop: 0 }}>How it works<em>.</em></h2>
         <div className="steps">
           {STEPS.map((s) => (
             <div key={s.n} className="step">
@@ -76,24 +86,11 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ d
       {featured.length > 0 && (
         <section className="wrap section">
           <div className="row" style={{ justifyContent: "space-between", alignItems: "baseline" }}>
-            <p className="eyebrow" style={{ margin: 0 }}>Shooting this week</p>
+            <h2 style={{ margin: 0 }}>Shooting this week<em>.</em></h2>
             <Link className="small" href="/book">See everyone</Link>
           </div>
-          <div className="grid" style={{ marginTop: 12 }}>
-            {featured.map((p) => {
-              const from = p.packages.length ? Math.min(...p.packages.map((k) => k.price)) : null;
-              return (
-                <Link key={p.id} href={`/p/${p.id}`} className="card pro-card">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img className="cover" src={photoUrl(p.photos[0])} alt="" loading="lazy" />
-                  <div className="body">
-                    <span className="eyebrow">{KIND_LABEL[(p.kind ?? "photo") as Kind]} · {p.city}</span>
-                    <h3>{p.profiles?.name}</h3>
-                    {from && <span className="small">From ${from}</span>}
-                  </div>
-                </Link>
-              );
-            })}
+          <div className="grid pros" style={{ marginTop: 16 }}>
+            {featured.map((p) => <ProCard key={p.id} p={p} />)}
           </div>
         </section>
       )}
@@ -109,9 +106,16 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ d
         </div>
       </section>
 
-      <footer className="wrap foot small muted">
-        <span>Rollshot · South Florida</span>
-        <Link href="/book">Find a photographer</Link>
+      <footer className="wrap foot small">
+        <div>
+          <span className="logo">Rollshot</span>
+          <p className="muted" style={{ margin: "6px 0 0" }}>Car photographers and videographers in South Florida.</p>
+        </div>
+        <nav className="foot-links">
+          <Link href="/book">Photographers</Link>
+          <Link href="/requests">Requests</Link>
+          <Link href="/signup?role=pro">Shoot for Rollshot</Link>
+        </nav>
       </footer>
     </main>
   );

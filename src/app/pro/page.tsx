@@ -35,16 +35,16 @@ export default async function Dashboard() {
   return (
     <main className="wrap">
       <div className="row" style={{ justifyContent: "space-between" }}>
-        <h1>Hey {profile.name.split(" ")[0]}.</h1>
+        <h1>Hey {profile.name.split(" ")[0]}<em>.</em></h1>
         <div className="row">
           <Link className="btn small" href={`/p/${user.id}`}>View my page</Link>
           <Link className="btn solid small" href="/pro/edit">Edit profile</Link>
         </div>
       </div>
-      <div className="grid" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))" }}>
-        <div className="card"><span className="eyebrow">New requests</span><h2 style={{ margin: 0 }}>{requests.length}</h2></div>
-        <div className="card"><span className="eyebrow">Upcoming</span><h2 style={{ margin: 0 }}>{upcoming.length}</h2></div>
-        <div className="card"><span className="eyebrow">Booked total</span><h2 style={{ margin: 0 }}>${earned}</h2></div>
+      <div className="stats">
+        <div><b>{requests.length}</b><span>New requests</span></div>
+        <div><b>{upcoming.length}</b><span>Upcoming</span></div>
+        <div><b>${earned}</b><span>Booked total</span></div>
       </div>
       {noPackages || noDates ? (
         <p className="notice" style={{ marginTop: 16 }}>

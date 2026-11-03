@@ -33,7 +33,7 @@ export default function OfferChoice({ requestId, proId, name, price, date }: { r
   return (
     <>
       <button type="button" className="btn small" disabled={busy} onClick={message}>Message</button>
-      <button type="button" className="btn pink small" disabled={busy} onClick={choose}>Choose {name.split(" ")[0]}</button>
+      <button type="button" className="btn solid small" disabled={busy} onClick={choose}>Choose {name.split(" ")[0]}</button>
       {error && <p className="error" style={{ margin: 0, width: "100%" }}>{error}</p>}
     </>
   );

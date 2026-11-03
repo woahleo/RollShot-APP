@@ -1,4 +1,5 @@
 import Link from "next/link";
+import DateTile from "@/components/DateTile";
 import { getMe } from "@/lib/supabase/server";
 import { CITIES } from "@/lib/types";
 import { goldenHour, today } from "@/lib/sun";
@@ -49,11 +50,11 @@ export default async function Requests({ searchParams }: { searchParams: Promise
           </p>
         </div>
         {role !== "pro" && (
-          <Link className="btn pink" href={user ? "/requests/new" : "/signup?role=client&next=/requests/new"}>Post a request</Link>
+          <Link className="btn solid" href={user ? "/requests/new" : "/signup?role=client&next=/requests/new"}>Post a request</Link>
         )}
       </div>
       {posted && <p className="notice" style={{ marginTop: 16 }}>Your request is up. You&apos;ll get a message when a photographer replies.</p>}
-      <div className="chips" style={{ margin: "20px 0" }}>
+      <div className="chips scroll" style={{ margin: "20px 0" }}>
         <Link className="chip" aria-pressed={!city} href="/requests">All cities</Link>
         {CITIES.map((c) => (
           <Link key={c} className="chip" aria-pressed={city === c} href={`/requests?city=${encodeURIComponent(c)}`}>{c}</Link>
@@ -68,16 +69,21 @@ export default async function Requests({ searchParams }: { searchParams: Promise
           const own = !!user && r.client_id === user.id;
           return (
             <article key={r.id} className="card req">
-              <span className="eyebrow">{r.shoot_type} · {KIND[r.kind]}</span>
-              <h3>{r.car}</h3>
-              <div className="req-meta">
-                <span>{r.city}</span>
-                <span>{r.date_from === r.date_to ? short(r.date_from) : `${short(r.date_from)} – ${short(r.date_to)}`}</span>
-                {r.budget && <span>${r.budget} budget</span>}
-                <span>Golden hour {goldenHour(r.date_from)}</span>
-                {late.get(r.client_id) ? <span className="late">Owner: {lateLabel(late.get(r.client_id))}</span> : null}
+              <div className="req-top">
+                <DateTile day={r.date_from} />
+                <div style={{ minWidth: 0 }}>
+                  <span className="eyebrow">{r.shoot_type} · {KIND[r.kind]}</span>
+                  <h3>{r.car}</h3>
+                  <span className="small muted">
+                    {r.city}
+                    {r.date_from !== r.date_to ? ` · until ${short(r.date_to)}` : ""}
+                    {r.budget ? ` · $${r.budget} budget` : ""}
+                  </span>
+                </div>
               </div>
-              {r.note && <p className="small" style={{ margin: "10px 0 0" }}>{r.note}</p>}
+              <p className="golden small"><span className="sun" aria-hidden="true" /> Golden hour {goldenHour(r.date_from)}</p>
+              {late.get(r.client_id) ? <p className="small late req-late">Owner: {lateLabel(late.get(r.client_id))}</p> : null}
+              {r.note && <p className="small req-note">{r.note}</p>}
               <div className="req-foot">
                 <span className="small muted">{own ? "Yours · " : ""}{n} {n === 1 ? "offer" : "offers"} · {ago(r.created_at)}</span>
                 <RequestActions id={r.id} role={role} signedIn={!!user} own={own} offers={n} mine={myOffers.get(r.id) ?? null} budget={r.budget} />

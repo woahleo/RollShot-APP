@@ -31,7 +31,7 @@ export default function SignedInAs({ profile, label, email, wanted }: { profile:
       <div className="row">
         <Link className="btn solid" href={home}>{profile.role === "pro" ? "Go to my dashboard" : "Find a photographer"}</Link>
         {mismatch && (
-          <Link className="btn pink" href="/settings">Switch this account to {profile.role === "pro" ? "a car owner" : "a photographer"}</Link>
+          <Link className="btn solid" href="/settings">Switch this account to {profile.role === "pro" ? "a car owner" : "a photographer"}</Link>
         )}
         <form action="/auth/signout" method="post">
           <button className="btn" type="submit">Sign out{mismatch ? ` to join as ${profile.role === "pro" ? "a car owner" : "a photographer"}` : ""}</button>
