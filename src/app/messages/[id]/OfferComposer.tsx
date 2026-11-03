@@ -8,8 +8,9 @@ import type { Message, Package } from "@/lib/types";
 const MAX = 5;
 
 /** Photographer picks a package (or a custom price) and up to 5 dates to offer in the chat. */
-export default function OfferComposer({ threadId, packages, openDates, onClose, onSent }: {
+export default function OfferComposer({ threadId, packages, openDates, context, onClose, onSent }: {
   threadId: string;
+  context?: string;
   packages: Package[];
   openDates: string[];
   onClose: () => void;
@@ -61,6 +62,7 @@ export default function OfferComposer({ threadId, packages, openDates, onClose, 
         <b style={{ fontWeight: 400 }}>Offer dates</b>
         <button type="button" className="btn small" onClick={onClose}>Cancel</button>
       </div>
+      {context && <p className="notice small" style={{ margin: "10px 0 0" }}>{context}</p>}
       <div className="chips" style={{ margin: "10px 0" }}>
         {packages.map((k) => (
           <button key={k.id} type="button" className="chip" aria-pressed={pkg === k.id} onClick={() => setPkg(k.id)}>

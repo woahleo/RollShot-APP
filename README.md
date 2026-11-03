@@ -17,10 +17,12 @@ Built with Next.js (App Router) and Supabase (sign-in, Postgres, photo storage, 
   - phone numbers, @handles and outside payment apps are blocked until a shoot is confirmed;
   - a photographer's Instagram and phone are visible only to clients with a confirmed shoot.
 
+- Request board: car owners post what they want shot (car, city, date window, budget); photographers reply with an offer in chat. Only the city is shown.
+
 ## Run it
 
 1. Create a free project at [supabase.com](https://supabase.com).
-2. In the Supabase SQL editor, run each file in `supabase/migrations/` in order (0001 to 0005), each in its own new query.
+2. In the Supabase SQL editor, run each file in `supabase/migrations/` in order (0001 to 0006), each in its own new query.
 3. Copy `.env.example` to `.env.local` and fill in the project URL and anon key (Project Settings > API).
 4. In Supabase > Authentication > URL Configuration, set the Site URL to `http://localhost:3000` (and later your real domain), and add `http://localhost:3000/**` to the redirect URLs (the `/**` matters: sign-in links carry extra details after `/auth/callback`).
 5. `npm install` then `npm run dev`, and open http://localhost:3000.

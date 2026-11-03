@@ -5,8 +5,9 @@ import { carLabel, type Car, type Message, type Package, type Thread } from "@/l
 import { today } from "@/lib/sun";
 import Chat from "./Chat";
 
-export default async function ChatPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function ChatPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ offer?: string }> }) {
   const { id } = await params;
+  const { offer } = await searchParams;
   const { supabase, user } = await getMe();
   if (!user) redirect("/signup");
   const { data } = await supabase
@@ -43,6 +44,7 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
         confirmed={confirmed}
         requested={requested}
         unlimited={t.unlimited}
+        startOffer={isPro && offer === "1"}
         otherName={other ?? ""}
         packages={(packages ?? []) as Package[]}
         openDates={((pro as { open_dates: string[] } | null)?.open_dates ?? []).filter((d) => d >= today()).sort()}
