@@ -7,6 +7,7 @@ import BookForm from "./BookForm";
 import { lateCancels, lateLabel } from "@/lib/lateCancels";
 import MessageButton from "./MessageButton";
 import Availability from "./Availability";
+import ShotCard, { type ShotRow } from "@/components/ShotCard";
 
 export default async function ProPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -29,6 +30,14 @@ export default async function ProPage({ params }: { params: Promise<{ id: string
   }
   const canBook = profile?.role === "client";
   const late = (await lateCancels(supabase, [pro.id])).get(pro.id);
+  const { data: shotRows } = await supabase
+    .from("shoot_posts")
+    .select("*")
+    .eq("pro_id", id)
+    .eq("hidden_by_owner", false)
+    .order("shoot_date", { ascending: false })
+    .limit(6);
+  const shots = (shotRows ?? []) as unknown as ShotRow[];
   const isMe = user?.id === pro.id;
   const name = pro.profiles?.name ?? "this photographer";
   const missing = [
@@ -104,6 +113,16 @@ export default async function ProPage({ params }: { params: Promise<{ id: string
           )}
         </aside>
       </div>
+
+      {shots.length > 0 && (
+        <section style={{ marginTop: 8 }}>
+          <h2>Recent shoots<em>.</em></h2>
+          <p className="lede" style={{ marginBottom: 16 }}>Real shoots booked through Rollshot.</p>
+          <div className="grid pros">
+            {shots.map((s) => <ShotCard key={s.id} s={s} showPro={false} />)}
+          </div>
+        </section>
+      )}
     </main>
   );
 }

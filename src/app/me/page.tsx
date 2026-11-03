@@ -11,7 +11,7 @@ export default async function Me() {
   if (!profile) redirect("/onboarding");
   if (profile.role === "pro") redirect("/pro");
   const [{ data: cars }, { data: requests }] = await Promise.all([
-    supabase.from("cars").select("*").eq("owner_id", user.id).order("created_at"),
+    supabase.from("cars").select("*, shoot_posts(count)").eq("owner_id", user.id).order("created_at"),
     supabase.from("requests").select("id, car, shoot_type, city, date_from, status, request_replies(count)").eq("client_id", user.id).eq("status", "open").gte("date_from", today()).order("date_from"),
   ]);
   const myRequests = (requests ?? []) as { id: string; car: string; shoot_type: string; city: string; date_from: string; request_replies: { count: number }[] }[];
@@ -19,7 +19,13 @@ export default async function Me() {
   return (
     <main className="wrap">
       <h1>Garage<em>.</em></h1>
-      <Garage userId={user.id} cars={(cars ?? []) as Car[]} />
+      <Garage
+        userId={user.id}
+        cars={((cars ?? []) as unknown as (Car & { public: boolean; shoot_posts: { count: number }[] })[]).map((c) => ({
+          ...c,
+          shots: c.shoot_posts?.[0]?.count ?? 0,
+        }))}
+      />
       <div className="row" style={{ justifyContent: "space-between", alignItems: "baseline" }}>
         <h2>Requests</h2>
         <Link className="small" href="/requests/new">Post a request</Link>

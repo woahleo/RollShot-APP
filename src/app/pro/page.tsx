@@ -6,6 +6,7 @@ import { prettyDate, today } from "@/lib/sun";
 import BookingRow from "@/components/BookingRow";
 import { lateCancels } from "@/lib/lateCancels";
 import OpenDates from "./OpenDates";
+import ShotCard, { type ShotRow } from "@/components/ShotCard";
 
 type Row = Booking & { client: { name: string } | null };
 
@@ -31,6 +32,11 @@ export default async function Dashboard() {
   const noDates = !p.open_dates.some((d) => d >= now);
   const earned = rows.filter((b) => b.status === "confirmed" || b.status === "rescheduled").reduce((s, b) => s + b.price, 0);
   const late = await lateCancels(supabase, rows.map((b) => b.client_id));
+  const { data: postRows } = await supabase.from("shoot_posts").select("*").eq("pro_id", user.id).order("shoot_date", { ascending: false });
+  const posts = (postRows ?? []) as unknown as ShotRow[];
+  const posted = new Set(posts.map((s) => s.booking_id));
+  // Shoots that happened and still have no photos up.
+  const toPost = rows.filter((b) => (b.status === "confirmed" || b.status === "rescheduled") && b.shoot_date <= now && !posted.has(b.id));
 
   return (
     <main className="wrap">
@@ -84,6 +90,32 @@ export default async function Dashboard() {
           </div>
         ))}
       </div>
+      <div className="row" style={{ justifyContent: "space-between", alignItems: "baseline" }}>
+        <h2>Your shoots<em>.</em></h2>
+        {posts.length > 0 && <Link className="small" href={`/p/${user.id}`}>See your page</Link>}
+      </div>
+      {toPost.length > 0 && (
+        <div className="notice" style={{ display: "grid", gap: 10 }}>
+          <b style={{ fontWeight: 400 }}>{toPost.length} shoot{toPost.length === 1 ? "" : "s"} waiting on photos</b>
+          <span className="muted">Posting them puts your work on your page and on the car&apos;s page, with a Book button on it.</span>
+          <div className="row" style={{ gap: 8 }}>
+            {toPost.slice(0, 4).map((b) => (
+              <Link key={b.id} className="btn small" href={`/pro/post/${b.id}`}>
+                Post {b.car ?? b.package_name} · {prettyDate(b.shoot_date)}
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+      {posts.length === 0 && toPost.length === 0 && (
+        <p className="muted">Nothing posted yet. After a shoot, post the photos here and they show on your page.</p>
+      )}
+      {posts.length > 0 && (
+        <div className="grid pros" style={{ marginTop: 16 }}>
+          {posts.map((s) => <ShotCard key={s.id} s={s} showPro={false} />)}
+        </div>
+      )}
+
       <h2 id="dates">Open dates</h2>
       <p className="small muted">Tap the days you can shoot. Tap again to close a day. Clients only see these days.</p>
       <OpenDates userId={user.id} initial={p.open_dates} />

@@ -4,6 +4,7 @@ import { accountLabel } from "@/lib/account";
 import { getMe } from "@/lib/supabase/server";
 import { photoUrl } from "@/lib/types";
 import ProCard, { type ProRow } from "@/components/ProCard";
+import ShotCard, { type ShotRow } from "@/components/ShotCard";
 
 const STEPS = [
   { n: "01", title: "Pick your photographer", body: "Browse local photographers and videographers by city, style and price." },
@@ -22,6 +23,13 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ d
     .order("updated_at", { ascending: false })
     .limit(3);
   const featured = (data ?? []) as ProRow[];
+  const { data: shotRows } = await supabase
+    .from("shoot_posts")
+    .select("*, pro:pros(profiles(name))")
+    .eq("hidden_by_owner", false)
+    .order("created_at", { ascending: false })
+    .limit(6);
+  const shots = (shotRows ?? []) as unknown as ShotRow[];
   // The hero shows real work from a photographer on Rollshot when there is some.
   const cover = featured.find((p) => p.photos.length > 0);
 
@@ -88,6 +96,19 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ d
           </div>
           <div className="grid pros" style={{ marginTop: 16 }}>
             {featured.map((p) => <ProCard key={p.id} p={p} />)}
+          </div>
+        </section>
+      )}
+
+      {shots.length > 0 && (
+        <section className="wrap section">
+          <div className="row" style={{ justifyContent: "space-between", alignItems: "baseline" }}>
+            <h2 style={{ margin: 0 }}>Shot on Rollshot<em>.</em></h2>
+            <Link className="small" href="/book">Book one of them</Link>
+          </div>
+          <p className="lede" style={{ margin: "8px 0 0" }}>Every one of these was a real booking. Tap a car to see the shoot and what it cost.</p>
+          <div className="grid pros" style={{ marginTop: 16 }}>
+            {shots.map((s) => <ShotCard key={s.id} s={s} />)}
           </div>
         </section>
       )}

@@ -261,3 +261,10 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--pink); outl
 .offer-row.chosen { border-color: var(--pink); box-shadow: 0 0 0 1px var(--pink); }
 .badge.cancelled { background: var(--chip); color: var(--muted); }
 .late { color: var(--bad); }
+
+/* finished shoots */
+.pro-card .count { position: absolute; right: 10px; top: 10px; padding: 4px 10px; border-radius: 999px; background: rgb(0 0 0 / .55); color: #fff; font-size: 12px; backdrop-filter: blur(6px); }
+.shot-card .cover { aspect-ratio: 3 / 2; }
+.shot-thumb { display: grid; gap: 6px; align-content: start; }
+.shot-thumb img { aspect-ratio: 1; object-fit: cover; border-radius: 12px; width: 100%; }
+.btn[aria-pressed="true"] { background: var(--solid); color: var(--solid-ink); border-color: var(--solid); }

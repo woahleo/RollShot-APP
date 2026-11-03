@@ -31,3 +31,10 @@ export function carLabel(c: Partial<Car>) {
 export function photoUrl(path: string) {
   return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/portfolio/${path}`;
 }
+
+export type ShootPost = {
+  id: string; booking_id: string; pro_id: string; owner_id: string; car_id: string | null;
+  car: string; city: string; shoot_type: string; price: number; shoot_date: string;
+  caption: string | null; photos: string[]; video_url: string | null;
+  hidden_by_owner: boolean; created_at: string;
+};

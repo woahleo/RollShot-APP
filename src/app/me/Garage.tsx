@@ -2,11 +2,12 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import Link from "next/link";
 import { carLabel, type Car } from "@/lib/types";
 
 const EMPTY = { year: "", make: "", model: "", color: "", mods: "" };
 
-export default function Garage({ userId, cars }: { userId: string; cars: Car[] }) {
+export default function Garage({ userId, cars }: { userId: string; cars: (Car & { public: boolean; shots: number })[] }) {
   const router = useRouter();
   const [form, setForm] = useState(EMPTY);
   const [error, setError] = useState("");
@@ -16,6 +17,10 @@ export default function Garage({ userId, cars }: { userId: string; cars: Car[] }
     const { error } = await createClient().from("cars").insert({ owner_id: userId, ...form });
     if (error) return setError(error.message);
     setForm(EMPTY);
+    router.refresh();
+  }
+  async function setPublic(id: string, on: boolean) {
+    await createClient().from("cars").update({ public: on }).eq("id", id);
     router.refresh();
   }
   async function remove(id: string) {
@@ -30,11 +35,20 @@ export default function Garage({ userId, cars }: { userId: string; cars: Car[] }
         {cars.length === 0 && <p className="muted">Add your car so photographers can plan the shot.</p>}
         {cars.map((c) => (
           <div key={c.id} className="card">
-            <div>
+            <div style={{ minWidth: 0 }}>
               <h3 style={{ margin: 0 }}>{carLabel(c)}</h3>
-              {c.mods && <span className="small muted">{c.mods}</span>}
+              <span className="small muted">
+                {c.shots > 0 ? `${c.shots} shoot${c.shots === 1 ? "" : "s"} posted` : "No shoots posted yet"}
+                {c.mods ? ` · ${c.mods}` : ""}
+              </span>
             </div>
-            <button className="btn small" onClick={() => remove(c.id)}>Remove</button>
+            <div className="row" style={{ gap: 8 }}>
+              <Link className="btn small" href={`/car/${c.id}`}>Car page</Link>
+              <button className="btn small" aria-pressed={c.public} onClick={() => setPublic(c.id, !c.public)}>
+                {c.public ? "Shared" : "Private"}
+              </button>
+              <button className="btn small" onClick={() => remove(c.id)}>Remove</button>
+            </div>
           </div>
         ))}
       </div>
