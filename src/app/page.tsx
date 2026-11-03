@@ -7,6 +7,7 @@ import { type ProRow } from "@/components/ProCard";
 import Feed, { buildFeed, type FeedShot } from "@/components/Feed";
 import ClientHome from "@/components/home/ClientHome";
 import ProHome from "@/components/home/ProHome";
+import HeroSlides, { type Slide } from "@/components/HeroSlides";
 
 const STEPS = [
   { n: "01", title: "Pick your creator", body: "Browse local photo and video creators by city, style and price." },
@@ -40,8 +41,11 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ d
   const shots = (shotRows ?? []) as unknown as FeedShot[];
   // Real shoots first; until there are enough, creators' portfolio shots fill the feed.
   const feed = buildFeed(shots, featured, 9);
-  // The hero shows real work from a creator on Rollshot when there is some.
-  const cover = featured.find((p) => p.photos.length > 0);
+  // The hero cycles through creators' photos in a random order, so a different creator's work shows
+  // every few seconds. Creators are shuffled, then their photos are dealt out in turns so the same
+  // creator never shows twice in a row (unless they're the only one).
+  const slides = heroSlides(featured, shots);
+  const cover = slides.length > 0;
 
   return (
     <main>
@@ -61,10 +65,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ d
           )}
         </div>
         <figure className={`viewfinder${cover ? " has-photo" : ""}`}>
-          {cover && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img className="vf-photo" src={photoUrl(cover.photos[0])} alt={`Car shot by ${cover.profiles?.name ?? "a Rollshot creator"}`} />
-          )}
+          <HeroSlides slides={slides} />
           <span className="vf-c tl" /><span className="vf-c tr" /><span className="vf-c bl" /><span className="vf-c br" />
           <div className="vf-hud vf-top" aria-hidden="true"><span><i className="rec" /> REC</span><span>4K · 24</span></div>
           {!cover && (
@@ -78,9 +79,6 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ d
             </svg>
           )}
           <div className="vf-hud vf-bottom" aria-hidden="true"><span>f/2.8</span><span>1/250</span><span>ISO 100</span></div>
-          {cover && (
-            <figcaption><Link href={proPath(cover)}>Shot by {cover.profiles?.name} · {cover.city}</Link></figcaption>
-          )}
         </figure>
       </section>
 
@@ -137,4 +135,39 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ d
       </footer>
     </main>
   );
+}
+
+function shuffle<T>(a: T[]) {
+  const x = [...a];
+  for (let i = x.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [x[i], x[j]] = [x[j], x[i]];
+  }
+  return x;
+}
+
+/** Up to 16 photos from creators' portfolios and posted shoots, in a random order, one creator at a time. */
+function heroSlides(pros: ProRow[], shots: FeedShot[], max = 16): Slide[] {
+  const byPro = new Map<string, Slide[]>();
+  for (const p of pros) {
+    const href = proPath(p);
+    const list = p.photos.map((ph) => ({ src: photoUrl(ph), name: p.profiles?.name ?? "a Rollshot creator", city: p.city, href }));
+    byPro.set(p.id, list);
+  }
+  for (const s of shots) {
+    const list = byPro.get(s.pro_id) ?? [];
+    for (const ph of s.photos) list.push({ src: photoUrl(ph), name: s.pro?.profiles?.name ?? "a Rollshot creator", city: s.city, href: `/shot/${s.id}` });
+    byPro.set(s.pro_id, list);
+  }
+  const queues = shuffle([...byPro.values()].filter((l) => l.length)).map((l) => shuffle(l));
+  const out: Slide[] = [];
+  const seen = new Set<string>();
+  while (out.length < max && queues.some((q) => q.length)) {
+    for (const q of queues) {
+      const next = q.shift();
+      if (next && !seen.has(next.src)) { seen.add(next.src); out.push(next); }
+      if (out.length >= max) break;
+    }
+  }
+  return out;
 }

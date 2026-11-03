@@ -202,6 +202,11 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--pink); outl
 .viewfinder.has-photo { color: #fff; background: #111; border: 0; box-shadow: var(--shadow); }
 .viewfinder.has-photo::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgb(0 0 0 / .28), transparent 30%, transparent 62%, rgb(0 0 0 / .5)); pointer-events: none; }
 .vf-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.vf-slide { opacity: 0; transition: opacity 1.2s ease; }
+.vf-slide[data-on] { opacity: 1; }
+.vf-slide[data-prev] { opacity: 1; z-index: -1; transition: none; }
+.viewfinder { isolation: isolate; }
+@media (prefers-reduced-motion: reduce) { .vf-slide { transition: none; } }
 .viewfinder .vf-c, .viewfinder .vf-hud, .viewfinder figcaption { z-index: 1; }
 .viewfinder.has-photo .vf-c { border-color: #fff; }
 .viewfinder figcaption { position: absolute; left: 44px; bottom: 44px; font-size: 13px; }
