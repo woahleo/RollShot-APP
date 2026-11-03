@@ -4,6 +4,8 @@ import Link from "next/link";
 import "./globals.css";
 import ThemeToggle from "@/components/ThemeToggle";
 import ChatBubble from "@/components/ChatBubble";
+import NavLinks from "@/components/NavLinks";
+import AccountMenu from "@/components/AccountMenu";
 import { getMe } from "@/lib/supabase/server";
 import { accountLabel } from "@/lib/account";
 
@@ -20,6 +22,13 @@ const themeScript = `try{var t=localStorage.getItem("rs-theme");if(t)document.do
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { supabase, user, profile } = await getMe();
   const label = await accountLabel(supabase, profile);
+  // Two or three links at most; everything else lives in the account menu.
+  const links =
+    profile?.role === "pro"
+      ? [{ href: "/requests", label: "Requests" }, { href: "/pro", label: "Dashboard" }]
+      : profile?.role === "client"
+        ? [{ href: "/book", label: "Photographers" }, { href: "/requests", label: "Requests" }, { href: "/me", label: "Garage" }]
+        : [{ href: "/book", label: "Photographers" }, { href: "/requests", label: "Requests" }];
   return (
     <html lang="en" data-rs="light" className={outfit.variable} suppressHydrationWarning>
       <head>
@@ -28,17 +37,18 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body>
         <header className="top">
           <div className="wrap">
-            <Link href="/" className="logo">Rollshot</Link>
-            <nav className="nav">
-              {profile?.role !== "pro" && <Link href="/book">Find a photographer</Link>}
-              {profile?.role === "pro" && <Link href="/pro">Dashboard</Link>}
-              {profile?.role === "client" && <Link href="/me">My garage</Link>}
-              {user && <Link href="/messages">Messages</Link>}
-              {label && <span className="badge">{label}</span>}
-              {!user && <Link href="/signup">Sign up</Link>}
-              {user && <Link href="/settings">Settings</Link>}
-              <ThemeToggle />
-            </nav>
+            <Link href={profile?.role === "pro" ? "/pro" : "/"} className="logo">Rollshot</Link>
+            <NavLinks links={links} />
+            <div className="top-right">
+              {user ? (
+                <AccountMenu name={profile?.name ?? ""} label={label ?? ""} />
+              ) : (
+                <>
+                  <ThemeToggle />
+                  <Link href="/signup" className="btn solid small">Sign in</Link>
+                </>
+              )}
+            </div>
           </div>
         </header>
         {children}

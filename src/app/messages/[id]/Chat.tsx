@@ -14,6 +14,7 @@ type Props = {
   confirmed: boolean;
   requested: boolean;
   unlimited: boolean;
+  startOffer?: boolean;
   otherName: string;
   packages: Package[];
   openDates: string[];
@@ -26,12 +27,12 @@ const merge = (prev: Message[], next: Message[]) => {
   return [...byId.values()].sort((a, b) => a.created_at.localeCompare(b.created_at));
 };
 
-export default function Chat({ threadId, userId, isPro, initial, confirmed, requested, unlimited, otherName, packages, openDates, cars }: Props) {
+export default function Chat({ threadId, userId, isPro, initial, confirmed, requested, unlimited, startOffer = false, otherName, packages, openDates, cars }: Props) {
   const router = useRouter();
   const [messages, setMessages] = useState(initial);
   const [text, setText] = useState("");
   const [error, setError] = useState("");
-  const [composing, setComposing] = useState(false);
+  const [composing, setComposing] = useState(startOffer);
   const [busy, setBusy] = useState(false);
   const log = useRef<HTMLDivElement>(null);
   const lastSystem = useRef(initial.filter((m) => m.kind === "system").length);
@@ -99,6 +100,7 @@ export default function Chat({ threadId, userId, isPro, initial, confirmed, requ
       {composing ? (
         <OfferComposer
           threadId={threadId}
+          context={messages.filter((m) => m.kind === "system").at(-1)?.body}
           packages={packages}
           openDates={openDates}
           onClose={() => setComposing(false)}

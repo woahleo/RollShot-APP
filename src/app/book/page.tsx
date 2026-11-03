@@ -31,7 +31,7 @@ export default async function Book({ searchParams }: { searchParams: Promise<{ c
   return (
     <main className="wrap">
       <h1>Find a <em>photographer.</em></h1>
-      <p className="lede">Pick a photographer or videographer, then tap Book now on their page.</p>
+      <p className="lede">Pick a photographer or videographer, then tap Book now on their page. Or <Link href="/requests">post a request</Link> and let them come to you.</p>
       <div className="chips" style={{ marginBottom: 10 }}>
         {KINDS.map((k) => (
           <Link key={k.key} className="chip" aria-pressed={(kind ?? "") === k.key} href={href(city, k.key)}>{k.label}</Link>
