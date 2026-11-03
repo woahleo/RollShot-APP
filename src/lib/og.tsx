@@ -70,11 +70,52 @@ function Viewfinder() {
   );
 }
 
+/** A person's photo framed by the viewfinder corners, in place of the car sketch. */
+function PhotoFrame({ src }: { src: string }) {
+  return (
+    <div style={{ position: "relative", display: "flex", width: 430, height: 430, alignItems: "center", justifyContent: "center" }}>
+      <Corner pos="tl" />
+      <Corner pos="tr" />
+      <Corner pos="bl" />
+      <Corner pos="br" />
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={src} width={370} height={370} alt="" style={{ width: 370, height: 370, borderRadius: 24, objectFit: "cover" }} />
+      <div style={{ position: "absolute", top: 44, left: 44, display: "flex", alignItems: "center", gap: 8, padding: "6px 12px", borderRadius: 999, background: "rgba(10,10,10,.55)", color: "#fff", fontSize: 18 }}>
+        <div style={{ width: 10, height: 10, borderRadius: 5, background: PINK }} />
+        REC
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Load a public image for the card as a data URL. The card renderer reads PNG and JPEG reliably,
+ * and uploads here are usually WebP, so anything else is turned into a JPEG first.
+ * Returns null when there's nothing usable, so the card falls back to the car sketch.
+ */
+export async function loadPhoto(url: string | null | undefined) {
+  if (!url) return null;
+  try {
+    const res = await fetch(url, { signal: AbortSignal.timeout(4000) });
+    if (!res.ok) return null;
+    let buf = Buffer.from(await res.arrayBuffer());
+    let type = res.headers.get("content-type") ?? "";
+    if (!/^image\/(png|jpeg)$/.test(type)) {
+      const sharp = (await import("sharp")).default;
+      buf = await sharp(buf).rotate().resize(740, 740, { fit: "cover" }).jpeg({ quality: 85 }).toBuffer();
+      type = "image/jpeg";
+    }
+    return `data:${type};base64,${buf.toString("base64")}`;
+  } catch {
+    return null;
+  }
+}
+
 /**
  * The link preview card. With no title it is the Rollshot card itself;
  * with one it is a shoot or a photographer, still clearly from Rollshot.
  */
-export async function ogCard(opts: { eyebrow?: string; title?: string; lines?: string[] } = {}) {
+export async function ogCard(opts: { eyebrow?: string; title?: string; lines?: string[]; photo?: string | null } = {}) {
   const brand = !opts.title;
   return new ImageResponse(
     (
@@ -114,7 +155,7 @@ export async function ogCard(opts: { eyebrow?: string; title?: string; lines?: s
               </div>
             )}
           </div>
-          <Viewfinder />
+          {opts.photo ? <PhotoFrame src={opts.photo} /> : <Viewfinder />}
         </div>
       </div>
     ),
