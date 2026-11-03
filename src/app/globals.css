@@ -183,3 +183,5 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--pink); outl
 .offer-row h3 { margin: 0; }
 .offer-row .price { font-size: 26px; font-weight: 300; }
 .offer-row.chosen { border-color: var(--pink); box-shadow: 0 0 0 1px var(--pink); }
+.badge.cancelled { background: var(--chip); color: var(--muted); }
+.late { color: var(--bad); }

@@ -5,6 +5,7 @@ import { KIND_LABEL, photoUrl, type Kind } from "@/lib/types";
 import { goldenHour, prettyDate } from "@/lib/sun";
 import type { Request } from "../page";
 import OfferChoice from "./OfferChoice";
+import { lateCancels, lateLabel } from "@/lib/lateCancels";
 
 type Offer = {
   pro_id: string; price: number; note: string | null; status: "waiting" | "chosen" | "passed"; created_at: string;
@@ -25,6 +26,7 @@ export default async function RequestOffers({ params }: { params: Promise<{ id: 
     .eq("request_id", id)
     .order("price");
   const offers = (rows ?? []) as unknown as Offer[];
+  const late = await lateCancels(supabase, offers.map((o) => o.pro_id));
   const open = r.status === "open";
   const chosen = offers.find((o) => o.status === "chosen");
 
@@ -61,7 +63,7 @@ export default async function RequestOffers({ params }: { params: Promise<{ id: 
               <div style={{ display: "grid", gap: 6 }}>
                 <div className="row" style={{ justifyContent: "space-between", alignItems: "baseline" }}>
                   <div>
-                    <span className="eyebrow">{KIND_LABEL[(o.pro?.kind ?? "photo") as Kind]} · {o.pro?.city}</span>
+                    <span className="eyebrow">{KIND_LABEL[(o.pro?.kind ?? "photo") as Kind]} · {o.pro?.city}{late.get(o.pro_id) ? <span className="late"> · {lateLabel(late.get(o.pro_id))}</span> : null}</span>
                     <h3>{name}</h3>
                   </div>
                   <span className="price">${o.price}</span>

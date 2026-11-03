@@ -27,7 +27,7 @@ export default async function ChatPage({ params, searchParams }: { params: Promi
   ]);
   const statuses = (bookings ?? []).map((b) => b.status as string);
   const confirmed = statuses.some((s) => s === "confirmed" || s === "rescheduled");
-  const requested = statuses.some((s) => s !== "declined");
+  const requested = statuses.some((s) => s !== "declined" && s !== "cancelled");
   const other = isPro ? t.client?.name : t.pro?.profiles?.name;
 
   return (

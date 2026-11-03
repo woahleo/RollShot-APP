@@ -3,6 +3,7 @@ import { getMe } from "@/lib/supabase/server";
 import { CITIES } from "@/lib/types";
 import { goldenHour, today } from "@/lib/sun";
 import RequestActions from "./RequestActions";
+import { lateCancels, lateLabel } from "@/lib/lateCancels";
 
 export type Request = {
   id: string; client_id: string; car: string; city: string; kind: "photo" | "video" | "either"; shoot_type: string;
@@ -36,6 +37,7 @@ export default async function Requests({ searchParams }: { searchParams: Promise
   const replies = new Map(((counts ?? []) as { request_id: string; replies: number }[]).map((c) => [c.request_id, Number(c.replies)]));
   const myOffers = new Map(((mine ?? []) as { request_id: string; price: number | null; note: string | null }[]).map((r) => [r.request_id, r]));
   const role = profile?.role ?? null;
+  const late = role === "pro" ? await lateCancels(supabase, rows.map((r) => r.client_id)) : new Map<string, number>();
 
   return (
     <main className="wrap">
@@ -73,6 +75,7 @@ export default async function Requests({ searchParams }: { searchParams: Promise
                 <span>{r.date_from === r.date_to ? short(r.date_from) : `${short(r.date_from)} – ${short(r.date_to)}`}</span>
                 {r.budget && <span>${r.budget} budget</span>}
                 <span>Golden hour {goldenHour(r.date_from)}</span>
+                {late.get(r.client_id) ? <span className="late">Owner: {lateLabel(late.get(r.client_id))}</span> : null}
               </div>
               {r.note && <p className="small" style={{ margin: "10px 0 0" }}>{r.note}</p>}
               <div className="req-foot">

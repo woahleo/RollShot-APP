@@ -10,15 +10,22 @@ const LABEL: Record<Booking["status"], string> = {
   confirmed: "Confirmed",
   declined: "Declined",
   rescheduled: "Rain checked",
+  cancelled: "Cancelled",
 };
 
 /** One booking with the actions the viewer is allowed to take. */
-export default function BookingRow({ b, who, asPro, openDates }: { b: Booking; who: string; asPro: boolean; openDates: string[] }) {
+export default function BookingRow({ b, who, asPro, openDates, whoLate = 0 }: { b: Booking; who: string; asPro: boolean; openDates: string[]; whoLate?: number }) {
   const router = useRouter();
   const [moving, setMoving] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
+  const [reason, setReason] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-  const upcoming = b.shoot_date >= today() && b.status !== "declined";
+  const upcoming = b.shoot_date >= today() && b.status !== "declined" && b.status !== "cancelled";
+  const tomorrow = new Date(`${today()}T12:00:00`);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  // Matches the database rule: within 48 hours means the shoot is today or tomorrow, once it was accepted.
+  const late = b.status !== "requested" && b.shoot_date <= tomorrow.toISOString().slice(0, 10);
   const options = openDates.filter((d) => d >= today() && d !== b.shoot_date).sort();
 
   async function call(fn: string, args: Record<string, unknown>) {
@@ -28,6 +35,7 @@ export default function BookingRow({ b, who, asPro, openDates }: { b: Booking; w
     setBusy(false);
     if (error) return setError(error.message);
     setMoving(false);
+    setCancelling(false);
     router.refresh();
   }
 
@@ -35,13 +43,13 @@ export default function BookingRow({ b, who, asPro, openDates }: { b: Booking; w
     <div className="card" style={{ display: "grid", gap: 8 }}>
       <div className="row" style={{ justifyContent: "space-between" }}>
         <div>
-          <h3 style={{ margin: 0 }}>{who}</h3>
+          <h3 style={{ margin: 0 }}>{who}{whoLate > 0 && <span className="small muted" style={{ fontWeight: 300 }}> · {whoLate} late cancel{whoLate === 1 ? "" : "s"}</span>}</h3>
           <span className="small muted">
             {b.package_name} · ${b.price}
             {b.car ? ` · ${b.car}` : ""}
           </span>
         </div>
-        <span className={`badge ${b.status}`}>{asPro && b.status === "requested" ? "New request" : LABEL[b.status]}</span>
+        <span className={`badge ${b.status}`}>{asPro && b.status === "requested" ? "New request" : LABEL[b.status]}{b.status === "cancelled" && b.late_cancel ? " late" : ""}</span>
       </div>
       <span className="small">
         {prettyDate(b.shoot_date)} · golden hour {goldenHour(b.shoot_date)}
@@ -55,7 +63,29 @@ export default function BookingRow({ b, who, asPro, openDates }: { b: Booking; w
               <button className="btn small" disabled={busy} onClick={() => call("respond_booking", { p_booking: b.id, p_accept: false })}>Decline</button>
             </>
           )}
-          <button className="btn small" onClick={() => setMoving(!moving)}>Rain check</button>
+          <button className="btn small" onClick={() => { setMoving(!moving); setCancelling(false); }}>Rain check</button>
+          {!(asPro && b.status === "requested") && (
+            <button className="btn small" onClick={() => { setCancelling(!cancelling); setMoving(false); }}>
+              {b.status === "requested" ? "Withdraw" : "Cancel"}
+            </button>
+          )}
+        </div>
+      )}
+      {cancelling && (
+        <div className="notice" style={{ display: "grid", gap: 8 }}>
+          <b style={{ fontWeight: 400 }}>{b.status === "requested" ? "Withdraw this request?" : "Cancel this shoot?"}</b>
+          {late ? (
+            <span>It&apos;s less than 48 hours away, so this counts as a <b style={{ fontWeight: 400 }}>late cancel</b> and shows on your profile. If it&apos;s the weather, use Rain check instead, it&apos;s free.</span>
+          ) : (
+            <span>Free to cancel. It&apos;s more than 48 hours away. If it&apos;s the weather, Rain check moves it instead.</span>
+          )}
+          <input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Reason (optional)" maxLength={200} />
+          <div className="row" style={{ gap: 8 }}>
+            <button className="btn solid small" disabled={busy} onClick={() => call("cancel_booking", { p_booking: b.id, p_reason: reason })}>
+              {b.status === "requested" ? "Yes, withdraw" : late ? "Yes, cancel (late)" : "Yes, cancel"}
+            </button>
+            <button className="btn small" onClick={() => setCancelling(false)}>Keep it</button>
+          </div>
         </div>
       )}
       {moving && (

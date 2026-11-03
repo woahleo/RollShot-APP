@@ -4,6 +4,7 @@ import { getMe } from "@/lib/supabase/server";
 import { KIND_LABEL, carLabel, photoUrl, type Car, type Kind, type Package, type Pro } from "@/lib/types";
 import { today } from "@/lib/sun";
 import BookForm from "./BookForm";
+import { lateCancels, lateLabel } from "@/lib/lateCancels";
 import MessageButton from "./MessageButton";
 import Availability from "./Availability";
 
@@ -27,6 +28,7 @@ export default async function ProPage({ params }: { params: Promise<{ id: string
     contact = k;
   }
   const canBook = profile?.role === "client";
+  const late = (await lateCancels(supabase, [pro.id])).get(pro.id);
   const isMe = user?.id === pro.id;
   const name = pro.profiles?.name ?? "this photographer";
   const missing = [
@@ -37,7 +39,7 @@ export default async function ProPage({ params }: { params: Promise<{ id: string
 
   return (
     <main className="wrap">
-      <p className="eyebrow">{KIND_LABEL[(pro.kind ?? "photo") as Kind]} · {pro.city}</p>
+      <p className="eyebrow">{KIND_LABEL[(pro.kind ?? "photo") as Kind]} · {pro.city}{late ? <span className="late"> · {lateLabel(late)}</span> : null}</p>
       <div className="row" style={{ justifyContent: "space-between", alignItems: "flex-end" }}>
         <h1 style={{ marginBottom: 0 }}>{pro.profiles?.name}</h1>
         {!isMe && <a className="btn pink" href="#book">Book now</a>}

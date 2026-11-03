@@ -8,10 +8,11 @@ export type Pro = {
   shoot_types: string[]; open_dates: string[]; photos: string[];
 };
 export type Package = { id: string; pro_id: string; name: string; price: number; position: number };
-export type BookingStatus = "requested" | "confirmed" | "declined" | "rescheduled";
+export type BookingStatus = "requested" | "confirmed" | "declined" | "rescheduled" | "cancelled";
 export type Booking = {
   id: string; pro_id: string; client_id: string; package_name: string; price: number;
   shoot_date: string; car: string | null; status: BookingStatus; rain_from: string | null; created_at: string;
+  late_cancel?: boolean; cancelled_by?: string | null;
 };
 export type Thread = { id: string; pro_id: string; client_id: string; updated_at: string; unlimited: boolean };
 export type Message = {

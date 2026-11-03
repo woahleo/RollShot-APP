@@ -4,6 +4,7 @@ import { getMe } from "@/lib/supabase/server";
 import type { Booking, Pro } from "@/lib/types";
 import { prettyDate, today } from "@/lib/sun";
 import BookingRow from "@/components/BookingRow";
+import { lateCancels } from "@/lib/lateCancels";
 import OpenDates from "./OpenDates";
 
 type Row = Booking & { client: { name: string } | null };
@@ -28,7 +29,8 @@ export default async function Dashboard() {
   const upcoming = rows.filter((b) => (b.status === "confirmed" || b.status === "rescheduled") && b.shoot_date >= now);
   const noPackages = packages === 0;
   const noDates = !p.open_dates.some((d) => d >= now);
-  const earned = rows.filter((b) => b.status !== "declined" && b.status !== "requested").reduce((s, b) => s + b.price, 0);
+  const earned = rows.filter((b) => b.status === "confirmed" || b.status === "rescheduled").reduce((s, b) => s + b.price, 0);
+  const late = await lateCancels(supabase, rows.map((b) => b.client_id));
 
   return (
     <main className="wrap">
@@ -57,12 +59,12 @@ export default async function Dashboard() {
       <h2>Requests</h2>
       {requests.length === 0 && <p className="muted">Nothing waiting. Open more dates below to get requests.</p>}
       <div style={{ display: "grid", gap: 10 }}>
-        {requests.map((b) => <BookingRow key={b.id} b={b} who={b.client?.name ?? "Client"} asPro openDates={p.open_dates} />)}
+        {requests.map((b) => <BookingRow key={b.id} b={b} who={b.client?.name ?? "Client"} asPro openDates={p.open_dates} whoLate={late.get(b.client_id)} />)}
       </div>
       <h2>Upcoming shoots</h2>
       {upcoming.length === 0 && <p className="muted">No confirmed shoots yet.</p>}
       <div style={{ display: "grid", gap: 10 }}>
-        {upcoming.map((b) => <BookingRow key={b.id} b={b} who={b.client?.name ?? "Client"} asPro openDates={p.open_dates} />)}
+        {upcoming.map((b) => <BookingRow key={b.id} b={b} who={b.client?.name ?? "Client"} asPro openDates={p.open_dates} whoLate={late.get(b.client_id)} />)}
       </div>
       <div className="row" style={{ justifyContent: "space-between", alignItems: "baseline" }}>
         <h2>Your offers</h2>
