@@ -3,12 +3,14 @@ import SignedInAs from "@/components/SignedInAs";
 import { accountLabel } from "@/lib/account";
 import { getMe } from "@/lib/supabase/server";
 
-export default async function Home() {
+export default async function Home({ searchParams }: { searchParams: Promise<{ deleted?: string }> }) {
+  const { deleted } = await searchParams;
   const { supabase, user, profile } = await getMe();
   const label = await accountLabel(supabase, profile);
   return (
     <main className="wrap">
       <p className="eyebrow">West Palm Beach · Boca · Fort Lauderdale · Miami</p>
+      {deleted && <p className="notice">Your account was deleted.</p>}
       <h1>Your car, shot <em>right.</em></h1>
       <p className="lede">Book local car photographers and videographers by the shoot. See their work, pick an open date with golden hour times, and chat once you request.</p>
       {user ? (

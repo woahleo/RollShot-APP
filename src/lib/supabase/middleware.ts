@@ -1,7 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-const PRIVATE = ["/me", "/pro", "/messages", "/onboarding"];
+const PRIVATE = ["/me", "/pro", "/messages", "/onboarding", "/settings"];
 
 export async function updateSession(request: NextRequest) {
   // If Supabase didn't recognise our callback URL it falls back to the Site URL (usually "/?code=...").

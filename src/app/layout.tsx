@@ -36,11 +36,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               {user && <Link href="/messages">Messages</Link>}
               {label && <span className="badge">{label}</span>}
               {!user && <Link href="/signup">Sign up</Link>}
-              {user && (
-                <form action="/auth/signout" method="post">
-                  <button className="btn small" type="submit">Sign out</button>
-                </form>
-              )}
+              {user && <Link href="/settings">Settings</Link>}
               <ThemeToggle />
             </nav>
           </div>
