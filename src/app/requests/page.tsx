@@ -2,7 +2,7 @@ import Link from "next/link";
 import DateTile from "@/components/DateTile";
 import { getMe } from "@/lib/supabase/server";
 import { CITIES } from "@/lib/types";
-import { goldenHour, today } from "@/lib/sun";
+import { today } from "@/lib/sun";
 import RequestActions from "./RequestActions";
 import { lateCancels, lateLabel } from "@/lib/lateCancels";
 
@@ -81,7 +81,6 @@ export default async function Requests({ searchParams }: { searchParams: Promise
                   </span>
                 </div>
               </div>
-              <p className="golden small"><span className="sun" aria-hidden="true" /> Golden hour {goldenHour(r.date_from)}</p>
               {late.get(r.client_id) ? <p className="small late req-late">Owner: {lateLabel(late.get(r.client_id))}</p> : null}
               {r.note && <p className="small req-note">{r.note}</p>}
               <div className="req-foot">

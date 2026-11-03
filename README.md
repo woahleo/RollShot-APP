@@ -9,7 +9,7 @@ Built with Next.js (App Router) and Supabase (sign-in, Postgres, photo storage, 
 - Landing page with a car owner or photographer choice, and a sign-up page with Google, Apple and email links.
 - Onboarding: car owners add a car to their garage; photographers pick their city.
 - Photographer profile: bio, shoot types, packages, portfolio photos (resized to 2000px WebP in the browser before upload), Instagram and phone.
-- Browse shooters by city, see open dates with golden hour times, request a date.
+- Browse shooters by city, see their open dates, book one.
 - Photographer dashboard: accept or decline requests, upcoming shoots, open date calendar.
 - Rain checks: either side moves a shoot to another open date for free.
 - Live chat with a floating chat button. Rules enforced by the database, not the app:

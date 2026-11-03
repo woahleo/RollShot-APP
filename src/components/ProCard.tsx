@@ -17,7 +17,7 @@ export default function ProCard({ p, href }: { p: ProRow; href?: string }) {
         ) : (
           <div className="cover empty"><span>No photos yet</span></div>
         )}
-        {next && <span className="tag"><i className="sun" aria-hidden="true" /> Open {prettyDate(next)}</span>}
+        {next && <span className="tag">Open {prettyDate(next)}</span>}
       </div>
       <div className="body">
         <div className="line">

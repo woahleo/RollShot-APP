@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getMe } from "@/lib/supabase/server";
 import { KIND_LABEL, photoUrl, type Kind } from "@/lib/types";
-import { goldenHour, prettyDate } from "@/lib/sun";
+import { prettyDate } from "@/lib/sun";
 import type { Request } from "../page";
 import OfferChoice from "./OfferChoice";
 import { lateCancels, lateLabel } from "@/lib/lateCancels";
@@ -35,7 +35,7 @@ export default async function RequestOffers({ params }: { params: Promise<{ id: 
       <p className="eyebrow"><Link href="/requests">Requests</Link> · {r.city}</p>
       <h1 style={{ marginBottom: 6 }}>{r.shoot_type}<em>.</em></h1>
       <p className="lede" style={{ marginBottom: 10 }}>
-        {r.car} · {prettyDate(r.date_from)} · golden hour {goldenHour(r.date_from)}{r.budget ? ` · $${r.budget} budget` : ""}
+        {r.car} · {prettyDate(r.date_from)}{r.budget ? ` · $${r.budget} budget` : ""}
       </p>
       {r.note && <p className="muted" style={{ marginTop: 0 }}>{r.note}</p>}
 

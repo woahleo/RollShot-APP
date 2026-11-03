@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { goldenHour, prettyDate, today } from "@/lib/sun";
+import { prettyDate, today } from "@/lib/sun";
 import type { Message } from "@/lib/types";
 
 /** An offer in the chat. The car owner taps a date and books it; the photographer sees its status. */
@@ -54,7 +54,7 @@ export default function OfferCard({ m, isPro, otherName, cars, onBooked }: {
           <div className="offer-dates">
             {dates.map((d) => (
               <button key={d} type="button" className="chip" aria-pressed={date === d} onClick={() => setDate(d)}>
-                {prettyDate(d)} <span className="muted">· {goldenHour(d)}</span>
+                {prettyDate(d)}
               </button>
             ))}
           </div>
