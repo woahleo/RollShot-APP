@@ -362,3 +362,11 @@ button.link { background: none; border: 0; padding: 0; color: var(--ink); text-d
 .viewer-dots { position: absolute; bottom: max(14px, env(safe-area-inset-bottom)); left: 0; right: 0; display: flex; justify-content: center; gap: 6px; z-index: 2; }
 .viewer-dots i { width: 6px; height: 6px; border-radius: 50%; background: rgb(255 255 255 / .35); transition: background .15s, transform .15s; }
 .viewer-dots i.on { background: #fff; transform: scale(1.25); }
+
+/* Crew jobs: creators who replied to a job */
+.crew-replies { display: grid; gap: 0; border-top: 1px solid var(--line); }
+.crew-replies { margin-top: 12px; }
+.crew-reply { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.crew-reply:last-child { border-bottom: 0; }
+.crew-reply-go { display: flex; align-items: center; gap: 14px; margin-left: auto; }
+.crew-reply .error { margin: 0; }

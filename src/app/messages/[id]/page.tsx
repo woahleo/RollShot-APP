@@ -12,12 +12,14 @@ export default async function ChatPage({ params, searchParams }: { params: Promi
   if (!user) redirect("/signup");
   const { data } = await supabase
     .from("threads")
-    .select("*, pro:pros(profiles(name)), client:profiles!threads_client_id_fkey(name)")
+    .select("*, pro:pros(profiles(name)), client:profiles!threads_client_id_fkey(name, role)")
     .eq("id", id)
     .maybeSingle();
   if (!data) notFound();
-  const t = data as Thread & { pro: { profiles: { name: string } | null } | null; client: { name: string } | null };
-  const isPro = t.pro_id === user.id;
+  const t = data as Thread & { pro: { profiles: { name: string } | null } | null; client: { name: string; role: string } | null };
+  // Two creators talking about a crew job: no booking tools or message limit, and it unlocks once one hires the other.
+  const crew = t.client?.role === "pro";
+  const isPro = t.pro_id === user.id && !crew;
   const [{ data: messages }, { data: bookings }, { data: packages }, { data: pro }, { data: cars }] = await Promise.all([
     supabase.from("messages").select("*").eq("thread_id", id).order("created_at"),
     supabase.from("bookings").select("status").eq("pro_id", t.pro_id).eq("client_id", t.client_id),
@@ -26,15 +28,20 @@ export default async function ChatPage({ params, searchParams }: { params: Promi
     isPro ? Promise.resolve({ data: [] }) : supabase.from("cars").select("*").eq("owner_id", user.id).order("created_at"),
   ]);
   const statuses = (bookings ?? []).map((b) => b.status as string);
-  const confirmed = statuses.some((s) => s === "confirmed" || s === "rescheduled");
-  const requested = statuses.some((s) => s !== "declined" && s !== "cancelled");
-  const other = isPro ? t.client?.name : t.pro?.profiles?.name;
+  const { data: hired } = crew
+    ? await supabase.rpc("has_confirmed_booking", { p_pro: t.pro_id, p_client: t.client_id })
+    : { data: false };
+  const confirmed = statuses.some((s) => s === "confirmed" || s === "rescheduled") || hired === true;
+  const requested = crew || statuses.some((s) => s !== "declined" && s !== "cancelled");
+  const other = t.pro_id === user.id ? t.client?.name : t.pro?.profiles?.name;
 
   return (
     <main className="wrap" style={{ paddingBottom: 16 }}>
       <div className="row" style={{ justifyContent: "space-between" }}>
         <h2 style={{ margin: 0 }}>{other ?? "Chat"}</h2>
-        {!isPro && <Link className="btn small" href={`/p/${t.pro_id}`}>{requested ? "View profile" : "Book a date"}</Link>}
+        {crew ? (
+          <Link className="btn small" href="/crew">Crew jobs</Link>
+        ) : !isPro && <Link className="btn small" href={`/p/${t.pro_id}`}>{requested ? "View profile" : "Book a date"}</Link>}
       </div>
       <Chat
         threadId={id}

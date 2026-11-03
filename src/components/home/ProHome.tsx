@@ -19,7 +19,7 @@ const KIND: Record<string, string> = { photo: "Photos", video: "Video", either: 
  */
 export default async function ProHome({ supabase, userId, profile }: { supabase: SupabaseClient; userId: string; profile: Profile }) {
   const now = today();
-  const [{ data: me }, { data: bookingRows }, { count: pkgCount }, { data: postRows }, { data: reqRows }, { data: myReplies }, feed] = await Promise.all([
+  const [{ data: me }, { data: bookingRows }, { count: pkgCount }, { data: postRows }, { data: reqRows }, { data: myReplies }, feed, { data: crewOffers }, { data: crewJobs }] = await Promise.all([
     supabase.from("pros").select("*").eq("id", userId).single(),
     supabase.from("bookings").select("*, client:profiles!bookings_client_id_fkey(name)").eq("pro_id", userId).order("shoot_date"),
     supabase.from("packages").select("id", { count: "exact", head: true }).eq("pro_id", userId),
@@ -27,7 +27,13 @@ export default async function ProHome({ supabase, userId, profile }: { supabase:
     supabase.from("requests").select("id, car, city, shoot_type, kind, date_from, date_to, budget, note").eq("status", "open").gte("date_to", now).order("created_at", { ascending: false }).limit(30),
     supabase.from("request_replies").select("request_id, price").eq("pro_id", userId),
     loadFeed(supabase, { skipPro: userId, size: 6 }),
+    // Crew: offers other creators sent me, and replies on jobs I posted.
+    supabase.from("gigs").select("id, role, shoot_date, poster:pros!gigs_poster_id_fkey(profiles(name))").eq("target_id", userId).eq("status", "open").gte("shoot_date", now),
+    supabase.from("gigs").select("id, role, gig_replies(pro_id)").eq("poster_id", userId).eq("status", "open").is("target_id", null).gte("shoot_date", now),
   ]);
+  const hireMe = (crewOffers ?? []) as unknown as { id: string; role: string; shoot_date: string; poster: { profiles: { name: string } | null } | null }[];
+  const crewReplies = ((crewJobs ?? []) as { id: string; role: string; gig_replies: { pro_id: string }[] }[]).filter((g) => g.gig_replies.length > 0);
+  const replyCount = crewReplies.reduce((n, g) => n + g.gig_replies.length, 0);
   const pro = me as Pro;
   const rows = (bookingRows ?? []) as B[];
   const posted = new Set(((postRows ?? []) as { booking_id: string }[]).map((p) => p.booking_id));
@@ -52,6 +58,7 @@ export default async function ProHome({ supabase, userId, profile }: { supabase:
         <div className="row" style={{ gap: 8 }}>
           <Link className="btn solid small" href="/pro">Dashboard</Link>
           <Link className="btn small" href={proPath({ id: userId, handle: pro.handle })}>View my page</Link>
+          <Link className="btn small" href="/crew">Crew</Link>
         </div>
       </section>
 
@@ -66,6 +73,28 @@ export default async function ProHome({ supabase, userId, profile }: { supabase:
                 <span className="small muted">{asks.slice(0, 2).map((b) => `${b.client?.name ?? "Client"} · ${prettyDate(b.shoot_date)}`).join(", ")}</span>
               </div>
               <span className="todo-go">Answer</span>
+            </Link>
+          )}
+          {hireMe.length > 0 && (
+            <Link href="/crew" className="card todo-item hot">
+              <span className="todo-n">{hireMe.length}</span>
+              <div style={{ minWidth: 0 }}>
+                <span className="eyebrow">Crew</span>
+                <b>{hireMe.length === 1 ? `${hireMe[0].poster?.profiles?.name ?? "A creator"} wants to hire you` : `${hireMe.length} creators want to hire you`}</b>
+                <span className="small muted">{hireMe.slice(0, 2).map((g) => `${g.role} · ${prettyDate(g.shoot_date)}`).join(", ")}</span>
+              </div>
+              <span className="todo-go">Answer</span>
+            </Link>
+          )}
+          {replyCount > 0 && (
+            <Link href="/crew" className="card todo-item">
+              <span className="todo-n">{replyCount}</span>
+              <div style={{ minWidth: 0 }}>
+                <span className="eyebrow">Crew</span>
+                <b>{replyCount === 1 ? "A creator is in for your job" : `${replyCount} creators are in for your jobs`}</b>
+                <span className="small muted">{crewReplies.slice(0, 2).map((g) => g.role).join(", ")} · pick who you want</span>
+              </div>
+              <span className="todo-go">Pick</span>
             </Link>
           )}
           {nextShoot && (
@@ -99,7 +128,7 @@ export default async function ProHome({ supabase, userId, profile }: { supabase:
               <span className="todo-go">Fix</span>
             </Link>
           ))}
-          {!asks.length && !nextShoot && !toPost.length && !missing.length && (
+          {!asks.length && !nextShoot && !toPost.length && !missing.length && !hireMe.length && !replyCount && (
             <p className="notice" style={{ margin: 0 }}>You&apos;re all caught up. {openDays} open day{openDays === 1 ? "" : "s"} on your calendar.</p>
           )}
         </div>
