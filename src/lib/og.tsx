@@ -76,11 +76,11 @@ function BrandCard() {
           Your car, shot&nbsp;<span style={{ color: PINK }}>right.</span>
         </div>
         <div style={{ display: "flex", fontSize: 26, color: MUTED, marginTop: 16 }}>
-          Car photo and video creators in South Florida
+          Car photo and video creators across the US
         </div>
       </div>
       <div style={{ position: "absolute", bottom: 22, left: 30, right: 30, display: "flex", justifyContent: "space-between" }}>
-        <div style={label}>West Palm Beach · Boca · Fort Lauderdale · Miami</div>
+        <div style={label}>Miami · Los Angeles · New York · Houston · Atlanta</div>
         <div style={label}>f/2.8 · 1/250</div>
       </div>
     </div>

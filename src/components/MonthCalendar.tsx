@@ -21,11 +21,12 @@ type Props = {
   focus?: string | null;
   /** Small dots under these days (e.g. a booked shoot). */
   isDotted?: (day: string) => boolean;
+  tz?: string; // the creator's time zone, so "today" is their today
 };
 
 /** A compact month grid: tap days to pick them, arrows to change month. */
-export default function MonthCalendar({ selected, onPick, isEnabled = () => true, monthsAhead = 3, markEnabled = false, isMarked, startAt, focus, isDotted }: Props) {
-  const now = today();
+export default function MonthCalendar({ selected, onPick, isEnabled = () => true, monthsAhead = 3, markEnabled = false, isMarked, startAt, focus, isDotted, tz }: Props) {
+  const now = today(tz);
   const [y0, m0] = now.split("-").map(Number);
   const [offset, setOffset] = useState(() => {
     if (!startAt || startAt <= now) return 0;

@@ -2,7 +2,8 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { CITIES } from "@/lib/types";
+import CityOptions from "@/components/CityOptions";
+import { tzOf } from "@/lib/cities";
 import { prettyDate, today } from "@/lib/sun";
 import { CREW_ROLES, ROLE_HINT, type CrewRole } from "@/lib/crew";
 
@@ -17,9 +18,9 @@ export type GigDraft = { id: string; role: CrewRole; city: string; date: string;
 /** Post a crew job, or (with a target) offer it to one creator directly. With a gig, edits that job. */
 export default function CrewForm({ city: startCity, target, gig }: { city: string; target?: { id: string; name: string; role: CrewRole }; gig?: GigDraft }) {
   const router = useRouter();
-  const now = today();
   const [role, setRole] = useState<CrewRole>(gig?.role ?? target?.role ?? "Second shooter");
   const [city, setCity] = useState(gig?.city ?? startCity);
+  const now = today(tzOf(city));
   const [date, setDate] = useState(gig?.date ?? plus(now, 7));
   const [time, setTime] = useState(gig?.time?.slice(0, 5) ?? "");
   const [unpaid, setUnpaid] = useState(gig?.pay === 0);
@@ -59,7 +60,7 @@ export default function CrewForm({ city: startCity, target, gig }: { city: strin
       <label className="field">
         <span>City</span>
         <select value={city} onChange={(e) => setCity(e.target.value)}>
-          {CITIES.map((c) => <option key={c}>{c}</option>)}
+          <CityOptions />
         </select>
       </label>
       <div className="row" style={{ gap: 12, alignItems: "flex-start" }}>

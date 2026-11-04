@@ -13,7 +13,7 @@ import { accountLabel } from "@/lib/account";
 const outfit = Outfit({ subsets: ["latin"], weight: ["200", "300", "400", "500"], variable: "--font-outfit" });
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : "https://roll-shot-app.vercel.app");
-const DESCRIPTION = "Book car photo and video creators in South Florida. Real portfolios, real open dates, no back and forth.";
+const DESCRIPTION = "Book car photo and video creators in cities across the US. Real portfolios, real open dates, no back and forth.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

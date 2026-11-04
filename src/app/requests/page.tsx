@@ -1,7 +1,9 @@
 import Link from "next/link";
 import DateTile from "@/components/DateTile";
 import { getMe } from "@/lib/supabase/server";
-import { CITIES } from "@/lib/types";
+import { Suspense } from "react";
+import { cityLabel, isCity } from "@/lib/cities";
+import CityFilter from "@/components/CityFilter";
 import { today } from "@/lib/sun";
 import RequestActions from "./RequestActions";
 import { lateCancels, lateLabel } from "@/lib/lateCancels";
@@ -22,10 +24,15 @@ function ago(ts: string) {
 }
 
 export default async function Requests({ searchParams }: { searchParams: Promise<{ city?: string; posted?: string }> }) {
-  const { city, posted } = await searchParams;
+  const { city: picked, posted } = await searchParams;
   const { supabase, user, profile } = await getMe();
-  let q = supabase.from("requests").select("*").eq("status", "open").gte("date_to", today()).order("created_at", { ascending: false }).limit(60);
-  if (city && (CITIES as readonly string[]).includes(city)) q = q.eq("city", city);
+  // Creators start on their own city; anyone can switch to another city or all of them.
+  const { data: myPro } = profile?.role === "pro" && user ? await supabase.from("pros").select("city").eq("id", user.id).maybeSingle() : { data: null };
+  const home = (myPro as { city: string } | null)?.city;
+  const city = isCity(picked) ? picked : picked === "all" ? undefined : isCity(home) ? home : undefined;
+  // West Coast "today", so a request doesn't drop off the board while it's still that day there.
+  let q = supabase.from("requests").select("*").eq("status", "open").gte("date_to", today("America/Los_Angeles")).order("created_at", { ascending: false }).limit(60);
+  if (city) q = q.eq("city", city);
   const { data } = await q;
   const rows = (data ?? []) as Request[];
   const ids = rows.map((r) => r.id);
@@ -60,14 +67,14 @@ export default async function Requests({ searchParams }: { searchParams: Promise
         )}
       </div>
       {posted && <p className="notice" style={{ marginTop: 16 }}>Your request is up. You&apos;ll get a message when a creator replies.</p>}
-      <div className="chips scroll" style={{ margin: "20px 0" }}>
-        <Link className="chip" aria-pressed={!city} href="/requests">All cities</Link>
-        {CITIES.map((c) => (
-          <Link key={c} className="chip" aria-pressed={city === c} href={`/requests?city=${encodeURIComponent(c)}`}>{c}</Link>
-        ))}
+      <div style={{ margin: "20px 0" }}>
+        <Suspense><CityFilter value={city ?? "all"} noun="requests" /></Suspense>
       </div>
       {rows.length === 0 && (
-        <p className="notice">No open requests{city ? ` in ${city}` : ""} right now.{role !== "pro" && " Be the first to post one."}</p>
+        <p className="notice">
+          No open requests{city ? ` in ${cityLabel(city)}` : ""} right now.{role !== "pro" ? " Be the first to post one." : ""}
+          {city && role === "pro" ? <> <Link href="/requests?city=all">See all cities</Link>.</> : null}
+        </p>
       )}
       <div className="grid">
         {rows.map((r) => {

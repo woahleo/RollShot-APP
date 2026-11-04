@@ -2,7 +2,9 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { CITIES, SHOOT_TYPES } from "@/lib/types";
+import { SHOOT_TYPES } from "@/lib/types";
+import CityOptions from "@/components/CityOptions";
+import { tzOf } from "@/lib/cities";
 import { prettyDate, today } from "@/lib/sun";
 
 const KINDS = [
@@ -22,14 +24,14 @@ export type RequestDraft = {
 };
 
 /** Post a request, or with a draft, change one that's still open. */
-export default function RequestForm({ cars: garage, draft }: { cars: string[]; draft?: RequestDraft }) {
+export default function RequestForm({ cars: garage, draft, city: startCity = "" }: { cars: string[]; draft?: RequestDraft; city?: string }) {
   const router = useRouter();
-  const now = today();
   const cars = draft && !garage.includes(draft.car) ? [draft.car, ...garage] : garage;
   const [car, setCar] = useState(draft?.car ?? cars[0] ?? "");
   const [shoot, setShoot] = useState<string>(draft?.shoot_type ?? SHOOT_TYPES[0]);
   const [kind, setKind] = useState<string>(draft?.kind ?? "either");
-  const [city, setCity] = useState<string>(draft?.city ?? CITIES[0]);
+  const [city, setCity] = useState<string>(draft?.city ?? startCity);
+  const now = today(tzOf(city));
   const [date, setDate] = useState(draft?.date ?? plus(now, 7));
   const [budget, setBudget] = useState(draft?.budget ? String(draft.budget) : "");
   const [free, setFree] = useState(draft?.free ?? false);
@@ -40,6 +42,7 @@ export default function RequestForm({ cars: garage, draft }: { cars: string[]; d
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (car.trim().length < 2) return setError("Add your car.");
+    if (!city) return setError("Pick the city for the shoot.");
     if (!date || date < now) return setError("Pick a date from today on.");
     setBusy(true);
     setError("");
@@ -88,7 +91,8 @@ export default function RequestForm({ cars: garage, draft }: { cars: string[]; d
       <label className="field">
         <span>City</span>
         <select value={city} onChange={(e) => setCity(e.target.value)}>
-          {CITIES.map((c) => <option key={c}>{c}</option>)}
+          <option value="" disabled>Pick a city</option>
+          <CityOptions />
         </select>
       </label>
       <label className="field">

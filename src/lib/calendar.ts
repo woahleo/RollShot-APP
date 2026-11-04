@@ -2,7 +2,8 @@
 export type CalEvent = {
   uid: string;
   title: string;
-  day: string; // YYYY-MM-DD, Florida time
+  day: string; // YYYY-MM-DD, local to the shoot
+  tz?: string; // the shoot's time zone, Eastern if not given
   time: string | null; // HH:MM[:SS], or null for an all-day event
   minutes?: number;
   details: string;
@@ -10,15 +11,15 @@ export type CalEvent = {
   url?: string;
 };
 
-const TZ = "America/New_York";
+const ET = "America/New_York";
 
-/** A wall-clock time in Florida as a real instant, so it lands right on any phone's calendar. */
-export function floridaToUtc(day: string, time: string) {
+/** A wall-clock time in a time zone as a real instant, so it lands right on any phone's calendar. */
+export function localToUtc(day: string, time: string, tz = ET) {
   const [y, m, d] = day.split("-").map(Number);
   const [h, mi] = time.split(":").map(Number);
   const guess = Date.UTC(y, m - 1, d, h, mi);
   const parts = Object.fromEntries(
-    new Intl.DateTimeFormat("en-US", { timeZone: TZ, hourCycle: "h23", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" })
+    new Intl.DateTimeFormat("en-US", { timeZone: tz, hourCycle: "h23", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" })
       .formatToParts(new Date(guess))
       .map((p) => [p.type, p.value]),
   );
@@ -36,7 +37,7 @@ function nextDay(day: string) {
 
 function span(e: CalEvent) {
   if (!e.time) return { allDay: true as const, start: compact(e.day), end: compact(nextDay(e.day)) };
-  const start = floridaToUtc(e.day, e.time);
+  const start = localToUtc(e.day, e.time, e.tz);
   const end = new Date(start.getTime() + (e.minutes ?? 120) * 60000);
   return { allDay: false as const, start: stamp(start), end: stamp(end) };
 }
@@ -92,7 +93,7 @@ export function googleLink(e: CalEvent) {
     text: e.title,
     dates: `${s.start}/${s.end}`,
     details: e.details + (e.url ? `\n\n${e.url}` : ""),
-    ctz: TZ,
+    ctz: e.tz ?? ET,
   });
   if (e.location) q.set("location", e.location);
   return `https://calendar.google.com/calendar/render?${q}`;
