@@ -23,7 +23,7 @@ export default async function OwnerProfile({ params }: { params: Promise<{ id: s
   const { supabase, user, profile } = await getMe();
   if (!user) redirect(`/signup?next=/u/${id}`);
   const mine = user.id === id;
-  if (!mine && profile?.role !== "pro") notFound();
+  if (!mine && profile?.role !== "pro" && (await supabase.rpc("is_admin")).data !== true) notFound();
 
   const { data: who } = await supabase.from("profiles").select("*").eq("id", id).maybeSingle();
   const owner = who as Profile | null;
