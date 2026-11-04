@@ -1,6 +1,7 @@
 import type { NextRequest } from "next/server";
 import { getMe } from "@/lib/supabase/server";
 import { googleLink, icsFile, type CalEvent } from "@/lib/calendar";
+import { money } from "@/lib/money";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 type Person = { name: string | null } | null;
@@ -35,7 +36,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ kind
         title: asPro ? `Rollshot: ${b.car ? `${b.car} for ` : "shoot for "}${first(client, "your client")}` : `Rollshot: car shoot with ${first(pro?.profiles, "your creator")}`,
         day: b.shoot_date,
         time: b.shoot_time,
-        details: [`${b.package_name} · $${b.price}`, b.car ? `Car: ${b.car}` : "", b.shoot_time ? "" : "Time to be set in chat."].filter(Boolean).join("\n"),
+        details: [`${b.package_name} · ${money(b.price)}`, b.car ? `Car: ${b.car}` : "", b.shoot_time ? "" : "Time to be set in chat."].filter(Boolean).join("\n"),
         location: pro?.city ? `${pro.city}, FL` : undefined,
         url: t ? `${site}/messages/${t.id}` : `${site}${asPro ? "/pro" : "/shoots"}`,
       };
@@ -56,7 +57,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ kind
         day: g.shoot_date,
         time: g.shoot_time,
         minutes: 180,
-        details: [`${g.role} · $${g.pay}`, g.note ?? "", g.shoot_time ? "" : "Time to be set in chat."].filter(Boolean).join("\n"),
+        details: [`${g.role} · ${g.pay === 0 ? "Unpaid, for experience" : `$${g.pay}`}`, g.note ?? "", g.shoot_time ? "" : "Time to be set in chat."].filter(Boolean).join("\n"),
         location: g.city,
         url: `${site}/crew`,
       };

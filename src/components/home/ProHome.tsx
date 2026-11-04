@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { money } from "@/lib/money";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import Feed from "@/components/Feed";
 import DateTile from "@/components/DateTile";
@@ -8,7 +9,7 @@ import { prettyDate, today } from "@/lib/sun";
 import { proPath, type Booking, type Profile, type Pro } from "@/lib/types";
 import { HomeFoot } from "./ClientHome";
 
-type Req = { id: string; car: string; city: string; shoot_type: string; kind: string; date_from: string; date_to: string; budget: number | null; note: string | null };
+type Req = { id: string; car: string; city: string; shoot_type: string; kind: string; date_from: string; date_to: string; budget: number | null; note: string | null; free?: boolean };
 type B = Booking & { client: { name: string } | null };
 
 const KIND: Record<string, string> = { photo: "Photos", video: "Video", either: "Photo or video" };
@@ -24,7 +25,7 @@ export default async function ProHome({ supabase, userId, profile }: { supabase:
     supabase.from("bookings").select("*, client:profiles!bookings_client_id_fkey(name)").eq("pro_id", userId).order("shoot_date"),
     supabase.from("packages").select("id", { count: "exact", head: true }).eq("pro_id", userId),
     supabase.from("shoot_posts").select("booking_id").eq("pro_id", userId),
-    supabase.from("requests").select("id, car, city, shoot_type, kind, date_from, date_to, budget, note").eq("status", "open").gte("date_to", now).order("created_at", { ascending: false }).limit(30),
+    supabase.from("requests").select("id, car, city, shoot_type, kind, date_from, date_to, budget, note, free").eq("status", "open").gte("date_to", now).order("created_at", { ascending: false }).limit(30),
     supabase.from("request_replies").select("request_id, price").eq("pro_id", userId),
     loadFeed(supabase, { skipPro: userId, size: 4 }),
     // Crew: offers other creators sent me, and replies on jobs I posted.
@@ -159,13 +160,13 @@ export default async function ProHome({ supabase, userId, profile }: { supabase:
                     <div style={{ minWidth: 0 }}>
                       <span className="eyebrow">{r.shoot_type} · {KIND[r.kind] ?? r.kind}</span>
                       <h3>{r.car}</h3>
-                      <span className="small muted">{r.city}{r.budget ? ` · $${r.budget} budget` : ""}</span>
+                      <span className="small muted">{r.city}{r.free ? " · Free portfolio shoot" : r.budget ? ` · $${r.budget} budget` : ""}</span>
                     </div>
                   </div>
                   {r.note && <p className="small req-note">{r.note}</p>}
                   <div className="req-foot">
                     <span className="small muted">{r.city === pro.city ? "In your city" : "Nearby"}</span>
-                    <span className={mine ? "badge confirmed" : "todo-go"}>{mine ? `You offered${offered.get(r.id) ? ` $${offered.get(r.id)}` : ""}` : "Send an offer"}</span>
+                    <span className={mine ? "badge confirmed" : "todo-go"}>{mine ? `You offered${offered.get(r.id) != null ? ` ${money(offered.get(r.id))}` : ""}` : "Send an offer"}</span>
                   </div>
                 </Link>
               );

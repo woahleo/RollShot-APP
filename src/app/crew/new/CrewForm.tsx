@@ -22,7 +22,8 @@ export default function CrewForm({ city: startCity, target, gig }: { city: strin
   const [city, setCity] = useState(gig?.city ?? startCity);
   const [date, setDate] = useState(gig?.date ?? plus(now, 7));
   const [time, setTime] = useState(gig?.time?.slice(0, 5) ?? "");
-  const [pay, setPay] = useState(gig ? String(gig.pay) : "");
+  const [unpaid, setUnpaid] = useState(gig?.pay === 0);
+  const [pay, setPay] = useState(gig && gig.pay > 0 ? String(gig.pay) : "");
   const [note, setNote] = useState(gig?.note ?? "");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -31,10 +32,10 @@ export default function CrewForm({ city: startCity, target, gig }: { city: strin
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!date || date < now) return setError("Pick a date from today on.");
-    if (!pay || Number(pay) < 1) return setError("Add what you'll pay.");
+    if (!unpaid && (!pay || Number(pay) < 1)) return setError("Add what you'll pay, or pick Unpaid.");
     setBusy(true);
     setError("");
-    const fields = { p_role: role, p_city: city, p_date: date, p_time: time || null, p_pay: Number(pay), p_note: note.trim() || null };
+    const fields = { p_role: role, p_city: city, p_date: date, p_time: time || null, p_pay: unpaid ? 0 : Number(pay), p_note: note.trim() || null };
     const { error } = gig
       ? await createClient().rpc("edit_gig", { p_gig: gig.id, ...fields })
       : await createClient().rpc("post_gig", { ...fields, p_target: target?.id ?? null });
@@ -72,11 +73,21 @@ export default function CrewForm({ city: startCity, target, gig }: { city: strin
           <input type="time" value={time} step={1800} onChange={(e) => setTime(e.target.value)} />
         </label>
       </div>
-      <label className="field">
+      <div className="field">
         <span>Pay</span>
-        <input value={pay} onChange={(e) => setPay(e.target.value.replace(/\D/g, "").slice(0, 6))} placeholder="$" inputMode="numeric" />
-        <small className="muted">What you&apos;ll pay them for the job. You settle it between you for now.</small>
-      </label>
+        <div className="chips">
+          <button type="button" className="chip" aria-pressed={!unpaid} onClick={() => setUnpaid(false)}>Paid</button>
+          <button type="button" className="chip" aria-pressed={unpaid} onClick={() => setUnpaid(true)}>Unpaid, for experience</button>
+        </div>
+        {unpaid ? (
+          <small className="muted">For creators who want to learn on a real shoot and build their portfolio. It shows as unpaid, so everyone knows up front.</small>
+        ) : (
+          <>
+            <input value={pay} onChange={(e) => setPay(e.target.value.replace(/\D/g, "").slice(0, 6))} placeholder="$" inputMode="numeric" aria-label="Pay" />
+            <small className="muted">What you&apos;ll pay them for the job. You settle it between you for now.</small>
+          </>
+        )}
+      </div>
       <label className="field">
         <span>Details (optional)</span>
         <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={3} maxLength={500} placeholder="Rollers on the Rickenbacker at sunset. Bring a gimbal." />

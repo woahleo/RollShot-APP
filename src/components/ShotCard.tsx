@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { money } from "@/lib/money";
 import { photoUrl, type ShootPost } from "@/lib/types";
 import { videoHost } from "@/lib/photos";
 
@@ -22,7 +23,7 @@ export default function ShotCard({ s, showPro = true }: { s: ShotRow; showPro?: 
       <div className="body">
         <div className="line">
           <h3>{s.car}</h3>
-          <span className="from">${s.price}</span>
+          <span className="from">{money(s.price)}</span>
         </div>
         <span className="muted small">{s.shoot_type} · {s.city}{showPro && name ? ` · ${name}` : ""}</span>
       </div>

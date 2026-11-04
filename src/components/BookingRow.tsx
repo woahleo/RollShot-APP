@@ -8,6 +8,7 @@ import type { Booking } from "@/lib/types";
 import DateTile from "./DateTile";
 import AddToCalendar from "./AddToCalendar";
 import { prettyTime } from "@/lib/hours";
+import { money } from "@/lib/money";
 
 const LABEL: Record<Booking["status"], string> = {
   requested: "Waiting for them to accept",
@@ -52,7 +53,7 @@ export default function BookingRow({ b, who, asPro, openDates, whoLate = 0 }: { 
           <h3 style={{ margin: 0 }}>{asPro ? <Link className="who-link" href={`/u/${b.client_id}`}>{who}</Link> : who}{whoLate > 0 && <span className="small muted" style={{ fontWeight: 300 }}> · {whoLate} late cancel{whoLate === 1 ? "" : "s"}</span>}</h3>
           <span className="small muted">
             {b.shoot_time ? `${prettyTime(b.shoot_time)} · ` : ""}
-            {b.package_name} · ${b.price}
+            {b.package_name} · {money(b.price)}
             {b.car ? ` · ${b.car}` : ""}
           </span>
         </div>

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { money } from "@/lib/money";
 import { redirect } from "next/navigation";
 import { getMe } from "@/lib/supabase/server";
 import { proPath, type Booking, type Pro } from "@/lib/types";
@@ -126,7 +127,7 @@ export default async function Dashboard() {
               <div key={i} className="card" style={{ padding: "12px 16px" }}>
                 <span>{o.request!.shoot_type} · {o.request!.car} · {o.request!.city} · {prettyDate(o.request!.date_from)}</span>
                 <span className="row" style={{ gap: 8 }}>
-                  <b style={{ fontWeight: 400 }}>${o.price}</b>
+                  <b style={{ fontWeight: 400 }}>{money(o.price)}</b>
                   <span className={`badge ${o.status === "chosen" ? "confirmed" : o.status === "passed" ? "declined" : "requested"}`}>
                     {o.status === "chosen" ? "Chosen" : o.status === "passed" ? "Not chosen" : "Waiting"}
                   </span>

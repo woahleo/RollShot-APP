@@ -22,8 +22,8 @@ function GigTop({ g, who }: { g: Gig; who?: React.ReactNode }) {
     <div className="req-top">
       <DateTile day={g.shoot_date} />
       <div style={{ minWidth: 0 }}>
-        <span className="eyebrow">{g.role}</span>
-        <h3>${g.pay}{who ? <span className="muted" style={{ fontWeight: 300 }}> · {who}</span> : null}</h3>
+        <span className="eyebrow">{g.role}{g.pay === 0 ? " · for experience" : ""}</span>
+        <h3>{g.pay === 0 ? "Unpaid" : `$${g.pay}`}{who ? <span className="muted" style={{ fontWeight: 300 }}> · {who}</span> : null}</h3>
         <span className="small muted">{[g.city, g.shoot_time ? prettyTime(g.shoot_time) : "Time in chat"].join(" · ")}</span>
       </div>
     </div>
