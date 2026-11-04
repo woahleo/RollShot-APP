@@ -6,6 +6,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import ChatBubble from "@/components/ChatBubble";
 import NavLinks from "@/components/NavLinks";
 import AccountMenu from "@/components/AccountMenu";
+import Bell from "@/components/Bell";
 import { getMe } from "@/lib/supabase/server";
 import { accountLabel } from "@/lib/account";
 
@@ -20,14 +21,19 @@ export const metadata: Metadata = {
   description: DESCRIPTION,
   openGraph: { siteName: "Rollshot", type: "website", title: "Rollshot · Your car, shot right.", description: DESCRIPTION },
   twitter: { card: "summary_large_image", title: "Rollshot · Your car, shot right.", description: DESCRIPTION },
+  appleWebApp: { capable: true, title: "Rollshot", statusBarStyle: "default" },
+  icons: { apple: "/apple-touch-icon.png" },
 };
-export const viewport: Viewport = { width: "device-width", initialScale: 1 };
+export const viewport: Viewport = { width: "device-width", initialScale: 1, themeColor: "#ffffff" };
 
 const themeScript = `try{var t=localStorage.getItem("rs-theme");if(t)document.documentElement.dataset.rs=t}catch(e){}`;
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { supabase, user, profile } = await getMe();
-  const label = await accountLabel(supabase, profile);
+  const [label, admin] = await Promise.all([
+    accountLabel(supabase, profile),
+    user ? supabase.rpc("is_admin").then((r) => r.data === true, () => false) : Promise.resolve(false),
+  ]);
   // Two or three links at most; everything else lives in the account menu.
   const links =
     profile?.role === "pro"
@@ -47,7 +53,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <NavLinks links={links} />
             <div className="top-right">
               {user ? (
-                <AccountMenu name={profile?.name ?? ""} label={label ?? ""} avatar={profile?.avatar} />
+                <>
+                  {profile && <Bell userId={user.id} />}
+                  <AccountMenu name={profile?.name ?? ""} label={label ?? ""} avatar={profile?.avatar} admin={admin} />
+                </>
               ) : (
                 <>
                   <ThemeToggle />

@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { prettyDate, today } from "@/lib/sun";
 import type { Booking } from "@/lib/types";
 import DateTile from "./DateTile";
+import AddToCalendar from "./AddToCalendar";
 import { prettyTime } from "@/lib/hours";
 
 const LABEL: Record<Booking["status"], string> = {
@@ -66,6 +67,7 @@ export default function BookingRow({ b, who, asPro, openDates, whoLate = 0 }: { 
               <button className="btn small" disabled={busy} onClick={() => call("respond_booking", { p_booking: b.id, p_accept: false })}>Decline</button>
             </>
           )}
+          {(b.status === "confirmed" || b.status === "rescheduled") && <AddToCalendar kind="booking" id={b.id} />}
           <button className="btn small" onClick={() => { setMoving(!moving); setCancelling(false); }}>Rain check</button>
           {!(asPro && b.status === "requested") && (
             <button className="btn small" onClick={() => { setCancelling(!cancelling); setMoving(false); }}>

@@ -8,6 +8,7 @@ import { today } from "@/lib/sun";
 import { proPath } from "@/lib/types";
 import type { Gig, GigReply } from "@/lib/crew";
 import { AnswerOffer, CloseJob, PickReply, ReplyJob } from "./CrewActions";
+import AddToCalendar from "@/components/AddToCalendar";
 
 type Person = { id: string; handle: string | null; profiles: { name: string; avatar: string | null } | null };
 type Row = Gig & { poster: Person | null; target: Person | null; hired: Person | null };
@@ -103,7 +104,10 @@ export default async function Crew({ searchParams }: { searchParams: Promise<{ p
                 {g.note && <p className="small req-note">{g.note}</p>}
                 <div className="req-foot">
                   <span className="badge confirmed">Booked</span>
-                  {chat(g.poster_id) && <Link className="btn small" href={chat(g.poster_id)!}>Message</Link>}
+                  <div className="row" style={{ gap: 6 }}>
+                    <AddToCalendar kind="gig" id={g.id} />
+                    {chat(g.poster_id) && <Link className="btn small" href={chat(g.poster_id)!}>Message</Link>}
+                  </div>
                 </div>
               </div>
             ))}
@@ -151,8 +155,11 @@ export default async function Crew({ searchParams }: { searchParams: Promise<{ p
                     </span>
                     {g.status === "open" ? (
                       <CloseJob gig={g.id} direct={direct} />
-                    ) : g.status === "filled" && chat(g.hired_id) ? (
-                      <Link className="btn small" href={chat(g.hired_id)!}>Message</Link>
+                    ) : g.status === "filled" ? (
+                      <div className="row" style={{ gap: 6 }}>
+                        {g.shoot_date >= now && <AddToCalendar kind="gig" id={g.id} />}
+                        {chat(g.hired_id) && <Link className="btn small" href={chat(g.hired_id)!}>Message</Link>}
+                      </div>
                     ) : null}
                   </div>
                 </div>
