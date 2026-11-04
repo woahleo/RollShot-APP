@@ -17,16 +17,22 @@ const plus = (d: string, days: number) => {
   return x.toISOString().slice(0, 10);
 };
 
-export default function RequestForm({ cars }: { cars: string[] }) {
+export type RequestDraft = {
+  id: string; car: string; shoot_type: string; kind: string; city: string; date: string; budget: number | null; note: string | null; offers: number;
+};
+
+/** Post a request, or with a draft, change one that's still open. */
+export default function RequestForm({ cars: garage, draft }: { cars: string[]; draft?: RequestDraft }) {
   const router = useRouter();
   const now = today();
-  const [car, setCar] = useState(cars[0] ?? "");
-  const [shoot, setShoot] = useState<string>(SHOOT_TYPES[0]);
-  const [kind, setKind] = useState<string>("either");
-  const [city, setCity] = useState<string>(CITIES[0]);
-  const [date, setDate] = useState(plus(now, 7));
-  const [budget, setBudget] = useState("");
-  const [note, setNote] = useState("");
+  const cars = draft && !garage.includes(draft.car) ? [draft.car, ...garage] : garage;
+  const [car, setCar] = useState(draft?.car ?? cars[0] ?? "");
+  const [shoot, setShoot] = useState<string>(draft?.shoot_type ?? SHOOT_TYPES[0]);
+  const [kind, setKind] = useState<string>(draft?.kind ?? "either");
+  const [city, setCity] = useState<string>(draft?.city ?? CITIES[0]);
+  const [date, setDate] = useState(draft?.date ?? plus(now, 7));
+  const [budget, setBudget] = useState(draft?.budget ? String(draft.budget) : "");
+  const [note, setNote] = useState(draft?.note ?? "");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -36,13 +42,17 @@ export default function RequestForm({ cars }: { cars: string[] }) {
     if (!date || date < now) return setError("Pick a date from today on.");
     setBusy(true);
     setError("");
-    const { error } = await createClient().from("requests").insert({
+    const fields = {
       car: car.trim(), shoot_type: shoot, kind, city, date_from: date, date_to: date,
       budget: budget ? Number(budget) : null, note: note.trim() || null,
-    });
+    };
+    const supabase = createClient();
+    const { error } = draft
+      ? await supabase.from("requests").update(fields).eq("id", draft.id)
+      : await supabase.from("requests").insert(fields);
     setBusy(false);
     if (error) return setError(error.message);
-    router.push("/requests?posted=1");
+    router.push(draft ? `/requests/${draft.id}?edited=1` : "/requests?posted=1");
     router.refresh();
   }
 
@@ -94,7 +104,12 @@ export default function RequestForm({ cars }: { cars: string[] }) {
         <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={3} maxLength={500} placeholder="Just got it wrapped, want rollers on the bridge at sunset." />
       </label>
       {error && <p className="error" style={{ margin: 0 }}>{error}</p>}
-      <button className="btn solid" disabled={busy}>Post request</button>
+      <button className="btn solid" disabled={busy}>{draft ? "Save changes" : "Post request"}</button>
+      {draft && draft.offers > 0 && (
+        <p className="small muted" style={{ margin: 0 }}>
+          {draft.offers === 1 ? "The creator who sent an offer gets" : `The ${draft.offers} creators who sent offers get`} a notification with the new details. Their offers stay, so check they still fit.
+        </p>
+      )}
       <p className="small muted" style={{ margin: 0 }}>Phone numbers and handles aren&apos;t allowed here. You&apos;ll chat in Rollshot.</p>
     </form>
   );
