@@ -540,6 +540,7 @@ main.wrap:has(+ .site-foot) { padding-bottom: 72px; }
 .onboard-photo button { position: absolute; top: 6px; right: 6px; width: 26px; height: 26px; border-radius: 50%; border: 0; background: rgb(10 10 10 / .6); color: #fff; font-size: 12px; cursor: pointer; display: grid; place-items: center; }
 .onboard-drop { min-height: 110px; }
 .chip[aria-pressed="true"] .muted { color: inherit; opacity: .65; }
+.linklike { background: none; border: 0; padding: 0; color: var(--ink); text-decoration: underline; cursor: pointer; font: inherit; }
 
 /* Tiles you can drag into order (useDragSort). A long press starts a drag on phones. */
 [data-sort-key] { cursor: grab; touch-action: pan-y; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; transition: transform .15s, opacity .15s; }

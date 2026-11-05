@@ -56,7 +56,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ d
           <h1 className="hero-title">Your car, shot <em>right.</em></h1>
           <p className="lede">Book local car photo and video creators by the shoot. Real portfolios, real open dates, no back and forth.</p>
           {user ? (
-            <SignedInAs profile={profile} label={label} email={user.email ?? ""} wanted={null} />
+            <SignedInAs profile={profile} label={label} email={user.email || (user.phone ? `+${user.phone}` : "")} wanted={null} />
           ) : (
             <div className="row" style={{ marginTop: 8 }}>
               <Link className="btn pink" href="/signup?role=client">Book a creator</Link>
