@@ -12,16 +12,18 @@ const plus = (d: string, days: number) => {
   return x.toISOString().slice(0, 10);
 };
 
-/** Post a crew job, or (with a target) offer it to one creator directly. */
-export default function CrewForm({ city: startCity, target }: { city: string; target?: { id: string; name: string; role: CrewRole } }) {
+export type GigDraft = { id: string; role: CrewRole; city: string; date: string; time: string | null; pay: number; note: string | null; replies: number };
+
+/** Post a crew job, or (with a target) offer it to one creator directly. With a gig, edits that job. */
+export default function CrewForm({ city: startCity, target, gig }: { city: string; target?: { id: string; name: string; role: CrewRole }; gig?: GigDraft }) {
   const router = useRouter();
   const now = today();
-  const [role, setRole] = useState<CrewRole>(target?.role ?? "Second shooter");
-  const [city, setCity] = useState(startCity);
-  const [date, setDate] = useState(plus(now, 7));
-  const [time, setTime] = useState("");
-  const [pay, setPay] = useState("");
-  const [note, setNote] = useState("");
+  const [role, setRole] = useState<CrewRole>(gig?.role ?? target?.role ?? "Second shooter");
+  const [city, setCity] = useState(gig?.city ?? startCity);
+  const [date, setDate] = useState(gig?.date ?? plus(now, 7));
+  const [time, setTime] = useState(gig?.time?.slice(0, 5) ?? "");
+  const [pay, setPay] = useState(gig ? String(gig.pay) : "");
+  const [note, setNote] = useState(gig?.note ?? "");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const first = target?.name.split(" ")[0];
@@ -32,13 +34,13 @@ export default function CrewForm({ city: startCity, target }: { city: string; ta
     if (!pay || Number(pay) < 1) return setError("Add what you'll pay.");
     setBusy(true);
     setError("");
-    const { error } = await createClient().rpc("post_gig", {
-      p_role: role, p_city: city, p_date: date, p_time: time || null, p_pay: Number(pay), p_note: note.trim() || null,
-      p_target: target?.id ?? null,
-    });
+    const fields = { p_role: role, p_city: city, p_date: date, p_time: time || null, p_pay: Number(pay), p_note: note.trim() || null };
+    const { error } = gig
+      ? await createClient().rpc("edit_gig", { p_gig: gig.id, ...fields })
+      : await createClient().rpc("post_gig", { ...fields, p_target: target?.id ?? null });
     setBusy(false);
     if (error) return setError(error.message);
-    router.push(target ? "/crew?sent=1" : "/crew?posted=1");
+    router.push(gig ? "/crew?edited=1" : target ? "/crew?sent=1" : "/crew?posted=1");
     router.refresh();
   }
 
@@ -80,9 +82,15 @@ export default function CrewForm({ city: startCity, target }: { city: string; ta
         <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={3} maxLength={500} placeholder="Rollers on the Rickenbacker at sunset. Bring a gimbal." />
       </label>
       {error && <p className="error" style={{ margin: 0 }}>{error}</p>}
-      <button className="btn solid" disabled={busy}>{target ? `Send offer to ${first}` : "Post job"}</button>
+      <button className="btn solid" disabled={busy}>{gig ? "Save changes" : target ? `Send offer to ${first}` : "Post job"}</button>
       <p className="small muted" style={{ margin: 0 }}>
-        {target
+        {gig
+          ? target
+            ? `${first} gets a note in chat with the new details.`
+            : gig.replies
+              ? `The ${gig.replies === 1 ? "creator who replied gets" : `${gig.replies} creators who replied get`} a notification with the new details.`
+              : "Creators see the new details on their Crew page right away."
+          : target
           ? `${first} gets it in chat and on their Crew page, and can accept or decline.`
           : "Creators on Rollshot see it on their Crew page and can say they're in. You pick one."}
       </p>

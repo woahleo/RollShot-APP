@@ -5,6 +5,7 @@ import { KIND_LABEL, photoUrl, type Kind } from "@/lib/types";
 import { prettyDate } from "@/lib/sun";
 import type { Request } from "../page";
 import OfferChoice from "./OfferChoice";
+import OwnerTools from "./OwnerTools";
 import { lateCancels, lateLabel } from "@/lib/lateCancels";
 
 type Offer = {
@@ -12,8 +13,9 @@ type Offer = {
   pro: { city: string; kind: Kind; photos: string[]; shoot_types: string[]; profiles: { name: string } | null } | null;
 };
 
-export default async function RequestOffers({ params }: { params: Promise<{ id: string }> }) {
+export default async function RequestOffers({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ edited?: string }> }) {
   const { id } = await params;
+  const sp = await searchParams;
   const { supabase, user } = await getMe();
   if (!user) redirect(`/signup?next=/requests/${id}`);
   const { data } = await supabase.from("requests").select("*").eq("id", id).maybeSingle();
@@ -38,6 +40,8 @@ export default async function RequestOffers({ params }: { params: Promise<{ id: 
         {r.car} · {prettyDate(r.date_from)}{r.budget ? ` · $${r.budget} budget` : ""}
       </p>
       {r.note && <p className="muted" style={{ marginTop: 0 }}>{r.note}</p>}
+      {sp.edited && <p className="notice">Changes saved.{offers.length ? " Creators who sent offers got a notification." : ""}</p>}
+      {open && <OwnerTools id={r.id} offers={offers.length} />}
 
       {chosen ? (
         <p className="notice">You chose <b>{chosen.pro?.profiles?.name}</b> for ${chosen.price}. It&apos;s booked and confirmed. <Link href="/shoots">See your shoots</Link></p>

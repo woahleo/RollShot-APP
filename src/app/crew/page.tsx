@@ -34,7 +34,7 @@ function GigTop({ g, who }: { g: Gig; who?: React.ReactNode }) {
  * Crew: creators hiring creators. Offers sent to you, jobs you're booked on, jobs you posted
  * (with who replied), and open jobs from other creators, your city first.
  */
-export default async function Crew({ searchParams }: { searchParams: Promise<{ posted?: string; sent?: string }> }) {
+export default async function Crew({ searchParams }: { searchParams: Promise<{ posted?: string; sent?: string; edited?: string }> }) {
   const sp = await searchParams;
   const { supabase, user, profile } = await getMe();
   if (!user) redirect("/signup?next=/crew");
@@ -75,6 +75,7 @@ export default async function Crew({ searchParams }: { searchParams: Promise<{ p
       </div>
       {sp.posted && <p className="notice" style={{ marginTop: 16 }}>Job posted. Creators can say they&apos;re in now. You&apos;ll get a chat from each one.</p>}
       {sp.sent && <p className="notice" style={{ marginTop: 16 }}>Offer sent. They got it in chat too.</p>}
+      {sp.edited && <p className="notice" style={{ marginTop: 16 }}>Changes saved. Anyone who replied got a notification.</p>}
 
       {offers.length > 0 && (
         <section>
@@ -154,7 +155,10 @@ export default async function Crew({ searchParams }: { searchParams: Promise<{ p
                       {g.status === "filled" ? "Filled" : g.status === "declined" ? "Declined" : direct ? "Waiting on them" : `${replies.length} repl${replies.length === 1 ? "y" : "ies"}`}
                     </span>
                     {g.status === "open" ? (
-                      <CloseJob gig={g.id} direct={direct} />
+                      <div className="row" style={{ gap: 6 }}>
+                        <Link className="btn small" href={`/crew/${g.id}/edit`}>Edit</Link>
+                        <CloseJob gig={g.id} direct={direct} />
+                      </div>
                     ) : g.status === "filled" ? (
                       <div className="row" style={{ gap: 6 }}>
                         {g.shoot_date >= now && <AddToCalendar kind="gig" id={g.id} />}
