@@ -8,8 +8,9 @@ import { REVIEW_EMAIL } from "@/lib/app";
 type Role = "client" | "pro";
 
 /**
- * In the iPhone app, Google sign-in is hidden (Google blocks it inside apps) and the email step asks
- * for the code from the email, since tapping the link would open Safari instead of the app.
+ * The sign-in email has a link (works on any device, see /auth/confirm) and a code, which can be
+ * typed here, handy when the email is opened on another device. In the iPhone app, Google is hidden
+ * (Google blocks sign-in inside apps) and the code is the way in, since the link opens Safari.
  */
 export default function SignupForm({ initialRole, next, linkError, providers, inApp = false }: { initialRole: Role | null; next: string; linkError: string; providers: { google: boolean; apple: boolean }; inApp?: boolean }) {
   const [role, setRole] = useState<Role | null>(initialRole);
@@ -61,11 +62,15 @@ export default function SignupForm({ initialRole, next, linkError, providers, in
     if (error) setError(error.message); else setSent(true);
   }
 
-  if (sent && inApp) {
+  if (sent) {
     return (
       <div className="card">
         <h3>Check your email</h3>
-        <p className="muted">We sent a code to {email}. Type it here to sign in.</p>
+        <p className="muted">
+          {inApp
+            ? <>We sent a code to {email}. Type it here to sign in.</>
+            : <>We sent a link and a code to {email}. Tap the link on any device, or type the code here.</>}
+        </p>
         <form onSubmit={checkCode}>
           <label className="field">
             <span>Code</span>
@@ -75,15 +80,6 @@ export default function SignupForm({ initialRole, next, linkError, providers, in
         </form>
         {error && <p className="error">{error}</p>}
         <button type="button" className="btn small" style={{ marginTop: 12 }} onClick={() => { setSent(false); setCode(""); setError(""); }}>Use a different email</button>
-      </div>
-    );
-  }
-
-  if (sent) {
-    return (
-      <div className="card">
-        <h3>Check your email</h3>
-        <p className="muted">We sent a sign-in link to {email}. Open it on this device.</p>
       </div>
     );
   }
