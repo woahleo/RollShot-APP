@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { photoUrl } from "@/lib/types";
 
 /** A round initial that opens a small menu: messages, settings, light/dark and sign out. */
-export default function AccountMenu({ name, label, avatar }: { name: string; label: string; avatar?: string | null }) {
+export default function AccountMenu({ name, label, avatar, admin = false }: { name: string; label: string; avatar?: string | null; admin?: boolean }) {
   const [open, setOpen] = useState(false);
   const [dark, setDark] = useState(false);
   const box = useRef<HTMLDivElement>(null);
@@ -50,6 +50,8 @@ export default function AccountMenu({ name, label, avatar }: { name: string; lab
             <span>{label}</span>
           </div>
           <Link href="/messages" role="menuitem">Messages</Link>
+          <Link href="/notifications" role="menuitem">Notifications</Link>
+          {admin && <Link href="/admin" role="menuitem">Admin</Link>}
           <Link href="/settings" role="menuitem">Settings</Link>
           <button type="button" role="menuitem" onClick={flip}>{dark ? "Light mode" : "Dark mode"}</button>
           <form action="/auth/signout" method="post">

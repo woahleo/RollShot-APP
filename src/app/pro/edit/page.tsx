@@ -12,6 +12,7 @@ export default async function Page() {
     supabase.from("packages").select("*").eq("pro_id", user.id).order("position"),
     supabase.from("pro_contacts").select("instagram, phone").eq("pro_id", user.id).maybeSingle(),
   ]);
+  if (!pro) redirect("/onboarding"); // signed up as a creator but the creator details never saved
   return (
     <main className="wrap">
       <h1>Your profile<em>.</em></h1>

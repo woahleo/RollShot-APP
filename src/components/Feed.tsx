@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { money } from "@/lib/money";
 import { KIND_LABEL, photoUrl, proPath, type Kind, type Package, type Pro, type ShootPost } from "@/lib/types";
 import { prettyDate } from "@/lib/sun";
 import { videoHost } from "@/lib/photos";
@@ -45,7 +46,7 @@ export function buildFeed(shots: FeedShot[], pros: FeedPro[], size = 9): Item[] 
       meta: `${s.city} · ${prettyDate(s.shoot_date)}`,
       title: s.car,
       note: s.caption,
-      price: `${s.shoot_type} · $${s.price}`,
+      price: `${s.shoot_type} · ${money(s.price)}`,
       badge: s.video_url ? videoHost(s.video_url) : null,
       more: Math.max(0, s.photos.length - 1),
     });

@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { tzOf } from "@/lib/cities";
+import { money } from "@/lib/money";
 import { redirect } from "next/navigation";
 import { getMe } from "@/lib/supabase/server";
 import { proPath, type Booking, type Pro } from "@/lib/types";
@@ -25,6 +27,7 @@ export default async function Dashboard() {
   ]);
   type MyOffer = { price: number; status: "waiting" | "chosen" | "passed"; request: { car: string; shoot_type: string; city: string; date_from: string } | null };
   const myOffers = ((offerRows ?? []) as unknown as MyOffer[]).filter((o) => o.request && o.request.date_from >= today());
+  if (!pro) redirect("/onboarding"); // signed up as a creator but the creator details never saved
   const p = pro as Pro;
   const rows = (bookings ?? []) as Row[];
   const now = today();
@@ -77,7 +80,7 @@ export default async function Dashboard() {
 
       <section id="dates">
         <h2>Open days</h2>
-        <OpenDates userId={user.id} initial={p.open_dates} initialHours={p.open_hours ?? {}} booked={upcoming.map((b) => b.shoot_date)} />
+        <OpenDates tz={tzOf(p.city)} userId={user.id} initial={p.open_dates} initialHours={p.open_hours ?? {}} booked={upcoming.map((b) => b.shoot_date)} />
       </section>
 
       <section>
@@ -126,7 +129,7 @@ export default async function Dashboard() {
               <div key={i} className="card" style={{ padding: "12px 16px" }}>
                 <span>{o.request!.shoot_type} · {o.request!.car} · {o.request!.city} · {prettyDate(o.request!.date_from)}</span>
                 <span className="row" style={{ gap: 8 }}>
-                  <b style={{ fontWeight: 400 }}>${o.price}</b>
+                  <b style={{ fontWeight: 400 }}>{money(o.price)}</b>
                   <span className={`badge ${o.status === "chosen" ? "confirmed" : o.status === "passed" ? "declined" : "requested"}`}>
                     {o.status === "chosen" ? "Chosen" : o.status === "passed" ? "Not chosen" : "Waiting"}
                   </span>

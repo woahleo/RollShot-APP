@@ -8,6 +8,7 @@ import { today } from "@/lib/sun";
 import { proPath } from "@/lib/types";
 import type { Gig, GigReply } from "@/lib/crew";
 import { AnswerOffer, CloseJob, PickReply, ReplyJob } from "./CrewActions";
+import AddToCalendar from "@/components/AddToCalendar";
 
 type Person = { id: string; handle: string | null; profiles: { name: string; avatar: string | null } | null };
 type Row = Gig & { poster: Person | null; target: Person | null; hired: Person | null };
@@ -21,8 +22,8 @@ function GigTop({ g, who }: { g: Gig; who?: React.ReactNode }) {
     <div className="req-top">
       <DateTile day={g.shoot_date} />
       <div style={{ minWidth: 0 }}>
-        <span className="eyebrow">{g.role}</span>
-        <h3>${g.pay}{who ? <span className="muted" style={{ fontWeight: 300 }}> · {who}</span> : null}</h3>
+        <span className="eyebrow">{g.role}{g.pay === 0 ? " · for experience" : ""}</span>
+        <h3>{g.pay === 0 ? "Unpaid" : `$${g.pay}`}{who ? <span className="muted" style={{ fontWeight: 300 }}> · {who}</span> : null}</h3>
         <span className="small muted">{[g.city, g.shoot_time ? prettyTime(g.shoot_time) : "Time in chat"].join(" · ")}</span>
       </div>
     </div>
@@ -33,7 +34,7 @@ function GigTop({ g, who }: { g: Gig; who?: React.ReactNode }) {
  * Crew: creators hiring creators. Offers sent to you, jobs you're booked on, jobs you posted
  * (with who replied), and open jobs from other creators, your city first.
  */
-export default async function Crew({ searchParams }: { searchParams: Promise<{ posted?: string; sent?: string }> }) {
+export default async function Crew({ searchParams }: { searchParams: Promise<{ posted?: string; sent?: string; edited?: string }> }) {
   const sp = await searchParams;
   const { supabase, user, profile } = await getMe();
   if (!user) redirect("/signup?next=/crew");
@@ -43,14 +44,14 @@ export default async function Crew({ searchParams }: { searchParams: Promise<{ p
   const now = today();
   const sel = `*, poster:pros!gigs_poster_id_fkey(${PERSON}), target:pros!gigs_target_id_fkey(${PERSON}), hired:pros!gigs_hired_id_fkey(${PERSON})`;
   const [{ data: pro }, { data: forMe }, { data: mineRows }, { data: openRows }, { data: myReplies }, { data: threadRows }] = await Promise.all([
-    supabase.from("pros").select("city").eq("id", me).single(),
+    supabase.from("pros").select("city, more_cities").eq("id", me).single(),
     supabase.from("gigs").select(sel).or(`target_id.eq.${me},hired_id.eq.${me}`).gte("shoot_date", now).order("shoot_date"),
     supabase.from("gigs").select(`${sel}, gig_replies(*, pro:pros(${PERSON}))`).eq("poster_id", me).gte("shoot_date", now).neq("status", "closed").order("shoot_date"),
     supabase.from("gigs").select(sel).is("target_id", null).eq("status", "open").neq("poster_id", me).gte("shoot_date", now).order("shoot_date").limit(40),
     supabase.from("gig_replies").select("gig_id, status").eq("pro_id", me),
     supabase.from("threads").select("id, pro_id, client_id").or(`pro_id.eq.${me},client_id.eq.${me}`),
   ]);
-  const city = (pro as { city: string } | null)?.city ?? "";
+  const myCities = pro ? [(pro as { city: string }).city, ...((pro as { more_cities?: string[] }).more_cities ?? [])] : [];
   const chatWith = new Map(((threadRows ?? []) as { id: string; pro_id: string; client_id: string }[]).map((t) => [t.pro_id === me ? t.client_id : t.pro_id, t.id]));
   const chat = (other: string | null | undefined) => (other && chatWith.get(other) ? `/messages/${chatWith.get(other)}` : null);
   const incoming = (forMe ?? []) as Row[];
@@ -58,7 +59,7 @@ export default async function Crew({ searchParams }: { searchParams: Promise<{ p
   const booked = incoming.filter((g) => g.hired_id === me && g.status === "filled");
   const mine = (mineRows ?? []) as Mine[];
   const replied = new Set(((myReplies ?? []) as { gig_id: string }[]).map((r) => r.gig_id));
-  const open = ((openRows ?? []) as Row[]).sort((a, b) => Number(b.city === city) - Number(a.city === city));
+  const open = ((openRows ?? []) as Row[]).sort((a, b) => Number(myCities.includes(b.city)) - Number(myCities.includes(a.city)));
 
   return (
     <main className="wrap">
@@ -74,6 +75,7 @@ export default async function Crew({ searchParams }: { searchParams: Promise<{ p
       </div>
       {sp.posted && <p className="notice" style={{ marginTop: 16 }}>Job posted. Creators can say they&apos;re in now. You&apos;ll get a chat from each one.</p>}
       {sp.sent && <p className="notice" style={{ marginTop: 16 }}>Offer sent. They got it in chat too.</p>}
+      {sp.edited && <p className="notice" style={{ marginTop: 16 }}>Changes saved. Anyone who replied got a notification.</p>}
 
       {offers.length > 0 && (
         <section>
@@ -103,7 +105,10 @@ export default async function Crew({ searchParams }: { searchParams: Promise<{ p
                 {g.note && <p className="small req-note">{g.note}</p>}
                 <div className="req-foot">
                   <span className="badge confirmed">Booked</span>
-                  {chat(g.poster_id) && <Link className="btn small" href={chat(g.poster_id)!}>Message</Link>}
+                  <div className="row" style={{ gap: 6 }}>
+                    <AddToCalendar kind="gig" id={g.id} />
+                    {chat(g.poster_id) && <Link className="btn small" href={chat(g.poster_id)!}>Message</Link>}
+                  </div>
                 </div>
               </div>
             ))}
@@ -150,9 +155,15 @@ export default async function Crew({ searchParams }: { searchParams: Promise<{ p
                       {g.status === "filled" ? "Filled" : g.status === "declined" ? "Declined" : direct ? "Waiting on them" : `${replies.length} repl${replies.length === 1 ? "y" : "ies"}`}
                     </span>
                     {g.status === "open" ? (
-                      <CloseJob gig={g.id} direct={direct} />
-                    ) : g.status === "filled" && chat(g.hired_id) ? (
-                      <Link className="btn small" href={chat(g.hired_id)!}>Message</Link>
+                      <div className="row" style={{ gap: 6 }}>
+                        <Link className="btn small" href={`/crew/${g.id}/edit`}>Edit</Link>
+                        <CloseJob gig={g.id} direct={direct} />
+                      </div>
+                    ) : g.status === "filled" ? (
+                      <div className="row" style={{ gap: 6 }}>
+                        {g.shoot_date >= now && <AddToCalendar kind="gig" id={g.id} />}
+                        {chat(g.hired_id) && <Link className="btn small" href={chat(g.hired_id)!}>Message</Link>}
+                      </div>
                     ) : null}
                   </div>
                 </div>
@@ -173,7 +184,7 @@ export default async function Crew({ searchParams }: { searchParams: Promise<{ p
                 <GigTop g={g} who={<Link href={proPath(g.poster ?? { id: g.poster_id })}>{nameOf(g.poster)}</Link>} />
                 {g.note && <p className="small req-note">{g.note}</p>}
                 <div className="req-foot">
-                  <span className="small muted">{g.city === city ? "In your city" : "Nearby"}</span>
+                  <span className="small muted">{myCities.includes(g.city) ? "In your city" : "Nearby"}</span>
                   <ReplyJob gig={g.id} replied={replied.has(g.id)} />
                 </div>
               </div>

@@ -2,7 +2,9 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { CITIES, HANDLE_RE, KIND_LABEL, proPath, SHOOT_TYPES, type Kind, type Package, type Pro } from "@/lib/types";
+import CityOptions from "@/components/CityOptions";
+import MoreCities from "@/components/MoreCities";
+import { HANDLE_RE, KIND_LABEL, proPath, SHOOT_TYPES, type Kind, type Package, type Pro } from "@/lib/types";
 import AvatarUpload from "@/components/AvatarUpload";
 import PortfolioPhotos from "@/components/PortfolioPhotos";
 import ReelPicker from "@/components/ReelPicker";
@@ -15,7 +17,7 @@ type Props = {
 export default function EditPro({ userId, name, avatar, site, pro, packages, contact }: Props) {
   const router = useRouter();
   const supabase = createClient();
-  const [info, setInfo] = useState({ city: pro.city, kind: pro.kind ?? "photo", about: pro.about ?? "", shoot_types: pro.shoot_types });
+  const [info, setInfo] = useState({ city: pro.city, more_cities: pro.more_cities ?? [], kind: pro.kind ?? "photo", about: pro.about ?? "", shoot_types: pro.shoot_types });
   const [reach, setReach] = useState({ instagram: contact?.instagram ?? "", phone: contact?.phone ?? "" });
   const [pkgs, setPkgs] = useState(packages.map((p) => ({ ...p })));
   const [msg, setMsg] = useState("");
@@ -89,11 +91,12 @@ export default function EditPro({ userId, name, avatar, site, pro, packages, con
 
       <form className="card" onSubmit={saveInfo}>
         <h3>About you</h3>
-        <label className="field"><span>City</span>
-          <select value={info.city} onChange={(e) => setInfo({ ...info, city: e.target.value })}>
-            {CITIES.map((c) => <option key={c}>{c}</option>)}
+        <label className="field"><span>Home city</span>
+          <select value={info.city} onChange={(e) => setInfo({ ...info, city: e.target.value, more_cities: info.more_cities.filter((c) => c !== e.target.value) })}>
+            <CityOptions />
           </select>
         </label>
+        <MoreCities home={info.city} value={info.more_cities} onChange={(more_cities) => setInfo({ ...info, more_cities })} />
         <div className="field"><span>What you do</span>
           <div className="chips">
             {(Object.keys(KIND_LABEL) as Kind[]).map((k) => (

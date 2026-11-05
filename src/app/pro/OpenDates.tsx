@@ -18,8 +18,8 @@ const addDays = (d: string, n: number) => {
  * or close it. Tapping again never closes a day by accident. Quick buttons open a batch of days at once.
  * Days with a booked shoot have a dot and can't be opened again.
  */
-export default function OpenDates({ userId, initial, initialHours, booked = [] }: { userId: string; initial: string[]; initialHours: Hours; booked?: string[] }) {
-  const now = today();
+export default function OpenDates({ userId, initial, initialHours, booked = [], tz }: { userId: string; initial: string[]; initialHours: Hours; booked?: string[]; tz?: string }) {
+  const now = today(tz);
   const start = initial.filter((d) => d >= now);
   const busy = new Set(booked);
   const [s, setS] = useState<State>(() => ({
@@ -93,7 +93,7 @@ export default function OpenDates({ userId, initial, initialHours, booked = [] }
           <button type="button" className="chip" onClick={() => openMany(next7)}>Open next 7 days</button>
           {count > 0 && <button type="button" className="chip" onClick={() => { setFocus(null); save({ open: new Set(), hours: {} }); }}>Close all</button>}
         </div>
-        <MonthCalendar selected={s.open} onPick={pick} focus={focus} isEnabled={(d) => !busy.has(d)} isDotted={(d) => busy.has(d)} />
+        <MonthCalendar tz={tz} selected={s.open} onPick={pick} focus={focus} isEnabled={(d) => !busy.has(d)} isDotted={(d) => busy.has(d)} />
         <p className="small muted" style={{ margin: "8px 0 0" }}>
           {count ? `${count} open day${count === 1 ? "" : "s"}` : "No open days yet"}
           {busy.size > 0 ? " · dots are booked shoots" : ""}

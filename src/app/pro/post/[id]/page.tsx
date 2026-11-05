@@ -1,4 +1,5 @@
 import { notFound, redirect } from "next/navigation";
+import { money } from "@/lib/money";
 import { getMe } from "@/lib/supabase/server";
 import type { Booking, ShootPost } from "@/lib/types";
 import { prettyDate } from "@/lib/sun";
@@ -19,7 +20,7 @@ export default async function PostShootPage({ params }: { params: Promise<{ id: 
 
   return (
     <main className="wrap" style={{ maxWidth: 680 }}>
-      <p className="eyebrow">{booking.package_name} · {prettyDate(booking.shoot_date)} · ${booking.price}</p>
+      <p className="eyebrow">{booking.package_name} · {prettyDate(booking.shoot_date)} · {money(booking.price)}</p>
       <h1 style={{ marginBottom: 6 }}>{post ? "Edit this post" : "Post this shoot"}<em>.</em></h1>
       <p className="lede">{booking.car ?? "This car"}. The photos go on your page, on the car&apos;s page, and anyone who sees them can book you from there.</p>
       <PostShoot userId={user.id} bookingId={booking.id} post={post} />

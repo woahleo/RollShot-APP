@@ -1,14 +1,16 @@
 import Link from "next/link";
 import DateTile from "@/components/DateTile";
 import { getMe } from "@/lib/supabase/server";
-import { CITIES } from "@/lib/types";
+import { Suspense } from "react";
+import { cityLabel, isCity } from "@/lib/cities";
+import CityFilter from "@/components/CityFilter";
 import { today } from "@/lib/sun";
 import RequestActions from "./RequestActions";
 import { lateCancels, lateLabel } from "@/lib/lateCancels";
 
 export type Request = {
   id: string; client_id: string; car: string; city: string; kind: "photo" | "video" | "either"; shoot_type: string;
-  date_from: string; date_to: string; budget: number | null; note: string | null; status: "open" | "closed"; created_at: string;
+  date_from: string; date_to: string; budget: number | null; free?: boolean; note: string | null; status: "open" | "closed"; created_at: string;
   chosen_pro: string | null;
 };
 
@@ -22,10 +24,17 @@ function ago(ts: string) {
 }
 
 export default async function Requests({ searchParams }: { searchParams: Promise<{ city?: string; posted?: string }> }) {
-  const { city, posted } = await searchParams;
+  const { city: picked, posted } = await searchParams;
   const { supabase, user, profile } = await getMe();
-  let q = supabase.from("requests").select("*").eq("status", "open").gte("date_to", today()).order("created_at", { ascending: false }).limit(60);
-  if (city && (CITIES as readonly string[]).includes(city)) q = q.eq("city", city);
+  // Creators start on their own cities; anyone can switch to another city or all of them.
+  const { data: myPro } = profile?.role === "pro" && user ? await supabase.from("pros").select("all_cities").eq("id", user.id).maybeSingle() : { data: null };
+  const myCities = ((myPro as { all_cities: string[] } | null)?.all_cities ?? []).filter(isCity);
+  const showMine = myCities.length > 1 && (picked === "mine" || !picked);
+  const city = isCity(picked) ? picked : picked === "all" || showMine ? undefined : myCities[0];
+  // West Coast "today", so a request doesn't drop off the board while it's still that day there.
+  let q = supabase.from("requests").select("*").eq("status", "open").gte("date_to", today("America/Los_Angeles")).order("created_at", { ascending: false }).limit(60);
+  if (city) q = q.eq("city", city);
+  else if (showMine) q = q.in("city", myCities);
   const { data } = await q;
   const rows = (data ?? []) as Request[];
   const ids = rows.map((r) => r.id);
@@ -60,14 +69,14 @@ export default async function Requests({ searchParams }: { searchParams: Promise
         )}
       </div>
       {posted && <p className="notice" style={{ marginTop: 16 }}>Your request is up. You&apos;ll get a message when a creator replies.</p>}
-      <div className="chips scroll" style={{ margin: "20px 0" }}>
-        <Link className="chip" aria-pressed={!city} href="/requests">All cities</Link>
-        {CITIES.map((c) => (
-          <Link key={c} className="chip" aria-pressed={city === c} href={`/requests?city=${encodeURIComponent(c)}`}>{c}</Link>
-        ))}
+      <div style={{ margin: "20px 0" }}>
+        <Suspense><CityFilter value={showMine ? "mine" : city ?? "all"} noun="requests" mine={myCities} /></Suspense>
       </div>
       {rows.length === 0 && (
-        <p className="notice">No open requests{city ? ` in ${city}` : ""} right now.{role !== "pro" && " Be the first to post one."}</p>
+        <p className="notice">
+          No open requests{city ? ` in ${cityLabel(city)}` : showMine ? " in your cities" : ""} right now.{role !== "pro" ? " Be the first to post one." : ""}
+          {(city || showMine) && role === "pro" ? <> <Link href="/requests?city=all">See all cities</Link>.</> : null}
+        </p>
       )}
       <div className="grid">
         {rows.map((r) => {
@@ -79,11 +88,12 @@ export default async function Requests({ searchParams }: { searchParams: Promise
                 <DateTile day={r.date_from} />
                 <div style={{ minWidth: 0 }}>
                   <span className="eyebrow">{r.shoot_type} · {KIND[r.kind]}</span>
+                  {r.free && <span className="badge free">Free portfolio shoot</span>}
                   <h3>{r.car}</h3>
                   <span className="small muted">
                     {r.city}
                     {r.date_from !== r.date_to ? ` · until ${short(r.date_to)}` : ""}
-                    {r.budget ? ` · $${r.budget} budget` : ""}
+                    {!r.free && r.budget ? ` · $${r.budget} budget` : ""}
                   </span>
                 </div>
               </div>
@@ -97,7 +107,7 @@ export default async function Requests({ searchParams }: { searchParams: Promise
               {r.note && <p className="small req-note">{r.note}</p>}
               <div className="req-foot">
                 <span className="small muted">{own ? "Yours · " : ""}{n} {n === 1 ? "offer" : "offers"} · {ago(r.created_at)}</span>
-                <RequestActions id={r.id} role={role} signedIn={!!user} own={own} offers={n} mine={myOffers.get(r.id) ?? null} budget={r.budget} />
+                <RequestActions id={r.id} role={role} signedIn={!!user} own={own} offers={n} mine={myOffers.get(r.id) ?? null} budget={r.budget} free={!!r.free} />
               </div>
             </article>
           );
