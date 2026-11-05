@@ -1,4 +1,5 @@
 import SignupForm from "./SignupForm";
+import { isApp } from "@/lib/app";
 import SignedInAs from "@/components/SignedInAs";
 import { accountLabel } from "@/lib/account";
 import { getMe } from "@/lib/supabase/server";
@@ -63,7 +64,7 @@ export default async function Signup({ searchParams }: { searchParams: Promise<{
   return (
     <main className="wrap">
       <div className="auth">
-        <SignupForm initialRole={role} next={sp.next ?? ""} linkError={linkError} providers={providers} />
+        <SignupForm initialRole={role} next={sp.next ?? ""} linkError={linkError} providers={providers} inApp={isApp((await headers()).get("user-agent"))} />
       </div>
     </main>
   );

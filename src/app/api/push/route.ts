@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import webpush from "web-push";
 import { pushReady } from "@/lib/push";
+import { apnsReady, sendApns } from "@/lib/apns";
 
 type Sub = { endpoint: string; keys: { p256dh: string; auth: string } };
 type Alert = { subs?: Sub[]; title?: string; body?: string | null; href?: string | null; tag?: string | null };
@@ -8,24 +9,35 @@ type Alert = { subs?: Sub[]; title?: string; body?: string | null; href?: string
 /**
  * The database calls this for each notification (see 0019_admin_notifications.sql). It signs the
  * alert with the app's push keys and hands it to Apple, Google or Mozilla, which wake the phone.
+ * Phones with the iPhone app are saved as "apns:<token>" and go straight to Apple's push service.
  */
 export async function POST(req: Request) {
   const secret = process.env.PUSH_SECRET;
-  if (!pushReady() || !secret || req.headers.get("x-push-secret") !== secret) {
+  if (!(pushReady() || apnsReady()) || !secret || req.headers.get("x-push-secret") !== secret) {
     return Response.json({ error: "Not allowed" }, { status: 401 });
   }
   const a = (await req.json().catch(() => ({}))) as Alert;
   if (!a.title || !Array.isArray(a.subs)) return Response.json({ error: "Nothing to send" }, { status: 400 });
-  webpush.setVapidDetails(
-    process.env.NEXT_PUBLIC_SITE_URL ?? "https://roll-shot-app.vercel.app",
-    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-    process.env.VAPID_PRIVATE_KEY!,
-  );
+  if (pushReady()) {
+    webpush.setVapidDetails(
+      process.env.NEXT_PUBLIC_SITE_URL ?? "https://roll-shot-app.vercel.app",
+      process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
+      process.env.VAPID_PRIVATE_KEY!,
+    );
+  }
   const payload = JSON.stringify({ title: a.title, body: a.body ?? "", href: a.href ?? "/", tag: a.tag ?? undefined });
   const dead: string[] = [];
   let sent = 0;
   await Promise.all(
     a.subs.slice(0, 20).map(async (s) => {
+      if (s.endpoint.startsWith("apns:")) {
+        if (!apnsReady()) return;
+        const r = await sendApns(s.endpoint.slice(5), a as { title: string });
+        if (r === "sent") sent++;
+        if (r === "dead") dead.push(s.endpoint);
+        return;
+      }
+      if (!pushReady()) return;
       try {
         await webpush.sendNotification(s, payload, { TTL: 60 * 60 * 24, urgency: "high" });
         sent++;

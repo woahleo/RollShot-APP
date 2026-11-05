@@ -4,6 +4,9 @@ import "./globals.css";
 import ThemeToggle from "@/components/ThemeToggle";
 import ChatBubble from "@/components/ChatBubble";
 import Tour from "@/components/Tour";
+import AppBridge from "@/components/AppBridge";
+import { headers } from "next/headers";
+import { isApp } from "@/lib/app";
 import NavLinks from "@/components/NavLinks";
 import AccountMenu from "@/components/AccountMenu";
 import Bell from "@/components/Bell";
@@ -22,7 +25,7 @@ export const metadata: Metadata = {
   appleWebApp: { capable: true, title: "Rollshot", statusBarStyle: "default" },
   icons: { apple: "/apple-touch-icon.png" },
 };
-export const viewport: Viewport = { width: "device-width", initialScale: 1, themeColor: "#ffffff" };
+export const viewport: Viewport = { width: "device-width", initialScale: 1, themeColor: "#ffffff", viewportFit: "cover" };
 
 // The tour starts on its own only for accounts made after it shipped; anyone can replay it from Settings.
 const TOUR_SINCE = "2026-11-05";
@@ -31,6 +34,7 @@ const themeScript = `try{var t=localStorage.getItem("rs-theme");if(t)document.do
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { supabase, user, profile } = await getMe();
+  const inApp = isApp((await headers()).get("user-agent"));
   const [label, admin] = await Promise.all([
     accountLabel(supabase, profile),
     user ? supabase.rpc("is_admin").then((r) => r.data === true, () => false) : Promise.resolve(false),
@@ -43,7 +47,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         ? [{ href: "/book", label: "Creators" }, { href: "/requests", label: "Requests" }, { href: "/shoots", label: "Shoots" }, { href: "/me", label: "Garage" }]
         : [{ href: "/book", label: "Creators" }, { href: "/requests", label: "Requests" }];
   return (
-    <html lang="en" data-rs="light" suppressHydrationWarning>
+    <html lang="en" data-rs="light" className={inApp ? "in-app" : undefined} suppressHydrationWarning>
       <head>
         <link rel="preload" href="/fonts/outfit-latin.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
@@ -78,6 +82,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           </div>
         </footer>
         {user && <ChatBubble userId={user.id} />}
+        {inApp && user && profile && <AppBridge />}
         {user && (profile?.role === "client" || profile?.role === "pro") && (
           <Tour userId={user.id} role={profile.role} name={profile.name} auto={!user.user_metadata?.tour_done && user.created_at >= TOUR_SINCE} />
         )}

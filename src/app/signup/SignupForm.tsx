@@ -3,15 +3,24 @@ import { useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { MIN_AGE } from "@/lib/legal";
+import { REVIEW_EMAIL } from "@/lib/app";
 
 type Role = "client" | "pro";
 
-export default function SignupForm({ initialRole, next, linkError, providers }: { initialRole: Role | null; next: string; linkError: string; providers: { google: boolean; apple: boolean } }) {
+/**
+ * In the iPhone app, Google sign-in is hidden (Google blocks it inside apps) and the email step asks
+ * for the code from the email, since tapping the link would open Safari instead of the app.
+ */
+export default function SignupForm({ initialRole, next, linkError, providers, inApp = false }: { initialRole: Role | null; next: string; linkError: string; providers: { google: boolean; apple: boolean }; inApp?: boolean }) {
   const [role, setRole] = useState<Role | null>(initialRole);
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
   const [error, setError] = useState(linkError);
   const [busy, setBusy] = useState(false);
+  const [code, setCode] = useState("");
+  const [password, setPassword] = useState("");
+  const review = email.trim().toLowerCase() === REVIEW_EMAIL;
+  const google = providers.google && !inApp;
 
   function callback() {
     const q = new URLSearchParams();
@@ -26,12 +35,48 @@ export default function SignupForm({ initialRole, next, linkError, providers }: 
     if (error) { setError(error.message); setBusy(false); }
   }
 
+  // After the code or password signs them in, the callback sends them to onboarding or home.
+  function signedIn() {
+    window.location.assign(callback().replace(window.location.origin, ""));
+  }
+
+  async function checkCode(e: React.FormEvent) {
+    e.preventDefault();
+    setBusy(true); setError("");
+    const { error } = await createClient().auth.verifyOtp({ email, token: code.replace(/\D/g, ""), type: "email" });
+    if (error) { setBusy(false); setError("That code didn't work. Check the newest email from us, or send a new one."); return; }
+    signedIn();
+  }
+
   async function magic(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true); setError("");
+    if (review) {
+      const { error } = await createClient().auth.signInWithPassword({ email: email.trim(), password });
+      if (error) { setBusy(false); setError(error.message); return; }
+      return signedIn();
+    }
     const { error } = await createClient().auth.signInWithOtp({ email, options: { emailRedirectTo: callback() } });
     setBusy(false);
     if (error) setError(error.message); else setSent(true);
+  }
+
+  if (sent && inApp) {
+    return (
+      <div className="card">
+        <h3>Check your email</h3>
+        <p className="muted">We sent a code to {email}. Type it here to sign in.</p>
+        <form onSubmit={checkCode}>
+          <label className="field">
+            <span>Code</span>
+            <input inputMode="numeric" autoComplete="one-time-code" required maxLength={10} value={code} onChange={(e) => setCode(e.target.value)} placeholder="123456" />
+          </label>
+          <button className="btn solid" disabled={busy || code.replace(/\D/g, "").length < 6}>Sign in</button>
+        </form>
+        {error && <p className="error">{error}</p>}
+        <button type="button" className="btn small" style={{ marginTop: 12 }} onClick={() => { setSent(false); setCode(""); setError(""); }}>Use a different email</button>
+      </div>
+    );
   }
 
   if (sent) {
@@ -50,10 +95,10 @@ export default function SignupForm({ initialRole, next, linkError, providers }: 
         <button type="button" aria-pressed={role === "client"} onClick={() => setRole("client")}>I own a car</button>
         <button type="button" aria-pressed={role === "pro"} onClick={() => setRole("pro")}>I shoot cars</button>
       </div>
-      {(providers.google || providers.apple) && (
+      {(google || providers.apple) && (
         <>
           <div className="list">
-            {providers.google && <button className="btn" disabled={busy} onClick={() => oauth("google")}>Continue with Google</button>}
+            {google && <button className="btn" disabled={busy} onClick={() => oauth("google")}>Continue with Google</button>}
             {providers.apple && <button className="btn" disabled={busy} onClick={() => oauth("apple")}>Continue with Apple</button>}
           </div>
           <div className="divider">or</div>
@@ -64,7 +109,13 @@ export default function SignupForm({ initialRole, next, linkError, providers }: 
           <span>Email</span>
           <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" />
         </label>
-        <button className="btn solid" disabled={busy}>Email me a sign-in link</button>
+        {review && (
+          <label className="field">
+            <span>Password</span>
+            <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" />
+          </label>
+        )}
+        <button className="btn solid" disabled={busy}>{review ? "Sign in" : inApp ? "Email me a code" : "Email me a sign-in link"}</button>
       </form>
       {error && <p className="error">{error}</p>}
       <p className="small muted">Already have an account? Use the same button, it signs you in.</p>

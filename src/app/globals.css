@@ -30,6 +30,9 @@ main.wrap { padding-block: 32px 112px; }
 
 /* header */
 .top { position: sticky; top: 0; z-index: 25; background: color-mix(in srgb, var(--bg) 86%, transparent); backdrop-filter: saturate(1.4) blur(14px); -webkit-backdrop-filter: saturate(1.4) blur(14px); border-bottom: 1px solid var(--line); }
+/* In the iPhone app the page runs under the clock and notch, so the header makes room for them. */
+html.in-app .top { padding-top: env(safe-area-inset-top, 0px); }
+html.in-app .site-foot { padding-bottom: env(safe-area-inset-bottom, 0px); }
 .top::before { content: ""; display: block; height: 2px; background: linear-gradient(90deg, var(--pink), var(--sky) 55%, var(--sun)); opacity: .85; }
 .top .wrap { display: flex; align-items: center; gap: 20px; height: 60px; }
 .top-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
