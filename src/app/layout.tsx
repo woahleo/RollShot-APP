@@ -67,6 +67,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           </div>
         </header>
         {children}
+        <footer className="site-foot">
+          <div className="wrap">
+            <span>© {new Date().getFullYear()} Rollshot</span>
+            <Link href="/terms">Terms</Link>
+            <Link href="/privacy">Privacy</Link>
+            <Link href="/copyright">Copyright</Link>
+          </div>
+        </footer>
         {user && <ChatBubble userId={user.id} />}
       </body>
     </html>
