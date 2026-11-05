@@ -25,7 +25,15 @@ export default function Videos({ paths, name }: { paths: string[]; name: string 
         else v.pause();
       }
     }, { threshold: 0.6 });
-    el.querySelectorAll("video").forEach((v) => io.observe(v));
+    el.querySelectorAll("video").forEach((v) => {
+      io.observe(v);
+      // A video can finish loading its size before the page wakes up and misses onLoadedMetadata.
+      const p = v.dataset.path;
+      if (p && v.readyState >= 1 && v.videoWidth && v.videoHeight) {
+        const r = v.videoWidth / v.videoHeight;
+        setShape((m) => (m[p] === r ? m : { ...m, [p]: r }));
+      }
+    });
     return () => io.disconnect();
   }, [paths]);
 
@@ -39,6 +47,7 @@ export default function Videos({ paths, name }: { paths: string[]; name: string 
         <div key={p} className={`vid${wide ? " wide" : ""}`} style={wide ? { aspectRatio: String(r) } : undefined}>
           <video
             src={photoUrl(p)}
+            data-path={p}
             poster={photoUrl(posterOf(p))}
             muted={loud !== p}
             loop

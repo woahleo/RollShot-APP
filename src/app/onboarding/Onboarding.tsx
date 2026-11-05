@@ -10,6 +10,8 @@ import CityOptions from "@/components/CityOptions";
 import MoreCities from "@/components/MoreCities";
 import AgeBlocked from "@/components/AgeBlocked";
 import { AGE_BLOCK_COOKIE, ageOn, MIN_AGE } from "@/lib/legal";
+import { MAX_REELS, cleanReelLink } from "@/lib/reels";
+import { useDragSort } from "@/lib/useDragSort";
 
 type Role = "client" | "pro";
 
@@ -31,6 +33,22 @@ export default function Onboarding({ userId, defaultName, initialRole, blocked: 
   const [uploading, setUploading] = useState(0);
 
   const [carPhotos, setCarPhotos] = useState<string[]>([]);
+  const [reels, setReels] = useState<string[]>([]);
+  const [reelLink, setReelLink] = useState("");
+  const [reelError, setReelError] = useState("");
+  const photoSort = useDragSort(photos, setPhotos);
+  const carSort = useDragSort(carPhotos, setCarPhotos);
+  const reelSort = useDragSort(reels, setReels);
+
+  function addReel() {
+    const clean = cleanReelLink(reelLink);
+    if (!clean) return setReelError("Paste a link to a reel or post, like instagram.com/reel/…");
+    if (reels.includes(clean)) return setReelError("You already added that one.");
+    if (reels.length >= MAX_REELS) return setReelError(`Up to ${MAX_REELS} for now. You can change them later.`);
+    setReels([...reels, clean]);
+    setReelLink("");
+    setReelError("");
+  }
 
   /**
    * Photos go straight to the person's own folder as they pick them, before the account is made:
@@ -66,15 +84,17 @@ export default function Onboarding({ userId, defaultName, initialRole, blocked: 
     createClient().storage.from("portfolio").remove([path]);
   }
 
-  /** Thumbnails with remove buttons, and a picker until the limit. */
-  const photoPicker = (list: string[], forCar: boolean, max: number, empty: string) => (
+  /** Thumbnails to drag into order, with remove buttons, and a picker until the limit. */
+  const photoPicker = (list: string[], forCar: boolean, max: number, empty: string) => {
+    const sort = forCar ? carSort : photoSort;
+    return (
     <>
       {list.length > 0 && (
         <div className="onboard-photos">
-          {list.map((ph, i) => (
-            <div key={ph} className="onboard-photo">
+          {sort.order.map((ph, i) => (
+            <div key={ph} className="onboard-photo" {...sort.itemProps(ph)}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={photoUrl(ph)} alt={`Photo ${i + 1}`} />
+              <img src={photoUrl(ph)} alt={`Photo ${i + 1}`} draggable={false} />
               <button type="button" onClick={() => dropPhoto(ph, forCar)} aria-label={`Remove photo ${i + 1}`}>✕</button>
             </div>
           ))}
@@ -87,7 +107,8 @@ export default function Onboarding({ userId, defaultName, initialRole, blocked: 
         </label>
       )}
     </>
-  );
+    );
+  };
 
   async function save(e: React.FormEvent) {
     e.preventDefault();
@@ -116,7 +137,7 @@ export default function Onboarding({ userId, defaultName, initialRole, blocked: 
     }
     setBusy(true); setError("");
     if (role === "pro") {
-      const { error: e2 } = await supabase.from("pros").insert({ id: userId, city, more_cities: moreCities.filter((c) => c !== city), kind, photos });
+      const { error: e2 } = await supabase.from("pros").insert({ id: userId, city, more_cities: moreCities.filter((c) => c !== city), kind, photos, reels: kind === "photo" ? [] : reels });
       if (e2) { setBusy(false); return setError(e2.message); }
       router.replace("/pro/edit");
     } else {
@@ -166,8 +187,37 @@ export default function Onboarding({ userId, defaultName, initialRole, blocked: 
         <div className="field"><span>Your best shots ({MIN_PHOTOS} to {MAX_PHOTOS})</span>
           {photoPicker(photos, false, MAX_PHOTOS, "Tap to add photos of your car work")}
           <span className="small muted">
-            {photos.length < MIN_PHOTOS ? `${MIN_PHOTOS - photos.length} more to go. ` : ""}The first one is your cover. You can change them later.
+            {photos.length < MIN_PHOTOS ? `${MIN_PHOTOS - photos.length} more to go. ` : ""}Drag to change the order. The first one is your cover. You can change them later.
           </span>
+        </div>
+      )}
+      {role === "pro" && kind !== "photo" && (
+        <div className="field"><span>Instagram reels of your work (optional)</span>
+          <div className="row reel-add">
+            <input
+              value={reelLink}
+              onChange={(e) => { setReelLink(e.target.value); setReelError(""); }}
+              onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addReel(); } }}
+              placeholder="Paste a reel link"
+              style={{ flex: "1 1 auto", width: "auto" }}
+              inputMode="url"
+              aria-label="Instagram reel link"
+            />
+            <button type="button" className="btn small" style={{ flex: "none", width: "auto" }} disabled={!reelLink.trim() || reels.length >= MAX_REELS} onClick={addReel}>Add</button>
+          </div>
+          {reelError && <span className="error">{reelError}</span>}
+          {reels.length > 0 && (
+            <ol className="reel-list" style={{ marginTop: 4 }}>
+              {reelSort.order.map((r) => (
+                <li key={r} {...reelSort.itemProps(r)}>
+                  <span className="drag-grip" aria-hidden="true">⋮⋮</span>
+                  <span className="small" style={{ overflowWrap: "anywhere", flex: 1 }}>{r.replace("https://www.instagram.com/", "instagram.com/")}</span>
+                  <button type="button" className="btn small" onClick={() => setReels(reels.filter((x) => x !== r))}>Remove</button>
+                </li>
+              ))}
+            </ol>
+          )}
+          <span className="small muted">Up to {MAX_REELS}. They play on your page. You can also upload videos once you&apos;re in.</span>
         </div>
       )}
       {role === "client" && (

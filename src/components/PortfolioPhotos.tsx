@@ -5,9 +5,10 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { compress, photoExt } from "@/lib/photos";
 import { MAX_PHOTOS, MIN_PHOTOS, photoUrl } from "@/lib/types";
+import { useDragSort } from "@/lib/useDragSort";
 
 /**
- * A creator's portfolio: add photos, pick the cover, remove ones they don't want.
+ * A creator's portfolio: add photos, drag them into order (the first is the cover), remove ones they don't want.
  * Used on the dashboard and on the profile editor, so uploading is never more than a tap away.
  */
 export default function PortfolioPhotos({ userId, photos: initial, pageHref }: { userId: string; photos: string[]; pageHref?: string }) {
@@ -55,6 +56,7 @@ export default function PortfolioPhotos({ userId, photos: initial, pageHref }: {
     await supabase.storage.from("portfolio").remove([path]);
   }
   const full = photos.length >= MAX_PHOTOS;
+  const sort = useDragSort(photos, savePhotos);
 
   const picker = (label: string, cls: string) => (
     <label className={cls} style={{ cursor: uploading ? "progress" : "pointer" }}>
@@ -70,7 +72,7 @@ export default function PortfolioPhotos({ userId, photos: initial, pageHref }: {
         {photos.length > 0 && !full && picker("Add photos", "btn solid small")}
       </div>
       <p className="small muted" style={{ margin: "6px 0 14px" }}>
-        Any car work you&apos;re proud of, old shoots too. The first photo is your cover and shows in the home feed.
+        Any car work you&apos;re proud of, old shoots too. Drag photos to change the order. The first one is your cover and shows in the home feed.
         {pageHref && photos.length > 0 && <> <Link href={pageHref}>See them on your page</Link>.</>}
       </p>
       {photos.length < MIN_PHOTOS && (
@@ -82,11 +84,11 @@ export default function PortfolioPhotos({ userId, photos: initial, pageHref }: {
         picker("Tap to add photos from your phone or computer", "drop")
       ) : (
         <div className="gallery">
-          {photos.map((ph, i) => (
-            <div key={ph} className="shot-thumb">
+          {sort.order.map((ph, i) => (
+            <div key={ph} className="shot-thumb" {...sort.itemProps(ph)}>
               <div style={{ position: "relative" }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={photoUrl(ph)} alt="" />
+                <img src={photoUrl(ph)} alt="" draggable={false} />
                 {i === 0 && <span className="cover-tag">Cover</span>}
               </div>
               <div className="row" style={{ gap: 6 }}>
