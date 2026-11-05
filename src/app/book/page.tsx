@@ -34,7 +34,7 @@ export default async function Book({ searchParams }: { searchParams: Promise<{ c
     <main className="wrap">
       <h1>Find a creator<em>.</em></h1>
       <p className="lede">Pick someone whose work you like and book an open day. Or <Link href="/requests">post a request</Link> and let them come to you.</p>
-      <div className="filters">
+      <div className="filters" data-tour="filters">
         <div className="seg" role="group" aria-label="Who">
           {KINDS.map((k) => (
             <Link key={k.key} aria-pressed={(kind ?? "") === k.key} href={href(city, k.key)}>{k.label}</Link>
@@ -54,7 +54,7 @@ export default async function Book({ searchParams }: { searchParams: Promise<{ c
           )}
         </div>
       )}
-      <div className="grid pros">
+      <div className="grid pros" data-tour="creators">
         {pros.map((p) => <ProCard key={p.id} p={p} href={`${proPath(p)}#book`} />)}
       </div>
     </main>
