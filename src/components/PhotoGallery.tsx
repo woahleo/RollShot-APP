@@ -102,11 +102,14 @@ export default function PhotoGallery({ photos, alt, className = "gallery feature
   return (
     <>
       {split ? (
-        // A tall lead photo sits above the rest on a phone and beside them on a wider screen.
-        <div className="gallery-split" style={style} ref={grid}>
-          {tile(photos[0], 0, "lead")}
-          <div className={`gallery split-rest${mostlyTall ? " tall-tiles" : ""}`}>
-            {photos.slice(1).map((src, i) => tile(src, i + 1))}
+        // A tall lead photo sits above the rest, or beside them when the gallery itself is wide enough
+        // (the screen size alone isn't enough: on a creator page the booking card takes half of it).
+        <div className="gallery-fit" style={style} ref={grid}>
+          <div className="gallery-split">
+            {tile(photos[0], 0, "lead")}
+            <div className={`gallery split-rest${mostlyTall ? " tall-tiles" : ""}`}>
+              {photos.slice(1).map((src, i) => tile(src, i + 1))}
+            </div>
           </div>
         </div>
       ) : (
