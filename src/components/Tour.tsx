@@ -82,6 +82,7 @@ export default function Tour({ userId, role, name, auto }: { userId: string; rol
     setRect(null);
     try { localStorage.setItem(doneKey(userId), "1"); } catch {}
     createClient().auth.updateUser({ data: { tour_done: true } }).catch(() => {});
+    window.dispatchEvent(new Event("rs-tour-done"));
   }, [userId]);
 
   // Go to the step's page if needed, then follow its target as the page scrolls or moves.

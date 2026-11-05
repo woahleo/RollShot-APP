@@ -1,6 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { isApp } from "@/lib/app";
+import { appPushPermission, appPushTurnedOff, turnOffAppPush, turnOnAppPush } from "@/lib/appPush";
 
 type State = "loading" | "unsupported" | "install" | "off" | "on" | "blocked" | "unset";
 
@@ -20,9 +22,15 @@ export default function PushToggle({ compact = false }: { compact?: boolean }) {
   const [state, setState] = useState<State>("loading");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [app, setApp] = useState(false);
 
   useEffect(() => {
     (async () => {
+      if (isApp()) {
+        setApp(true);
+        const perm = await appPushPermission();
+        return setState(perm === "denied" ? "blocked" : perm === "granted" && !appPushTurnedOff() ? "on" : "off");
+      }
       if (!KEY) return setState("unset");
       const supported = "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
       if (!supported) return setState(isIos() && !isInstalled() ? "install" : "unsupported");
@@ -37,6 +45,7 @@ export default function PushToggle({ compact = false }: { compact?: boolean }) {
     setBusy(true);
     setError("");
     try {
+      if (app) return setState(await turnOnAppPush());
       const perm = await Notification.requestPermission();
       if (perm !== "granted") {
         setState(perm === "denied" ? "blocked" : "off");
@@ -60,6 +69,10 @@ export default function PushToggle({ compact = false }: { compact?: boolean }) {
     setBusy(true);
     setError("");
     try {
+      if (app) {
+        await turnOffAppPush();
+        return setState("off");
+      }
       const reg = await navigator.serviceWorker.getRegistration("/sw.js");
       const sub = await reg?.pushManager.getSubscription();
       if (sub) {
@@ -84,7 +97,9 @@ export default function PushToggle({ compact = false }: { compact?: boolean }) {
         <p className="small muted" style={{ margin: "4px 0 0" }}>
           {state === "on" && "On for this device. You'll get an alert for new requests, offers, bookings and messages."}
           {state === "off" && "Get an alert on this device the moment someone posts a request, books you or messages you."}
-          {state === "blocked" && "Alerts are blocked for Rollshot in this browser. Allow notifications for this site in your browser or phone settings, then come back."}
+          {state === "blocked" && (app
+            ? "Alerts are off for Rollshot. Turn them on in your iPhone's Settings → Rollshot → Notifications, then come back."
+            : "Alerts are blocked for Rollshot in this browser. Allow notifications for this site in your browser or phone settings, then come back.")}
           {state === "unsupported" && "This browser can't show alerts. Try Chrome or Safari, or add Rollshot to your Home Screen."}
           {state === "install" && (
             <>On iPhone, add Rollshot to your Home Screen first: tap the Share button <span aria-hidden="true">(□↑)</span>, then <b style={{ fontWeight: 400 }}>Add to Home Screen</b>. Open it from there and turn alerts on.</>
