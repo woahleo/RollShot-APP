@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { videoCover } from "@/lib/photos";
 import { MAX_REELS, MAX_VIDEO_MB, cleanReelLink, posterOf } from "@/lib/reels";
 import { photoUrl } from "@/lib/types";
+import { useDragSort } from "@/lib/useDragSort";
 
 type Props = { userId: string; reels: string[]; videos?: string[]; pageHref?: string; instagram?: boolean };
 
@@ -90,11 +91,8 @@ export default function ReelPicker({ userId, reels: initialReels, videos: initia
     }
   }
 
-  const swap = <T,>(list: T[], i: number, step: number) => {
-    const next = [...list];
-    [next[i], next[i + step]] = [next[i + step], next[i]];
-    return next;
-  };
+  const videoSort = useDragSort(videos, (next) => save({ videos: next }));
+  const reelSort = useDragSort(reels, (next) => save({ reels: next }));
 
   return (
     <div className="card portfolio" id="videos">
@@ -109,21 +107,17 @@ export default function ReelPicker({ userId, reels: initialReels, videos: initia
       </div>
       <p className="small muted" style={{ margin: "6px 0 14px" }}>
         Up to {MAX_REELS} videos for your page. Uploaded videos play right on the page, tall or wide just as you shot them, with nothing around them (up to {MAX_VIDEO_MB} MB each).
-        You can also paste an Instagram reel link{instagram ? <>, or <Link href="/pro/instagram">pick from Instagram</Link></> : ""}.
+        Drag them to change the order. You can also paste an Instagram reel link{instagram ? <>, or <Link href="/pro/instagram">pick from Instagram</Link></> : ""}.
         {pageHref && total > 0 && <> <Link href={pageHref}>See them on your page</Link>.</>}
       </p>
 
       {videos.length > 0 && (
         <div className="vid-strip">
-          {videos.map((v, i) => (
-            <div key={v} className="vid-thumb">
+          {videoSort.order.map((v, i) => (
+            <div key={v} className="vid-thumb" {...videoSort.itemProps(v)} aria-label={`Video ${i + 1}`}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={photoUrl(posterOf(v))} alt="" loading="lazy" />
-              <div className="row" style={{ gap: 4 }}>
-                <button type="button" className="btn small" disabled={busy || i === 0} onClick={() => save({ videos: swap(videos, i, -1) })} aria-label="Move left">←</button>
-                <button type="button" className="btn small" disabled={busy || i === videos.length - 1} onClick={() => save({ videos: swap(videos, i, 1) })} aria-label="Move right">→</button>
-                <button type="button" className="btn small" disabled={busy} onClick={() => removeVideo(v)} aria-label="Remove video">✕</button>
-              </div>
+              <img src={photoUrl(posterOf(v))} alt="" loading="lazy" draggable={false} />
+              <button type="button" className="btn small" disabled={busy} onClick={() => removeVideo(v)} aria-label={`Remove video ${i + 1}`}>Remove</button>
             </div>
           ))}
         </div>
@@ -144,14 +138,11 @@ export default function ReelPicker({ userId, reels: initialReels, videos: initia
       {error && <p className="error small">{error}</p>}
       {reels.length > 0 && (
         <ol className="reel-list">
-          {reels.map((r, i) => (
-            <li key={r}>
+          {reelSort.order.map((r) => (
+            <li key={r} {...reelSort.itemProps(r)}>
+              <span className="drag-grip" aria-hidden="true">⋮⋮</span>
               <a href={r} target="_blank" rel="noreferrer" className="small">{r.replace("https://www.instagram.com/", "instagram.com/")}</a>
-              <div className="row" style={{ gap: 4 }}>
-                <button type="button" className="btn small" disabled={busy || i === 0} onClick={() => save({ reels: swap(reels, i, -1) })} aria-label="Move up">↑</button>
-                <button type="button" className="btn small" disabled={busy || i === reels.length - 1} onClick={() => save({ reels: swap(reels, i, 1) })} aria-label="Move down">↓</button>
-                <button type="button" className="btn small" disabled={busy} onClick={() => save({ reels: reels.filter((x) => x !== r) })}>Remove</button>
-              </div>
+              <button type="button" className="btn small" disabled={busy} onClick={() => save({ reels: reels.filter((x) => x !== r) })}>Remove</button>
             </li>
           ))}
         </ol>

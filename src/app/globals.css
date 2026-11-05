@@ -428,9 +428,9 @@ button.link { background: none; border: 0; padding: 0; color: var(--ink); text-d
    reaching Instagram's "Watch on Instagram" screen. */
 .reel-stop { position: absolute; inset: 0; z-index: 1; border: 0; padding: 0; background: transparent; cursor: pointer; }
 .reel-stop span { position: absolute; left: 8px; bottom: 8px; padding: 3px 9px; border-radius: 999px; background: rgba(0, 0, 0, .55); color: #fff; font-size: 11px; }
-@media (min-width: 700px) { .reels { grid-template-columns: repeat(2, 1fr); gap: 14px; } }
+@media (min-width: 700px) { .reels { grid-template-columns: 1fr; gap: 16px; } }
 .vids { display: grid; gap: 10px; grid-template-columns: repeat(2, 1fr); margin-bottom: 12px; }
-@media (min-width: 700px) { .vids { grid-template-columns: repeat(3, 1fr); gap: 14px; } }
+@media (min-width: 700px) { .vids { gap: 16px; } }
 .vid { position: relative; aspect-ratio: 9 / 16; border-radius: 16px; overflow: hidden; background: #000; }
 .vid video { width: 100%; height: 100%; object-fit: cover; display: block; cursor: pointer; }
 .vid.wide { grid-column: 1 / -1; max-height: 80vh; }
@@ -439,7 +439,7 @@ button.link { background: none; border: 0; padding: 0; color: var(--ink); text-d
 .vid-strip { display: flex; gap: 8px; overflow-x: auto; margin-bottom: 12px; padding-bottom: 2px; }
 .vid-thumb { flex: 0 0 104px; display: grid; gap: 6px; }
 .vid-thumb img { width: 104px; aspect-ratio: 9 / 16; object-fit: cover; border-radius: 10px; background: var(--chip); display: block; }
-.vid-thumb .btn { padding: 3px 0; flex: 1; font-size: 12px; }
+.vid-thumb .btn { padding: 3px 0; font-size: 12px; }
 .reel-add { flex-wrap: nowrap; gap: 8px; }
 .reel-add input { flex: 1; min-width: 0; }
 .reel-list { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 8px; }
@@ -540,3 +540,13 @@ main.wrap:has(+ .site-foot) { padding-bottom: 72px; }
 .onboard-photo button { position: absolute; top: 6px; right: 6px; width: 26px; height: 26px; border-radius: 50%; border: 0; background: rgb(10 10 10 / .6); color: #fff; font-size: 12px; cursor: pointer; display: grid; place-items: center; }
 .onboard-drop { min-height: 110px; }
 .chip[aria-pressed="true"] .muted { color: inherit; opacity: .65; }
+
+/* Tiles you can drag into order (useDragSort). A long press starts a drag on phones. */
+[data-sort-key] { cursor: grab; touch-action: pan-y; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; transition: transform .15s, opacity .15s; }
+[data-sort-key] img { -webkit-user-drag: none; }
+[data-sort-key][data-dragging] { cursor: grabbing; opacity: .55; transform: scale(.95); }
+[data-sort-key]:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.reel-list li[data-sort-key] { flex-wrap: nowrap; justify-content: flex-start; }
+.reel-list li[data-sort-key] a, .reel-list li[data-sort-key] > span.small { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.reel-list li[data-sort-key] .btn, .auth .reel-list .btn { flex: none; width: auto; }
+.drag-grip { color: var(--muted); letter-spacing: -2px; font-size: 13px; flex: none; }
