@@ -21,7 +21,7 @@ export type Message = {
   offer_name: string | null; offer_price: number | null; offer_dates: string[] | null; booking_id: string | null;
 };
 
-export const CITIES = ["West Palm Beach", "Boca Raton", "Fort Lauderdale", "Miami"] as const;
+export { CITIES } from "./cities";
 export const SHOOT_TYPES = ["Rolling shots", "Static", "Night", "Reels", "Track day", "Dealer stock"] as const;
 
 export function carLabel(c: Partial<Car>) {

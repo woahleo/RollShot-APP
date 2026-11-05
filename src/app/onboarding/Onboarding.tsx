@@ -2,7 +2,8 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { CITIES, KIND_LABEL, type Kind } from "@/lib/types";
+import { KIND_LABEL, type Kind } from "@/lib/types";
+import CityOptions from "@/components/CityOptions";
 
 type Role = "client" | "pro";
 
@@ -10,7 +11,7 @@ export default function Onboarding({ userId, defaultName, initialRole }: { userI
   const router = useRouter();
   const [role, setRole] = useState<Role | null>(initialRole);
   const [name, setName] = useState(defaultName);
-  const [city, setCity] = useState<string>(CITIES[0]);
+  const [city, setCity] = useState<string>("");
   const [kind, setKind] = useState<Kind>("photo");
   const [car, setCar] = useState({ year: "", make: "", model: "", color: "" });
   const [error, setError] = useState("");
@@ -55,7 +56,7 @@ export default function Onboarding({ userId, defaultName, initialRole }: { userI
       )}
       {role === "pro" && (
         <label className="field"><span>Where you shoot</span>
-          <select value={city} onChange={(e) => setCity(e.target.value)}>{CITIES.map((c) => <option key={c}>{c}</option>)}</select>
+          <select value={city} onChange={(e) => setCity(e.target.value)} required><option value="" disabled>Pick your city</option><CityOptions /></select>
         </label>
       )}
       {role === "client" && (

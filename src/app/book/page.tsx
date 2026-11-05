@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { CITIES, proPath } from "@/lib/types";
+import { Suspense } from "react";
+import { proPath } from "@/lib/types";
+import { cityLabel, isCity } from "@/lib/cities";
+import CityFilter from "@/components/CityFilter";
 import ProCard, { type ProRow } from "@/components/ProCard";
 
 const KINDS: { key: string; label: string }[] = [
@@ -10,12 +13,14 @@ const KINDS: { key: string; label: string }[] = [
 ];
 
 export default async function Book({ searchParams }: { searchParams: Promise<{ city?: string; kind?: string }> }) {
-  const { city, kind } = await searchParams;
+  const { city: picked, kind } = await searchParams;
+  const city = isCity(picked) ? picked : undefined;
   const supabase = await createClient();
   let q = supabase.from("pros").select("*, profiles(name), packages(*)").order("updated_at", { ascending: false });
-  if (city && (CITIES as readonly string[]).includes(city)) q = q.eq("city", city);
+  if (city) q = q.eq("city", city);
   if (kind === "photo" || kind === "video") q = q.in("kind", [kind, "both"]);
-  const { data } = await q;
+  const [{ data }, { data: cc }] = await Promise.all([q, supabase.rpc("city_counts")]);
+  const counts = Object.fromEntries(((cc ?? []) as { city: string; creators: number }[]).map((r) => [r.city, Number(r.creators)]));
   const pros = (data ?? []) as ProRow[];
   const href = (c?: string, k?: string) => {
     const p = new URLSearchParams();
@@ -35,15 +40,19 @@ export default async function Book({ searchParams }: { searchParams: Promise<{ c
             <Link key={k.key} aria-pressed={(kind ?? "") === k.key} href={href(city, k.key)}>{k.label}</Link>
           ))}
         </div>
-        <div className="chips scroll" role="group" aria-label="City">
-          <Link className="chip" aria-pressed={!city} href={href(undefined, kind)}>All cities</Link>
-          {CITIES.map((c) => (
-            <Link key={c} className="chip" aria-pressed={city === c} href={href(c, kind)}>{c}</Link>
-          ))}
-        </div>
+        <Suspense><CityFilter value={city ?? "all"} counts={counts} /></Suspense>
       </div>
       {pros.length === 0 && (
-        <p className="notice">No one matches yet. Check back soon, or <Link href="/signup?role=pro">join as a creator</Link>.</p>
+        <div className="notice first-city">
+          {city ? (
+            <>
+              <b>No creators in {cityLabel(city)} yet.</b>
+              <span>Shoot cars there? <Link href="/signup?role=pro">Be the first creator in {city}</Link>. Car owners can still <Link href="/requests/new">post a request</Link>, and creators who join will see it.</span>
+            </>
+          ) : (
+            <span>No one matches yet. Check back soon, or <Link href="/signup?role=pro">join as a creator</Link>.</span>
+          )}
+        </div>
       )}
       <div className="grid pros">
         {pros.map((p) => <ProCard key={p.id} p={p} href={`${proPath(p)}#book`} />)}

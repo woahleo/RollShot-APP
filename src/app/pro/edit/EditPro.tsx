@@ -2,7 +2,8 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { CITIES, HANDLE_RE, KIND_LABEL, proPath, SHOOT_TYPES, type Kind, type Package, type Pro } from "@/lib/types";
+import CityOptions from "@/components/CityOptions";
+import { HANDLE_RE, KIND_LABEL, proPath, SHOOT_TYPES, type Kind, type Package, type Pro } from "@/lib/types";
 import AvatarUpload from "@/components/AvatarUpload";
 import PortfolioPhotos from "@/components/PortfolioPhotos";
 import ReelPicker from "@/components/ReelPicker";
@@ -91,7 +92,7 @@ export default function EditPro({ userId, name, avatar, site, pro, packages, con
         <h3>About you</h3>
         <label className="field"><span>City</span>
           <select value={info.city} onChange={(e) => setInfo({ ...info, city: e.target.value })}>
-            {CITIES.map((c) => <option key={c}>{c}</option>)}
+            <CityOptions />
           </select>
         </label>
         <div className="field"><span>What you do</span>

@@ -103,7 +103,7 @@ export function HomeFoot() {
     <footer className="wrap foot small">
       <div>
         <span className="logo">Rollshot</span>
-        <p className="muted" style={{ margin: "6px 0 0" }}>Car photo and video creators in South Florida.</p>
+        <p className="muted" style={{ margin: "6px 0 0" }}>Car photo and video creators across the US.</p>
       </div>
       <nav className="foot-links">
         <Link href="/book">Creators</Link>

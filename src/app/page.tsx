@@ -52,7 +52,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ d
       <section className="wrap hero">
         <div className="hero-text">
           {deleted && <p className="notice">Your account was deleted.</p>}
-          <p className="eyebrow">West Palm Beach · Boca · Fort Lauderdale · Miami</p>
+          <p className="eyebrow">Miami · Los Angeles · New York · Houston · Atlanta · and more</p>
           <h1 className="hero-title">Your car, shot <em>right.</em></h1>
           <p className="lede">Book local car photo and video creators by the shoot. Real portfolios, real open dates, no back and forth.</p>
           {user ? (
@@ -125,7 +125,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ d
       <footer className="wrap foot small">
         <div>
           <span className="logo">Rollshot</span>
-          <p className="muted" style={{ margin: "6px 0 0" }}>Car photo and video creators in South Florida.</p>
+          <p className="muted" style={{ margin: "6px 0 0" }}>Car photo and video creators across the US.</p>
         </div>
         <nav className="foot-links">
           <Link href="/book">Creators</Link>

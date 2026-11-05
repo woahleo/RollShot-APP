@@ -482,3 +482,11 @@ button.link { background: none; border: 0; padding: 0; color: var(--ink); text-d
 /* Free portfolio shoots */
 .badge.free { background: color-mix(in srgb, var(--sky) 20%, var(--bg)); color: var(--ink); margin-top: 4px; }
 .offer-inline .chips { gap: 6px; }
+
+/* City dropdown and empty cities */
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.city-filter { position: relative; display: inline-flex; align-items: center; max-width: 100%; }
+.city-filter svg { position: absolute; left: 14px; pointer-events: none; color: var(--muted); }
+.city-filter select { appearance: none; -webkit-appearance: none; border-radius: 999px; padding: 9px 38px 9px 38px; background: var(--chip) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23636369' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 14px center; border: 1px solid transparent; font-size: 15px; max-width: 100%; text-overflow: ellipsis; cursor: pointer; }
+.first-city { display: grid; gap: 4px; }
+.first-city b { font-weight: 400; }

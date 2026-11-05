@@ -29,7 +29,7 @@ export default async function NewCrewJob({ searchParams }: { searchParams: Promi
           ? "Send an offer for one shoot. They accept or decline, and you can message each other any time."
           : "Need a second shooter, a videographer or a drone pilot? Post the day and the pay, creators say they're in, and you pick one."}
       </p>
-      <CrewForm city={(me as { city: string } | null)?.city ?? target?.city ?? "Miami"} target={target} />
+      <CrewForm city={(me as { city: string } | null)?.city ?? target?.city ?? ""} target={target} />
     </main>
   );
 }

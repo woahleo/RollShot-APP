@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { tzOf } from "@/lib/cities";
 import { money } from "@/lib/money";
 import { redirect } from "next/navigation";
 import { getMe } from "@/lib/supabase/server";
@@ -78,7 +79,7 @@ export default async function Dashboard() {
 
       <section id="dates">
         <h2>Open days</h2>
-        <OpenDates userId={user.id} initial={p.open_dates} initialHours={p.open_hours ?? {}} booked={upcoming.map((b) => b.shoot_date)} />
+        <OpenDates tz={tzOf(p.city)} userId={user.id} initial={p.open_dates} initialHours={p.open_hours ?? {}} booked={upcoming.map((b) => b.shoot_date)} />
       </section>
 
       <section>

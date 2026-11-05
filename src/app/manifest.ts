@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Rollshot",
     short_name: "Rollshot",
-    description: "Book car photo and video creators in South Florida.",
+    description: "Book car photo and video creators across the US.",
     start_url: "/",
     scope: "/",
     display: "standalone",
