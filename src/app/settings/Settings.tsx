@@ -78,6 +78,12 @@ export default function Settings({ userId, email, name: initialName, role, label
         )}
       </div>
 
+      <div className="card" style={{ display: "grid", gap: 10 }}>
+        <h3 style={{ margin: 0 }}>Tour</h3>
+        <p className="small muted" style={{ margin: 0 }}>A one-minute look at how Rollshot works.</p>
+        <button type="button" className="btn" style={{ justifySelf: "start" }} onClick={() => window.dispatchEvent(new Event("rs-tour"))}>Take the tour again</button>
+      </div>
+
       <form action="/auth/signout" method="post" className="card">
         <h3>Sign out</h3>
         <button className="btn" type="submit">Sign out</button>

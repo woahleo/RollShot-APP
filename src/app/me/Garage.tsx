@@ -57,7 +57,7 @@ export default function Garage({ userId, cars }: { userId: string; cars: (Car & 
           </div>
         ))}
       </div>
-      <form className="card" onSubmit={add}>
+      <form className="card" onSubmit={add} data-tour="add-car">
         <h3>Add a car</h3>
         <div className="row" style={{ flexWrap: "nowrap" }}>
           <label className="field" style={{ flex: "0 0 90px" }}><span>Year</span><input value={form.year} onChange={set("year")} /></label>

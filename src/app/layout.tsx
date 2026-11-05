@@ -3,6 +3,7 @@ import Link from "next/link";
 import "./globals.css";
 import ThemeToggle from "@/components/ThemeToggle";
 import ChatBubble from "@/components/ChatBubble";
+import Tour from "@/components/Tour";
 import NavLinks from "@/components/NavLinks";
 import AccountMenu from "@/components/AccountMenu";
 import Bell from "@/components/Bell";
@@ -22,6 +23,9 @@ export const metadata: Metadata = {
   icons: { apple: "/apple-touch-icon.png" },
 };
 export const viewport: Viewport = { width: "device-width", initialScale: 1, themeColor: "#ffffff" };
+
+// The tour starts on its own only for accounts made after it shipped; anyone can replay it from Settings.
+const TOUR_SINCE = "2026-11-05";
 
 const themeScript = `try{var t=localStorage.getItem("rs-theme");if(t)document.documentElement.dataset.rs=t}catch(e){}`;
 
@@ -74,6 +78,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           </div>
         </footer>
         {user && <ChatBubble userId={user.id} />}
+        {user && (profile?.role === "client" || profile?.role === "pro") && (
+          <Tour userId={user.id} role={profile.role} name={profile.name} auto={!user.user_metadata?.tour_done && user.created_at >= TOUR_SINCE} />
+        )}
       </body>
     </html>
   );

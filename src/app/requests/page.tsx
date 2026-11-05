@@ -65,7 +65,7 @@ export default async function Requests({ searchParams }: { searchParams: Promise
           </p>
         </div>
         {role !== "pro" && (
-          <Link className="btn solid" href={user ? "/requests/new" : "/signup?role=client&next=/requests/new"}>Post a request</Link>
+          <Link className="btn solid" data-tour="post-request" href={user ? "/requests/new" : "/signup?role=client&next=/requests/new"}>Post a request</Link>
         )}
       </div>
       {posted && <p className="notice" style={{ marginTop: 16 }}>Your request is up. You&apos;ll get a message when a creator replies.</p>}

@@ -48,11 +48,11 @@ export default async function Dashboard() {
       <div className="row" style={{ justifyContent: "space-between", alignItems: "flex-end" }}>
         <h1 style={{ marginBottom: 0 }}>Dashboard<em>.</em></h1>
         <div className="row" style={{ gap: 8 }}>
-          <Link className="btn small" href={proPath({ id: user.id, handle: pro?.handle })}>View my page</Link>
-          <Link className="btn solid small" href="/pro/edit">Edit profile</Link>
+          <Link className="btn small" data-tour="my-page" href={proPath({ id: user.id, handle: pro?.handle })}>View my page</Link>
+          <Link className="btn solid small" data-tour="edit-profile" href="/pro/edit">Edit profile</Link>
         </div>
       </div>
-      <div className="stats">
+      <div className="stats" data-tour="stats">
         <div><b>{requests.length}</b><span>New requests</span></div>
         <div><b>{upcoming.length}</b><span>Upcoming</span></div>
         <div><b>${earned}</b><span>Booked total</span></div>
@@ -78,7 +78,7 @@ export default async function Dashboard() {
         )}
       </section>
 
-      <section id="dates">
+      <section id="dates" data-tour="open-days">
         <h2>Open days</h2>
         <OpenDates tz={tzOf(p.city)} userId={user.id} initial={p.open_dates} initialHours={p.open_hours ?? {}} booked={upcoming.map((b) => b.shoot_date)} />
       </section>
