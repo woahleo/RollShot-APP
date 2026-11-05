@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { buildFeed, type FeedPro, type FeedShot } from "@/components/Feed";
+import { MIN_PHOTOS } from "@/lib/types";
 
 /** The shared feed: newest shoots, then creators' cover photos. One post per creator. */
 export async function loadFeed(supabase: SupabaseClient, { size = 9, skipPro }: { size?: number; skipPro?: string } = {}) {
@@ -7,7 +8,7 @@ export async function loadFeed(supabase: SupabaseClient, { size = 9, skipPro }: 
     supabase
       .from("pros")
       .select("*, profiles(name, avatar), packages(*)")
-      .neq("photos", "{}")
+      .gte("photo_count", MIN_PHOTOS)
       .order("updated_at", { ascending: false })
       .limit(24),
     supabase

@@ -1,6 +1,8 @@
 "use client";
 import { useState } from "react";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { MIN_AGE } from "@/lib/legal";
 
 type Role = "client" | "pro";
 
@@ -66,6 +68,7 @@ export default function SignupForm({ initialRole, next, linkError, providers }: 
       </form>
       {error && <p className="error">{error}</p>}
       <p className="small muted">Already have an account? Use the same button, it signs you in.</p>
+      <p className="small muted">Rollshot is for people {MIN_AGE} and older. By continuing you agree to the <Link href="/terms">Terms</Link> and <Link href="/privacy">Privacy Policy</Link>.</p>
     </>
   );
 }

@@ -2,7 +2,7 @@
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { compress } from "@/lib/photos";
+import { compress, photoExt } from "@/lib/photos";
 import { photoUrl } from "@/lib/types";
 
 export const MAX_CAR_PHOTOS = 12;
@@ -35,8 +35,8 @@ export default function CarPhotos({ userId, carId, photos: initial }: { userId: 
     for (const f of list) {
       try {
         const blob = await compress(f);
-        const path = `${userId}/car-${carId.slice(0, 8)}-${crypto.randomUUID().slice(0, 8)}.webp`;
-        const { error } = await supabase.storage.from("portfolio").upload(path, blob, { contentType: "image/webp", cacheControl: "31536000" });
+        const path = `${userId}/car-${carId.slice(0, 8)}-${crypto.randomUUID().slice(0, 8)}.${photoExt(blob)}`;
+        const { error } = await supabase.storage.from("portfolio").upload(path, blob, { contentType: blob.type, cacheControl: "31536000" });
         if (error) throw error;
         added.push(path);
       } catch (err) {

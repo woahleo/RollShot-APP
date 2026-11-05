@@ -19,7 +19,7 @@ export default function OfferChoice({ requestId, proId, name, price, date }: { r
     router.push(`/messages/${data}`);
   }
   async function choose() {
-    if (!confirm(`Book ${name} for ${date} at $${price}? The other offers will be turned down.`)) return;
+    if (!confirm(`Book ${name} for ${date}${price === 0 ? ", free" : ` at $${price}`}? The other offers will be turned down.`)) return;
     setBusy(true);
     setError("");
     const { error } = await createClient().rpc("choose_offer", { p_request: requestId, p_pro: proId });

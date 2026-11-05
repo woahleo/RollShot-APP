@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { citiesLabel, cityLabel, tzOf } from "@/lib/cities";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { getMe } from "@/lib/supabase/server";
@@ -21,7 +22,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const { data } = await supabase.from("pros").select("city, kind, profiles(name)").eq(proKey(key), key).maybeSingle();
   const p = data as unknown as { city: string; kind: Kind | null; profiles: { name: string } | null } | null;
   if (!p) return { title: "Creator · Rollshot" };
-  const title = `${p.profiles?.name ?? "Creator"} · ${KIND_LABEL[(p.kind ?? "photo") as Kind]} in ${p.city} · Rollshot`;
+  const title = `${p.profiles?.name ?? "Creator"} · ${KIND_LABEL[(p.kind ?? "photo") as Kind]} in ${cityLabel(p.city)} · Rollshot`;
   const description = `See their car shoots and book an open day on Rollshot.`;
   return { title, description, openGraph: { title, description }, twitter: { title, description } };
 }
@@ -36,7 +37,7 @@ export default async function ProPage({ params }: { params: Promise<{ id: string
   // Old links use the long id; send them to the readable one (a #book on the link carries over).
   if (proKey(key) === "id" && pro.handle) redirect(proPath(pro));
   const packages = [...pro.packages].sort((a, b) => a.position - b.position || a.price - b.price);
-  const dates = pro.open_dates.filter((d) => d >= today()).sort();
+  const dates = pro.open_dates.filter((d) => d >= today(tzOf(pro.city))).sort();
   let cars: Car[] = [];
   let contact: { instagram: string | null; phone: string | null } | null = null;
   if (user) {
@@ -70,7 +71,7 @@ export default async function ProPage({ params }: { params: Promise<{ id: string
 
   return (
     <main className="wrap">
-      <p className="eyebrow">{KIND_LABEL[(pro.kind ?? "photo") as Kind]} · {pro.city}{late ? <span className="late"> · {lateLabel(late)}</span> : null}</p>
+      <p className="eyebrow">{KIND_LABEL[(pro.kind ?? "photo") as Kind]} · {citiesLabel(pro.city, pro.more_cities)}{late ? <span className="late"> · {lateLabel(late)}</span> : null}</p>
       <div className="row" style={{ justifyContent: "space-between", alignItems: "flex-end" }}>
         <div className="pro-head">
           <Avatar name={name} avatar={pro.profiles?.avatar} size={72} />

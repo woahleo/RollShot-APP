@@ -4,7 +4,7 @@ export const KIND_LABEL: Record<Kind, string> = { photo: "Photo creator", video:
 export type Profile = { id: string; role: Role; name: string; created_at: string; avatar?: string | null };
 export type Car = { id: string; owner_id: string; year: string | null; make: string | null; model: string | null; color: string | null; mods: string | null; photos?: string[]; public?: boolean };
 export type Pro = {
-  id: string; city: string; kind: Kind; about: string | null; handle?: string | null;
+  id: string; city: string; more_cities?: string[]; kind: Kind; about: string | null; handle?: string | null;
   shoot_types: string[]; open_dates: string[]; photos: string[]; open_hours?: Record<string, string>; reels?: string[]; videos?: string[];
 };
 export type Package = { id: string; pro_id: string; name: string; price: number; position: number };
@@ -21,7 +21,7 @@ export type Message = {
   offer_name: string | null; offer_price: number | null; offer_dates: string[] | null; booking_id: string | null;
 };
 
-export const CITIES = ["West Palm Beach", "Boca Raton", "Fort Lauderdale", "Miami"] as const;
+export { CITIES } from "./cities";
 export const SHOOT_TYPES = ["Rolling shots", "Static", "Night", "Reels", "Track day", "Dealer stock"] as const;
 
 export function carLabel(c: Partial<Car>) {
@@ -40,6 +40,10 @@ export function proKey(key: string): "id" | "handle" {
 
 /** Usernames: 3 to 30 lowercase letters, numbers or dashes, not starting or ending with a dash. */
 export const HANDLE_RE = /^[a-z0-9][a-z0-9-]{1,28}[a-z0-9]$/;
+
+/** A creator's portfolio holds 3 to 10 photos (enforced in supabase/migrations/0024_photo_limits.sql). */
+export const MIN_PHOTOS = 3;
+export const MAX_PHOTOS = 10;
 
 export function photoUrl(path: string) {
   return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/portfolio/${path}`;

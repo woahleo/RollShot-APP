@@ -6,7 +6,9 @@ import { createClient } from "@/lib/supabase/client";
 import { prettyDate, today } from "@/lib/sun";
 import type { Booking } from "@/lib/types";
 import DateTile from "./DateTile";
+import AddToCalendar from "./AddToCalendar";
 import { prettyTime } from "@/lib/hours";
+import { money } from "@/lib/money";
 
 const LABEL: Record<Booking["status"], string> = {
   requested: "Waiting for them to accept",
@@ -51,7 +53,7 @@ export default function BookingRow({ b, who, asPro, openDates, whoLate = 0 }: { 
           <h3 style={{ margin: 0 }}>{asPro ? <Link className="who-link" href={`/u/${b.client_id}`}>{who}</Link> : who}{whoLate > 0 && <span className="small muted" style={{ fontWeight: 300 }}> · {whoLate} late cancel{whoLate === 1 ? "" : "s"}</span>}</h3>
           <span className="small muted">
             {b.shoot_time ? `${prettyTime(b.shoot_time)} · ` : ""}
-            {b.package_name} · ${b.price}
+            {b.package_name} · {money(b.price)}
             {b.car ? ` · ${b.car}` : ""}
           </span>
         </div>
@@ -66,6 +68,7 @@ export default function BookingRow({ b, who, asPro, openDates, whoLate = 0 }: { 
               <button className="btn small" disabled={busy} onClick={() => call("respond_booking", { p_booking: b.id, p_accept: false })}>Decline</button>
             </>
           )}
+          {(b.status === "confirmed" || b.status === "rescheduled") && <AddToCalendar kind="booking" id={b.id} />}
           <button className="btn small" onClick={() => { setMoving(!moving); setCancelling(false); }}>Rain check</button>
           {!(asPro && b.status === "requested") && (
             <button className="btn small" onClick={() => { setCancelling(!cancelling); setMoving(false); }}>
