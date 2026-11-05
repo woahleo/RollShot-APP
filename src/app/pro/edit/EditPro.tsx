@@ -87,7 +87,7 @@ export default function EditPro({ userId, name, avatar, site, pro, packages, con
       </div>
 
       <PortfolioPhotos userId={userId} photos={pro.photos} pageHref={proPath(pro)} />
-      <ReelPicker userId={userId} reels={pro.reels ?? []} pageHref={proPath(pro)} />
+      <ReelPicker userId={userId} reels={pro.reels ?? []} videos={pro.videos ?? []} pageHref={proPath(pro)} />
 
       <form className="card" onSubmit={saveInfo}>
         <h3>About you</h3>

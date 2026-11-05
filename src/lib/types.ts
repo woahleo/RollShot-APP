@@ -5,7 +5,7 @@ export type Profile = { id: string; role: Role; name: string; created_at: string
 export type Car = { id: string; owner_id: string; year: string | null; make: string | null; model: string | null; color: string | null; mods: string | null; photos?: string[]; public?: boolean };
 export type Pro = {
   id: string; city: string; more_cities?: string[]; kind: Kind; about: string | null; handle?: string | null;
-  shoot_types: string[]; open_dates: string[]; photos: string[]; open_hours?: Record<string, string>; reels?: string[];
+  shoot_types: string[]; open_dates: string[]; photos: string[]; open_hours?: Record<string, string>; reels?: string[]; videos?: string[];
 };
 export type Package = { id: string; pro_id: string; name: string; price: number; position: number };
 export type BookingStatus = "requested" | "confirmed" | "declined" | "rescheduled" | "cancelled";

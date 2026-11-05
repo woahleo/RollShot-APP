@@ -1,76 +1,148 @@
 "use client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { MAX_REELS, cleanReelLink } from "@/lib/reels";
+import { videoCover } from "@/lib/photos";
+import { MAX_REELS, MAX_VIDEO_MB, cleanReelLink, posterOf } from "@/lib/reels";
+import { photoUrl } from "@/lib/types";
+import { useDragSort } from "@/lib/useDragSort";
 
-/** Up to 6 Instagram reels for the creator's page: paste a link, move them around, remove them. */
-export default function ReelPicker({ userId, reels: initial, pageHref }: { userId: string; reels: string[]; pageHref?: string }) {
+type Props = { userId: string; reels: string[]; videos?: string[]; pageHref?: string; instagram?: boolean };
+
+/**
+ * Up to 6 videos for the creator's page: upload them from the phone (they play as plain video), or paste
+ * an Instagram reel link. Reorder and remove either kind.
+ */
+export default function ReelPicker({ userId, reels: initialReels, videos: initialVideos = [], pageHref, instagram = false }: Props) {
   const router = useRouter();
-  const [reels, setReels] = useState(initial);
+  const supabase = createClient();
+  const [videos, setVideos] = useState(initialVideos);
+  const [reels, setReels] = useState(initialReels);
+  const latest = useRef({ videos: initialVideos, reels: initialReels });
   const [link, setLink] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [uploading, setUploading] = useState("");
+  const total = videos.length + reels.length;
+  const full = total >= MAX_REELS;
 
-  async function save(next: string[]) {
+  async function save(next: { videos?: string[]; reels?: string[] }) {
+    const v = next.videos ?? latest.current.videos;
+    const r = next.reels ?? latest.current.reels;
     setBusy(true);
     setError("");
-    const { error } = await createClient().from("pros").update({ reels: next, updated_at: new Date().toISOString() }).eq("id", userId);
+    // Only send what changed, so links keep working even before the videos column exists.
+    const patch = { ...(next.videos ? { videos: v } : {}), ...(next.reels ? { reels: r } : {}), updated_at: new Date().toISOString() };
+    const { error } = await supabase.from("pros").update(patch).eq("id", userId);
     setBusy(false);
-    if (error) return setError(error.message.includes("pros_reels_valid") ? "That link didn't save. Try copying it again from Instagram." : error.message);
-    setReels(next);
+    if (error) {
+      setError(error.message.includes("_valid") ? `Up to ${MAX_REELS} videos in all. Remove one to add another.` : error.message);
+      return false;
+    }
+    latest.current = { videos: v, reels: r };
+    setVideos(v);
+    setReels(r);
     router.refresh();
+    return true;
   }
 
-  function add(e: React.FormEvent) {
+  function addLink(e: React.FormEvent) {
     e.preventDefault();
     const clean = cleanReelLink(link);
     if (!clean) return setError("Paste a link to a reel or post, like instagram.com/reel/…");
     if (reels.includes(clean)) return setError("That one is already on your page.");
-    if (reels.length >= MAX_REELS) return setError(`Up to ${MAX_REELS} videos. Remove one to add another.`);
+    if (full) return setError(`Up to ${MAX_REELS} videos in all. Remove one to add another.`);
     setLink("");
-    save([...reels, clean]);
+    save({ reels: [...reels, clean] });
   }
 
-  const move = (i: number, step: number) => {
-    const next = [...reels];
-    [next[i], next[i + step]] = [next[i + step], next[i]];
-    save(next);
-  };
+  async function upload(files: FileList | null) {
+    const f = files?.[0];
+    if (!f) return;
+    setError("");
+    if (full) return setError(`Up to ${MAX_REELS} videos in all. Remove one to add another.`);
+    if (!f.type.startsWith("video/")) return setError("That file isn't a video.");
+    if (f.size > MAX_VIDEO_MB * 1024 * 1024) {
+      return setError(`That video is ${Math.round(f.size / 1048576)} MB. Videos can be up to ${MAX_VIDEO_MB} MB, so trim it or export it at 1080p.`);
+    }
+    setUploading("Getting it ready…");
+    try {
+      const { blob } = await videoCover(f);
+      const ext = (f.name.split(".").pop() || "mp4").toLowerCase().replace(/[^a-z0-9]/g, "") || "mp4";
+      const path = `${userId}/vid-${crypto.randomUUID().slice(0, 12)}.${ext}`;
+      setUploading(`Uploading ${Math.round(f.size / 1048576)} MB…`);
+      const up = await supabase.storage.from("portfolio").upload(path, f, { contentType: f.type, cacheControl: "31536000" });
+      if (up.error) throw up.error;
+      await supabase.storage.from("portfolio").upload(posterOf(path), blob, { contentType: "image/jpeg", cacheControl: "31536000" });
+      if (!(await save({ videos: [...latest.current.videos, path] }))) {
+        await supabase.storage.from("portfolio").remove([path, posterOf(path)]);
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Upload failed";
+      setError(/maximum allowed size|too large|413/i.test(msg) ? `That video is too big. Videos can be up to ${MAX_VIDEO_MB} MB.` : msg);
+    }
+    setUploading("");
+  }
+
+  async function removeVideo(path: string) {
+    if (await save({ videos: latest.current.videos.filter((v) => v !== path) })) {
+      await supabase.storage.from("portfolio").remove([path, posterOf(path)]);
+    }
+  }
+
+  const videoSort = useDragSort(videos, (next) => save({ videos: next }));
+  const reelSort = useDragSort(reels, (next) => save({ reels: next }));
 
   return (
     <div className="card portfolio" id="videos">
       <div className="row" style={{ justifyContent: "space-between", alignItems: "center" }}>
-        <h3 style={{ margin: 0 }}>Your videos {reels.length > 0 && <span className="muted small">· {reels.length} of {MAX_REELS}</span>}</h3>
+        <h3 style={{ margin: 0 }}>Your videos {total > 0 && <span className="muted small">· {total} of {MAX_REELS}</span>}</h3>
+        {!full && (
+          <label className="btn solid small" style={{ cursor: uploading ? "progress" : "pointer" }}>
+            {uploading || "Upload video"}
+            <input type="file" accept="video/*" hidden disabled={!!uploading || busy} onChange={(e) => { upload(e.target.files); e.target.value = ""; }} />
+          </label>
+        )}
       </div>
       <p className="small muted" style={{ margin: "6px 0 14px" }}>
-        Pick up to {MAX_REELS} reels from your Instagram to play on your page. In Instagram, tap Share on a reel, then Copy link, and paste it here.
-        {pageHref && reels.length > 0 && <> <Link href={pageHref}>See them on your page</Link>.</>}
+        Up to {MAX_REELS} videos for your page. Uploaded videos play right on the page, tall or wide just as you shot them, with nothing around them (up to {MAX_VIDEO_MB} MB each).
+        Drag them to change the order. You can also paste an Instagram reel link{instagram ? <>, or <Link href="/pro/instagram">pick from Instagram</Link></> : ""}.
+        {pageHref && total > 0 && <> <Link href={pageHref}>See them on your page</Link>.</>}
       </p>
-      {reels.length < MAX_REELS && (
-        <form className="row reel-add" onSubmit={add}>
+
+      {videos.length > 0 && (
+        <div className="vid-strip">
+          {videoSort.order.map((v, i) => (
+            <div key={v} className="vid-thumb" {...videoSort.itemProps(v)} aria-label={`Video ${i + 1}`}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={photoUrl(posterOf(v))} alt="" loading="lazy" draggable={false} />
+              <button type="button" className="btn small" disabled={busy} onClick={() => removeVideo(v)} aria-label={`Remove video ${i + 1}`}>Remove</button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {!full && (
+        <form className="row reel-add" onSubmit={addLink}>
           <input
             value={link}
             onChange={(e) => { setLink(e.target.value); setError(""); }}
-            placeholder="https://www.instagram.com/reel/…"
+            placeholder="Or paste an Instagram reel link"
             inputMode="url"
             aria-label="Instagram reel link"
           />
-          <button className="btn solid small" disabled={busy || !link.trim()}>Add</button>
+          <button className="btn small" disabled={busy || !link.trim()}>Add</button>
         </form>
       )}
       {error && <p className="error small">{error}</p>}
       {reels.length > 0 && (
         <ol className="reel-list">
-          {reels.map((r, i) => (
-            <li key={r}>
+          {reelSort.order.map((r) => (
+            <li key={r} {...reelSort.itemProps(r)}>
+              <span className="drag-grip" aria-hidden="true">⋮⋮</span>
               <a href={r} target="_blank" rel="noreferrer" className="small">{r.replace("https://www.instagram.com/", "instagram.com/")}</a>
-              <div className="row" style={{ gap: 4 }}>
-                <button type="button" className="btn small" disabled={busy || i === 0} onClick={() => move(i, -1)} aria-label="Move up">↑</button>
-                <button type="button" className="btn small" disabled={busy || i === reels.length - 1} onClick={() => move(i, 1)} aria-label="Move down">↓</button>
-                <button type="button" className="btn small" disabled={busy} onClick={() => save(reels.filter((x) => x !== r))}>Remove</button>
-              </div>
+              <button type="button" className="btn small" disabled={busy} onClick={() => save({ reels: reels.filter((x) => x !== r) })}>Remove</button>
             </li>
           ))}
         </ol>

@@ -19,3 +19,9 @@ export function cleanReelLink(input: string): string | null {
   const kind = m[1].startsWith("reel") ? "reel" : m[1];
   return `https://www.instagram.com/${kind}/${m[2]}/`;
 }
+
+/** Uploaded videos are stored up to this size. Supabase's free plan stops at 50 MB per file. */
+export const MAX_VIDEO_MB = 50;
+
+/** An uploaded video's cover image sits next to it with the same name. */
+export const posterOf = (path: string) => path.replace(/\.[^./]+$/, "") + ".jpg";

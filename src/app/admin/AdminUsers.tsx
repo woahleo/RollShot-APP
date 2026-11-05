@@ -1,7 +1,8 @@
 "use client";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
 import { photoUrl } from "@/lib/types";
 
 export type AdminUser = {
@@ -31,10 +32,16 @@ const SCROLL_KEY = "rs-admin-scroll";
 /**
  * Every account, newest first, with a search box and a filter by account type. The tab and search
  * live in the address bar, so opening someone and pressing Back lands on the same tab, scrolled to
- * the same spot in the list.
+ * the same spot in the list. Any account but your own can be deleted from its row.
  */
-export default function AdminUsers({ users }: { users: AdminUser[] }) {
+export default function AdminUsers({ users: initial, meId }: { users: AdminUser[]; meId: string }) {
   const sp = useSearchParams();
+  const router = useRouter();
+  const [users, setUsers] = useState(initial);
+  const [confirm, setConfirm] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState("");
+  useEffect(() => setUsers(initial), [initial]);
   const tab = sp.get("tab") ?? undefined;
   const [q, setQ] = useState(sp.get("q") ?? "");
   const [f, setF] = useState<FilterKey>(isFilter(tab) ? tab : "all");
@@ -68,6 +75,27 @@ export default function AdminUsers({ users }: { users: AdminUser[] }) {
       (!s || [u.name, u.email, u.handle, u.city].some((v) => v?.toLowerCase().includes(s))),
     );
   }, [users, q, f]);
+  async function remove(u: AdminUser) {
+    setBusy(true);
+    setMsg("");
+    const supabase = createClient();
+    const { data, error } = await supabase.rpc("admin_delete_user", { p_user: u.id });
+    if (error) {
+      setBusy(false);
+      return setMsg(error.message);
+    }
+    // The account is gone. Now clear its files: the ones the database knew about, plus anything else in its folder.
+    const files = new Set<string>((data as string[] | null) ?? []);
+    const { data: listed } = await supabase.storage.from("portfolio").list(u.id, { limit: 1000 });
+    listed?.forEach((f) => f.id && files.add(`${u.id}/${f.name}`));
+    if (files.size) await supabase.storage.from("portfolio").remove([...files]);
+    setUsers((list) => list.filter((x) => x.id !== u.id));
+    setConfirm(null);
+    setBusy(false);
+    setMsg(`Deleted ${u.name || u.email || "that account"}.`);
+    router.refresh();
+  }
+
   const count = (k: string) => (k === "all" ? users.length : users.filter((u) => (k === "none" ? !u.role : u.role === k)).length);
 
   return (
@@ -76,6 +104,7 @@ export default function AdminUsers({ users }: { users: AdminUser[] }) {
         <h2 style={{ margin: 0 }}>Everyone</h2>
         <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search name, email, phone, city" style={{ maxWidth: 280 }} aria-label="Search people" />
       </div>
+      {msg && <p className="notice" role="status" style={{ marginTop: 12 }}>{msg}</p>}
       <div className="chips" style={{ margin: "12px 0 14px" }}>
         {FILTERS.map((x) => (
           <button key={x.key} type="button" className={`chip${f === x.key ? " on" : ""}`} aria-pressed={f === x.key} onClick={() => { setF(x.key); if (box.current) box.current.scrollTop = 0; }}>
@@ -116,7 +145,23 @@ export default function AdminUsers({ users }: { users: AdminUser[] }) {
                   {many(u.bookings, "booking")}
                   {u.role !== "pro" && many(u.requests, "request")}
                   {many(u.messages, "message")}
+                  {u.id !== meId && confirm !== u.id && (
+                    <button type="button" className="person-delete" onClick={() => { setConfirm(u.id); setMsg(""); }} aria-label={`Delete ${name}`}>
+                      Delete
+                    </button>
+                  )}
                 </div>
+                {confirm === u.id && (
+                  <div className="person-confirm notice">
+                    <span>
+                      Delete <b>{name}</b> for good? Their profile, photos, {u.role === "pro" ? "packages" : "garage"}, bookings and messages are removed, and they&apos;re signed out. This can&apos;t be undone.
+                    </span>
+                    <div className="row">
+                      <button type="button" className="btn small danger" disabled={busy} onClick={() => remove(u)}>{busy ? "Deleting…" : "Delete account"}</button>
+                      <button type="button" className="btn small" disabled={busy} onClick={() => setConfirm(null)}>Cancel</button>
+                    </div>
+                  </div>
+                )}
               </li>
             );
           })}

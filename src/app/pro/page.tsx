@@ -88,7 +88,7 @@ export default async function Dashboard() {
       </section>
 
       <section>
-        <ReelPicker userId={user.id} reels={p.reels ?? []} pageHref={proPath({ id: user.id, handle: p.handle })} />
+        <ReelPicker userId={user.id} reels={p.reels ?? []} videos={p.videos ?? []} pageHref={proPath({ id: user.id, handle: p.handle })} />
       </section>
 
       {(toPost.length > 0 || posts.length > 0) && (

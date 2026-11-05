@@ -418,12 +418,28 @@ button.link { background: none; border: 0; padding: 0; color: var(--ink); text-d
 
 /* Instagram reels on a creator's page */
 .reels-head { margin: 36px 0 14px; }
-.reels { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
-/* Instagram's player has a name bar on top (--ig-top) and likes and comments under the video. It's drawn
-   360px wide and scaled (--s) to the tile, which is the video's own 9:16 shape and hides everything else. */
-.reel { --ig-top: 55px; --s: .45; position: relative; aspect-ratio: 9 / 16; overflow: hidden; border-radius: 16px; background: #000; min-width: 0; }
-.reel iframe { position: absolute; top: 0; left: 0; width: 362px; height: calc(362px * 16 / 9 + var(--ig-top) + 320px); border: 0; transform-origin: 0 0; transform: scale(var(--s)) translate(-1px, calc(var(--ig-top) * -1)); }
-@media (min-width: 700px) { .reels { grid-template-columns: repeat(3, 1fr); gap: 14px; } }
+.reels { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+/* Instagram's player is drawn 360px wide and scaled (--s) to the tile. Without its script it shows the video
+   as a 16:9 frame under a name bar (--ig-top), with likes and comments below. The tile is exactly that
+   16:9 frame, so only the video shows. */
+.reel { --ig-top: 55px; --s: .9; position: relative; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 16px; background: #000; min-width: 0; }
+.reel iframe { position: absolute; top: 0; left: 0; width: 362px; height: 600px; border: 0; transform-origin: 0 0; transform: scale(var(--s)) translate(-1px, calc(var(--ig-top) * -1)); }
+/* After a reel starts playing, a clear layer sits over it so the next tap stops it here instead of
+   reaching Instagram's "Watch on Instagram" screen. */
+.reel-stop { position: absolute; inset: 0; z-index: 1; border: 0; padding: 0; background: transparent; cursor: pointer; }
+.reel-stop span { position: absolute; left: 8px; bottom: 8px; padding: 3px 9px; border-radius: 999px; background: rgba(0, 0, 0, .55); color: #fff; font-size: 11px; }
+@media (min-width: 700px) { .reels { grid-template-columns: 1fr; gap: 16px; } }
+.vids { display: grid; gap: 10px; grid-template-columns: repeat(2, 1fr); margin-bottom: 12px; }
+@media (min-width: 700px) { .vids { gap: 16px; } }
+.vid { position: relative; aspect-ratio: 9 / 16; border-radius: 16px; overflow: hidden; background: #000; }
+.vid video { width: 100%; height: 100%; object-fit: cover; display: block; cursor: pointer; }
+.vid.wide { grid-column: 1 / -1; max-height: 80vh; }
+.vid.wide video { object-fit: contain; }
+.vid-sound { position: absolute; left: 8px; bottom: 8px; padding: 3px 9px; border-radius: 999px; background: rgba(0, 0, 0, .55); color: #fff; font-size: 11px; pointer-events: none; }
+.vid-strip { display: flex; gap: 8px; overflow-x: auto; margin-bottom: 12px; padding-bottom: 2px; }
+.vid-thumb { flex: 0 0 104px; display: grid; gap: 6px; }
+.vid-thumb img { width: 104px; aspect-ratio: 9 / 16; object-fit: cover; border-radius: 10px; background: var(--chip); display: block; }
+.vid-thumb .btn { padding: 3px 0; font-size: 12px; }
 .reel-add { flex-wrap: nowrap; gap: 8px; }
 .reel-add input { flex: 1; min-width: 0; }
 .reel-list { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 8px; }
@@ -475,6 +491,10 @@ button.link { background: none; border: 0; padding: 0; color: var(--ink); text-d
 .person-stats { display: flex; gap: 12px; flex-wrap: wrap; }
 .person-stats b { color: var(--ink); font-weight: 400; }
 @media (max-width: 560px) { .person-stats { flex-basis: 100%; padding-left: 52px; } }
+.person-delete { margin-left: auto; background: none; border: 0; padding: 0 2px; color: var(--muted); cursor: pointer; font: inherit; }
+.person-delete:hover, .person-delete:focus-visible { color: var(--bad); }
+.person-confirm { flex-basis: 100%; display: grid; gap: 10px; border-color: var(--bad); }
+.btn.danger { color: var(--bad); border-color: var(--bad); }
 .badge.pro { background: color-mix(in srgb, var(--sky) 22%, var(--bg)); }
 .badge.client { background: color-mix(in srgb, var(--sun) 30%, var(--bg)); }
 .badge.none { background: var(--chip); color: var(--muted); }
@@ -521,3 +541,13 @@ main.wrap:has(+ .site-foot) { padding-bottom: 72px; }
 .onboard-drop { min-height: 110px; }
 .chip[aria-pressed="true"] .muted { color: inherit; opacity: .65; }
 .linklike { background: none; border: 0; padding: 0; color: var(--ink); text-decoration: underline; cursor: pointer; font: inherit; }
+
+/* Tiles you can drag into order (useDragSort). A long press starts a drag on phones. */
+[data-sort-key] { cursor: grab; touch-action: pan-y; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; transition: transform .15s, opacity .15s; }
+[data-sort-key] img { -webkit-user-drag: none; }
+[data-sort-key][data-dragging] { cursor: grabbing; opacity: .55; transform: scale(.95); }
+[data-sort-key]:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.reel-list li[data-sort-key] { flex-wrap: nowrap; justify-content: flex-start; }
+.reel-list li[data-sort-key] a, .reel-list li[data-sort-key] > span.small { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.reel-list li[data-sort-key] .btn, .auth .reel-list .btn { flex: none; width: auto; }
+.drag-grip { color: var(--muted); letter-spacing: -2px; font-size: 13px; flex: none; }
