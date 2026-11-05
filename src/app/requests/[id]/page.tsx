@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { getMe } from "@/lib/supabase/server";
 import { KIND_LABEL, photoUrl, type Kind } from "@/lib/types";
 import { prettyDate } from "@/lib/sun";
+import { money } from "@/lib/money";
 import type { Request } from "../page";
 import OfferChoice from "./OfferChoice";
 import OwnerTools from "./OwnerTools";
@@ -37,14 +38,14 @@ export default async function RequestOffers({ params, searchParams }: { params: 
       <p className="eyebrow"><Link href="/requests">Requests</Link> · {r.city}</p>
       <h1 style={{ marginBottom: 6 }}>{r.shoot_type}<em>.</em></h1>
       <p className="lede" style={{ marginBottom: 10 }}>
-        {r.car} · {prettyDate(r.date_from)}{r.budget ? ` · $${r.budget} budget` : ""}
+        {r.car} · {prettyDate(r.date_from)}{r.free ? " · free portfolio shoot" : r.budget ? ` · $${r.budget} budget` : ""}
       </p>
       {r.note && <p className="muted" style={{ marginTop: 0 }}>{r.note}</p>}
       {sp.edited && <p className="notice">Changes saved.{offers.length ? " Creators who sent offers got a notification." : ""}</p>}
       {open && <OwnerTools id={r.id} offers={offers.length} />}
 
       {chosen ? (
-        <p className="notice">You chose <b>{chosen.pro?.profiles?.name}</b> for ${chosen.price}. It&apos;s booked and confirmed. <Link href="/shoots">See your shoots</Link></p>
+        <p className="notice">You chose <b>{chosen.pro?.profiles?.name}</b> {chosen.price === 0 ? "to shoot it free" : `for $${chosen.price}`}. It&apos;s booked and confirmed. <Link href="/shoots">See your shoots</Link></p>
       ) : !open ? (
         <p className="notice">This request is closed.</p>
       ) : offers.length === 0 ? (
@@ -67,7 +68,7 @@ export default async function RequestOffers({ params, searchParams }: { params: 
               <div style={{ display: "grid", gap: 4, minWidth: 0 }}>
                 <div className="line">
                   <h3>{name}</h3>
-                  <span className="price">${o.price}</span>
+                  <span className="price">{money(o.price)}</span>
                 </div>
                 <span className="small muted">{KIND_LABEL[(o.pro?.kind ?? "photo") as Kind]} · {o.pro?.city}{late.get(o.pro_id) ? <span className="late"> · {lateLabel(late.get(o.pro_id))}</span> : null}</span>
                 {o.note && <p className="small" style={{ margin: "4px 0 0" }}>{o.note}</p>}

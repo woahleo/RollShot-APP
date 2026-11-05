@@ -18,7 +18,7 @@ const plus = (d: string, days: number) => {
 };
 
 export type RequestDraft = {
-  id: string; car: string; shoot_type: string; kind: string; city: string; date: string; budget: number | null; note: string | null; offers: number;
+  id: string; car: string; shoot_type: string; kind: string; city: string; date: string; budget: number | null; free: boolean; note: string | null; offers: number;
 };
 
 /** Post a request, or with a draft, change one that's still open. */
@@ -32,6 +32,7 @@ export default function RequestForm({ cars: garage, draft }: { cars: string[]; d
   const [city, setCity] = useState<string>(draft?.city ?? CITIES[0]);
   const [date, setDate] = useState(draft?.date ?? plus(now, 7));
   const [budget, setBudget] = useState(draft?.budget ? String(draft.budget) : "");
+  const [free, setFree] = useState(draft?.free ?? false);
   const [note, setNote] = useState(draft?.note ?? "");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -44,7 +45,7 @@ export default function RequestForm({ cars: garage, draft }: { cars: string[]; d
     setError("");
     const fields = {
       car: car.trim(), shoot_type: shoot, kind, city, date_from: date, date_to: date,
-      budget: budget ? Number(budget) : null, note: note.trim() || null,
+      budget: !free && budget ? Number(budget) : null, free, note: note.trim() || null,
     };
     const supabase = createClient();
     const { error } = draft
@@ -95,10 +96,24 @@ export default function RequestForm({ cars: garage, draft }: { cars: string[]; d
         <input type="date" value={date} min={now} onChange={(e) => setDate(e.target.value)} />
         {date && <small className="muted">{prettyDate(date)}</small>}
       </label>
-      <label className="field">
-        <span>Budget (optional)</span>
-        <input value={budget} onChange={(e) => setBudget(e.target.value.replace(/\D/g, ""))} placeholder="$" inputMode="numeric" />
-      </label>
+      <div className="field">
+        <span>Paid or free</span>
+        <div className="chips">
+          <button type="button" className="chip" aria-pressed={!free} onClick={() => setFree(false)}>I&apos;ll pay</button>
+          <button type="button" className="chip" aria-pressed={free} onClick={() => setFree(true)}>Free portfolio shoot</button>
+        </div>
+        <small className="muted">
+          {free
+            ? "Creators who are building their portfolio shoot it for free. Some may still name a price, and you pick who you want."
+            : "Creators send you a price. A budget helps them offer the right package."}
+        </small>
+      </div>
+      {!free && (
+        <label className="field">
+          <span>Budget (optional)</span>
+          <input value={budget} onChange={(e) => setBudget(e.target.value.replace(/\D/g, ""))} placeholder="$" inputMode="numeric" />
+        </label>
+      )}
       <label className="field">
         <span>Anything else (optional)</span>
         <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={3} maxLength={500} placeholder="Just got it wrapped, want rollers on the bridge at sunset." />

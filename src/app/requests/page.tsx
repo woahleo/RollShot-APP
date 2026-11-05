@@ -8,7 +8,7 @@ import { lateCancels, lateLabel } from "@/lib/lateCancels";
 
 export type Request = {
   id: string; client_id: string; car: string; city: string; kind: "photo" | "video" | "either"; shoot_type: string;
-  date_from: string; date_to: string; budget: number | null; note: string | null; status: "open" | "closed"; created_at: string;
+  date_from: string; date_to: string; budget: number | null; free?: boolean; note: string | null; status: "open" | "closed"; created_at: string;
   chosen_pro: string | null;
 };
 
@@ -79,11 +79,12 @@ export default async function Requests({ searchParams }: { searchParams: Promise
                 <DateTile day={r.date_from} />
                 <div style={{ minWidth: 0 }}>
                   <span className="eyebrow">{r.shoot_type} · {KIND[r.kind]}</span>
+                  {r.free && <span className="badge free">Free portfolio shoot</span>}
                   <h3>{r.car}</h3>
                   <span className="small muted">
                     {r.city}
                     {r.date_from !== r.date_to ? ` · until ${short(r.date_to)}` : ""}
-                    {r.budget ? ` · $${r.budget} budget` : ""}
+                    {!r.free && r.budget ? ` · $${r.budget} budget` : ""}
                   </span>
                 </div>
               </div>
@@ -97,7 +98,7 @@ export default async function Requests({ searchParams }: { searchParams: Promise
               {r.note && <p className="small req-note">{r.note}</p>}
               <div className="req-foot">
                 <span className="small muted">{own ? "Yours · " : ""}{n} {n === 1 ? "offer" : "offers"} · {ago(r.created_at)}</span>
-                <RequestActions id={r.id} role={role} signedIn={!!user} own={own} offers={n} mine={myOffers.get(r.id) ?? null} budget={r.budget} />
+                <RequestActions id={r.id} role={role} signedIn={!!user} own={own} offers={n} mine={myOffers.get(r.id) ?? null} budget={r.budget} free={!!r.free} />
               </div>
             </article>
           );

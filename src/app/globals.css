@@ -478,3 +478,7 @@ button.link { background: none; border: 0; padding: 0; color: var(--ink); text-d
 .setup-val { display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; align-items: center; padding: 8px 10px; border-radius: 10px; background: var(--soft); border: 1px solid var(--line); }
 .setup-val span { grid-column: 1 / -1; font-size: 11.5px; letter-spacing: .04em; }
 .setup-val code { font-size: 12px; overflow-wrap: anywhere; white-space: pre-wrap; min-width: 0; }
+
+/* Free portfolio shoots */
+.badge.free { background: color-mix(in srgb, var(--sky) 20%, var(--bg)); color: var(--ink); margin-top: 4px; }
+.offer-inline .chips { gap: 6px; }

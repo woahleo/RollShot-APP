@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { money } from "@/lib/money";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getMe } from "@/lib/supabase/server";
@@ -61,7 +62,7 @@ export default async function Shot({ params }: { params: Promise<{ id: string }>
       </div>
       <p className="lede" style={{ margin: "12px 0 20px" }}>
         {s.shoot_type} by <Link href={`/p/${s.pro_id}`}>{name}</Link>
-        {s.pro ? ` · ${KIND_LABEL[(s.pro.kind ?? "photo") as Kind]}` : ""} · ${s.price}
+        {s.pro ? ` · ${KIND_LABEL[(s.pro.kind ?? "photo") as Kind]}` : ""} · {money(s.price)}
       </p>
       {s.caption && <p style={{ marginTop: 0 }}>{s.caption}</p>}
       {s.hidden_by_owner && <p className="notice">Hidden by the car&apos;s owner. Only you two can see this page.</p>}

@@ -28,7 +28,7 @@ export default async function EditRequest({ params }: { params: Promise<{ id: st
       <p className="lede">Change the car, date, budget or anything else. Creators see the new version right away.</p>
       <RequestForm
         cars={((cars ?? []) as Car[]).map(carLabel).filter(Boolean)}
-        draft={{ id: r.id, car: r.car, shoot_type: r.shoot_type, kind: r.kind, city: r.city, date: r.date_from, budget: r.budget, note: r.note, offers: count ?? 0 }}
+        draft={{ id: r.id, car: r.car, shoot_type: r.shoot_type, kind: r.kind, city: r.city, date: r.date_from, budget: r.budget, free: !!r.free, note: r.note, offers: count ?? 0 }}
       />
     </main>
   );
