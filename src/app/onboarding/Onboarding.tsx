@@ -13,7 +13,7 @@ import { AGE_BLOCK_COOKIE, ageOn, MIN_AGE } from "@/lib/legal";
 
 type Role = "client" | "pro";
 
-export default function Onboarding({ userId, defaultName, initialRole, blocked: wasBlocked }: { userId: string; defaultName: string; initialRole: Role | null; blocked: boolean }) {
+export default function Onboarding({ userId, defaultName, initialRole, blocked: wasBlocked, finishing = false }: { userId: string; defaultName: string; initialRole: Role | null; blocked: boolean; finishing?: boolean }) {
   const router = useRouter();
   const [role, setRole] = useState<Role | null>(initialRole);
   const [name, setName] = useState(defaultName);
@@ -24,6 +24,8 @@ export default function Onboarding({ userId, defaultName, initialRole, blocked: 
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [birth, setBirth] = useState("");
+  // Set once the profile row exists, so pressing Continue again after a failed step doesn't redo it.
+  const [profileMade, setProfileMade] = useState(finishing);
   const [blocked, setBlocked] = useState(wasBlocked);
   const [photos, setPhotos] = useState<string[]>([]);
   const [uploading, setUploading] = useState(0);
@@ -93,10 +95,11 @@ export default function Onboarding({ userId, defaultName, initialRole, blocked: 
     if (role === "pro" && photos.length < MIN_PHOTOS) return setError(`Add at least ${MIN_PHOTOS} photos of your work.`);
     if (role === "client" && !(car.year.trim() && car.make.trim() && car.model.trim())) return setError("Add your car's year, make and model.");
     if (role === "client" && carPhotos.length === 0) return setError("Add at least one photo of your car.");
+    const supabase = createClient();
+    if (!profileMade) {
     const age = ageOn(birth);
     if (age === null) return setError("Enter your date of birth.");
     setBusy(true); setError("");
-    const supabase = createClient();
     if (age < MIN_AGE) {
       // The database deletes this sign-in; remember it on this browser so changing the date doesn't work.
       document.cookie = `${AGE_BLOCK_COOKIE}=1; path=/; max-age=${60 * 60 * 24 * 30}; samesite=lax`;
@@ -109,6 +112,9 @@ export default function Onboarding({ userId, defaultName, initialRole, blocked: 
     if (e0 || ok !== true) { setBusy(false); return setError(e0?.message ?? "We couldn't check your date of birth. Try again."); }
     const { error: e1 } = await supabase.from("profiles").insert({ id: userId, role, name: name.trim() });
     if (e1) { setBusy(false); return setError(e1.message); }
+    setProfileMade(true);
+    }
+    setBusy(true); setError("");
     if (role === "pro") {
       const { error: e2 } = await supabase.from("pros").insert({ id: userId, city, more_cities: moreCities.filter((c) => c !== city), kind, photos });
       if (e2) { setBusy(false); return setError(e2.message); }
@@ -127,15 +133,20 @@ export default function Onboarding({ userId, defaultName, initialRole, blocked: 
 
   return (
     <form onSubmit={save}>
-      <h1 style={{ fontSize: 40 }}>Almost there.</h1>
-      <div className="chips" style={{ marginBottom: 20 }}>
+      <h1 style={{ fontSize: 40 }}>{finishing ? "Finish your page." : "Almost there."}</h1>
+      {finishing && <p className="muted" style={{ marginTop: -8 }}>Your account is set up. Add your city and photos so car owners can find you.</p>}
+      {!profileMade && <div className="chips" style={{ marginBottom: 20 }}>
         <button type="button" className="chip" aria-pressed={role === "client"} onClick={() => setRole("client")}>I own a car</button>
         <button type="button" className="chip" aria-pressed={role === "pro"} onClick={() => setRole("pro")}>I&apos;m a creator (photo or video)</button>
-      </div>
+      </div>}
+      {!profileMade && (
+        <>
       <label className="field"><span>Your name</span><input required maxLength={80} value={name} onChange={(e) => setName(e.target.value)} /></label>
       <label className="field"><span>Date of birth</span>
         <input type="date" required value={birth} min="1900-01-01" max={new Date().toISOString().slice(0, 10)} onChange={(e) => setBirth(e.target.value)} />
       </label>
+        </>
+      )}
       {role === "pro" && (
         <div className="field"><span>What you do</span>
           <div className="chips">

@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import { money } from "@/lib/money";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -35,6 +36,7 @@ export default async function ProHome({ supabase, userId, profile }: { supabase:
   const hireMe = (crewOffers ?? []) as unknown as { id: string; role: string; shoot_date: string; poster: { profiles: { name: string } | null } | null }[];
   const crewReplies = ((crewJobs ?? []) as { id: string; role: string; gig_replies: { pro_id: string }[] }[]).filter((g) => g.gig_replies.length > 0);
   const replyCount = crewReplies.reduce((n, g) => n + g.gig_replies.length, 0);
+  if (!me) redirect("/onboarding"); // signed up as a creator but the creator details never saved
   const pro = me as Pro;
   const rows = (bookingRows ?? []) as B[];
   const posted = new Set(((postRows ?? []) as { booking_id: string }[]).map((p) => p.booking_id));
