@@ -418,7 +418,8 @@ button.link { background: none; border: 0; padding: 0; color: var(--ink); text-d
 
 /* Instagram reels on a creator's page */
 .reels-head { margin: 36px 0 14px; }
-.reels { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+.reels { display: grid; gap: 10px; grid-template-columns: repeat(2, 1fr); }
+.reel.wide { grid-column: 1 / -1; }
 /* Instagram's player is drawn 360px wide and scaled (--s) to the tile. Without its script it shows the video
    as a 16:9 frame under a name bar (--ig-top), with likes and comments below. The tile is exactly that
    16:9 frame, so only the video shows. */
@@ -428,7 +429,7 @@ button.link { background: none; border: 0; padding: 0; color: var(--ink); text-d
    reaching Instagram's "Watch on Instagram" screen. */
 .reel-stop { position: absolute; inset: 0; z-index: 1; border: 0; padding: 0; background: transparent; cursor: pointer; }
 .reel-stop span { position: absolute; left: 8px; bottom: 8px; padding: 3px 9px; border-radius: 999px; background: rgba(0, 0, 0, .55); color: #fff; font-size: 11px; }
-@media (min-width: 700px) { .reels { grid-template-columns: 1fr; gap: 16px; } }
+@media (min-width: 700px) { .reels { gap: 16px; } }
 .vids { display: grid; gap: 10px; grid-template-columns: repeat(2, 1fr); margin-bottom: 12px; }
 @media (min-width: 700px) { .vids { gap: 16px; } }
 .vid { position: relative; aspect-ratio: 9 / 16; border-radius: 16px; overflow: hidden; background: #000; }
