@@ -1,5 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { getMe } from "@/lib/supabase/server";
 import { pushReady } from "@/lib/push";
 import AdminUsers, { type AdminUser } from "./AdminUsers";
@@ -40,7 +41,7 @@ export default async function AdminPage() {
           </div>
         ))}
       </div>
-      <AdminUsers users={(users ?? []) as AdminUser[]} />
+      <Suspense><AdminUsers users={(users ?? []) as AdminUser[]} /></Suspense>
       <PushSetup
         appReady={pushReady()}
         dbLinked={counts.push_linked === true}

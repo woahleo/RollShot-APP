@@ -4,7 +4,7 @@ export const KIND_LABEL: Record<Kind, string> = { photo: "Photo creator", video:
 export type Profile = { id: string; role: Role; name: string; created_at: string; avatar?: string | null };
 export type Car = { id: string; owner_id: string; year: string | null; make: string | null; model: string | null; color: string | null; mods: string | null; photos?: string[]; public?: boolean };
 export type Pro = {
-  id: string; city: string; kind: Kind; about: string | null; handle?: string | null;
+  id: string; city: string; more_cities?: string[]; kind: Kind; about: string | null; handle?: string | null;
   shoot_types: string[]; open_dates: string[]; photos: string[]; open_hours?: Record<string, string>; reels?: string[];
 };
 export type Package = { id: string; pro_id: string; name: string; price: number; position: number };

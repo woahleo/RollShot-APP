@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { photoUrl } from "@/lib/types";
 
 export type AdminUser = {
@@ -23,10 +24,43 @@ const FILTERS = [
   { key: "none", label: "Didn't finish" },
 ] as const;
 
-/** Every account, newest first, with a search box and a filter by account type. */
+type FilterKey = (typeof FILTERS)[number]["key"];
+const isFilter = (k: string | undefined): k is FilterKey => FILTERS.some((x) => x.key === k);
+const SCROLL_KEY = "rs-admin-scroll";
+
+/**
+ * Every account, newest first, with a search box and a filter by account type. The tab and search
+ * live in the address bar, so opening someone and pressing Back lands on the same tab, scrolled to
+ * the same spot in the list.
+ */
 export default function AdminUsers({ users }: { users: AdminUser[] }) {
-  const [q, setQ] = useState("");
-  const [f, setF] = useState<(typeof FILTERS)[number]["key"]>("all");
+  const sp = useSearchParams();
+  const tab = sp.get("tab") ?? undefined;
+  const [q, setQ] = useState(sp.get("q") ?? "");
+  const [f, setF] = useState<FilterKey>(isFilter(tab) ? tab : "all");
+  const box = useRef<HTMLDivElement>(null);
+
+  // Keep the tab and search in the URL without reloading the page.
+  useEffect(() => {
+    const p = new URLSearchParams(window.location.search);
+    if (f === "all") p.delete("tab"); else p.set("tab", f);
+    if (q.trim()) p.set("q", q.trim()); else p.delete("q");
+    const next = `${window.location.pathname}${p.size ? `?${p}` : ""}`;
+    if (next !== `${window.location.pathname}${window.location.search}`) window.history.replaceState(window.history.state, "", next);
+  }, [f, q]);
+
+  // Put the list back where it was after Back, and remember where it is as it scrolls.
+  useEffect(() => {
+    const el = box.current;
+    if (!el) return;
+    try {
+      const saved = JSON.parse(sessionStorage.getItem(SCROLL_KEY) ?? "null") as { f: string; top: number } | null;
+      if (saved?.f === f) el.scrollTop = saved.top;
+    } catch {}
+    const save = () => { try { sessionStorage.setItem(SCROLL_KEY, JSON.stringify({ f, top: el.scrollTop })); } catch {} };
+    el.addEventListener("scroll", save, { passive: true });
+    return () => el.removeEventListener("scroll", save);
+  }, [f]);
   const shown = useMemo(() => {
     const s = q.trim().toLowerCase();
     return users.filter((u) =>
@@ -44,7 +78,7 @@ export default function AdminUsers({ users }: { users: AdminUser[] }) {
       </div>
       <div className="chips" style={{ margin: "12px 0 14px" }}>
         {FILTERS.map((x) => (
-          <button key={x.key} type="button" className={`chip${f === x.key ? " on" : ""}`} aria-pressed={f === x.key} onClick={() => setF(x.key)}>
+          <button key={x.key} type="button" className={`chip${f === x.key ? " on" : ""}`} aria-pressed={f === x.key} onClick={() => { setF(x.key); if (box.current) box.current.scrollTop = 0; }}>
             {x.label} <span className="muted">{count(x.key)}</span>
           </button>
         ))}
@@ -52,6 +86,7 @@ export default function AdminUsers({ users }: { users: AdminUser[] }) {
       {shown.length === 0 ? (
         <p className="muted">Nobody matches that.</p>
       ) : (
+        <div className="people-box" ref={box}>
         <ul className="people">
           {shown.map((u) => {
             const href = u.role === "pro" ? `/p/${u.handle ?? u.id}` : u.role === "client" ? `/u/${u.id}` : null;
@@ -86,7 +121,9 @@ export default function AdminUsers({ users }: { users: AdminUser[] }) {
             );
           })}
         </ul>
+        </div>
       )}
+      {shown.length > 0 && <p className="small muted" style={{ marginTop: 8 }}>Showing {shown.length} of {users.length}</p>}
     </section>
   );
 }

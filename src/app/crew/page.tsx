@@ -44,14 +44,14 @@ export default async function Crew({ searchParams }: { searchParams: Promise<{ p
   const now = today();
   const sel = `*, poster:pros!gigs_poster_id_fkey(${PERSON}), target:pros!gigs_target_id_fkey(${PERSON}), hired:pros!gigs_hired_id_fkey(${PERSON})`;
   const [{ data: pro }, { data: forMe }, { data: mineRows }, { data: openRows }, { data: myReplies }, { data: threadRows }] = await Promise.all([
-    supabase.from("pros").select("city").eq("id", me).single(),
+    supabase.from("pros").select("city, more_cities").eq("id", me).single(),
     supabase.from("gigs").select(sel).or(`target_id.eq.${me},hired_id.eq.${me}`).gte("shoot_date", now).order("shoot_date"),
     supabase.from("gigs").select(`${sel}, gig_replies(*, pro:pros(${PERSON}))`).eq("poster_id", me).gte("shoot_date", now).neq("status", "closed").order("shoot_date"),
     supabase.from("gigs").select(sel).is("target_id", null).eq("status", "open").neq("poster_id", me).gte("shoot_date", now).order("shoot_date").limit(40),
     supabase.from("gig_replies").select("gig_id, status").eq("pro_id", me),
     supabase.from("threads").select("id, pro_id, client_id").or(`pro_id.eq.${me},client_id.eq.${me}`),
   ]);
-  const city = (pro as { city: string } | null)?.city ?? "";
+  const myCities = pro ? [(pro as { city: string }).city, ...((pro as { more_cities?: string[] }).more_cities ?? [])] : [];
   const chatWith = new Map(((threadRows ?? []) as { id: string; pro_id: string; client_id: string }[]).map((t) => [t.pro_id === me ? t.client_id : t.pro_id, t.id]));
   const chat = (other: string | null | undefined) => (other && chatWith.get(other) ? `/messages/${chatWith.get(other)}` : null);
   const incoming = (forMe ?? []) as Row[];
@@ -59,7 +59,7 @@ export default async function Crew({ searchParams }: { searchParams: Promise<{ p
   const booked = incoming.filter((g) => g.hired_id === me && g.status === "filled");
   const mine = (mineRows ?? []) as Mine[];
   const replied = new Set(((myReplies ?? []) as { gig_id: string }[]).map((r) => r.gig_id));
-  const open = ((openRows ?? []) as Row[]).sort((a, b) => Number(b.city === city) - Number(a.city === city));
+  const open = ((openRows ?? []) as Row[]).sort((a, b) => Number(myCities.includes(b.city)) - Number(myCities.includes(a.city)));
 
   return (
     <main className="wrap">
@@ -184,7 +184,7 @@ export default async function Crew({ searchParams }: { searchParams: Promise<{ p
                 <GigTop g={g} who={<Link href={proPath(g.poster ?? { id: g.poster_id })}>{nameOf(g.poster)}</Link>} />
                 {g.note && <p className="small req-note">{g.note}</p>}
                 <div className="req-foot">
-                  <span className="small muted">{g.city === city ? "In your city" : "Nearby"}</span>
+                  <span className="small muted">{myCities.includes(g.city) ? "In your city" : "Nearby"}</span>
                   <ReplyJob gig={g.id} replied={replied.has(g.id)} />
                 </div>
               </div>

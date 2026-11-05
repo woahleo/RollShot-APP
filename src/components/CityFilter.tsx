@@ -6,7 +6,7 @@ import { CITY_GROUPS } from "@/lib/cities";
  * A city dropdown for the creators list and the requests board. It keeps the page's other filters,
  * and "All cities" sets city=all so a page with a default city can still show everything.
  */
-export default function CityFilter({ value, counts, noun = "creators" }: { value: string; counts?: Record<string, number>; noun?: string }) {
+export default function CityFilter({ value, counts, noun = "creators", mine = [] }: { value: string; counts?: Record<string, number>; noun?: string; mine?: string[] }) {
   const router = useRouter();
   const path = usePathname();
   const sp = useSearchParams();
@@ -23,6 +23,7 @@ export default function CityFilter({ value, counts, noun = "creators" }: { value
         <circle cx="12" cy="9.5" r="2.5" />
       </svg>
       <select value={value} onChange={(e) => go(e.target.value)} aria-label="City">
+        {mine.length > 1 && <option value="mine">My cities ({mine.join(", ")})</option>}
         <option value="all">All cities</option>
         {CITY_GROUPS.map((g) => (
           <optgroup key={g.region} label={g.region}>

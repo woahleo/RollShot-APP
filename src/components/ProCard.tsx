@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { cityLabel, tzOf } from "@/lib/cities";
+import { citiesLabel, tzOf } from "@/lib/cities";
 import { prettyDate, today } from "@/lib/sun";
 import { KIND_LABEL, photoUrl, type Kind, type Package, type Pro, proPath } from "@/lib/types";
 
@@ -25,7 +25,7 @@ export default function ProCard({ p, href }: { p: ProRow; href?: string }) {
           <h3>{p.profiles?.name ?? "Creator"}</h3>
           {from && <span className="from">From <b>${from}</b></span>}
         </div>
-        <span className="muted small">{KIND_LABEL[(p.kind ?? "photo") as Kind]} · {cityLabel(p.city)}</span>
+        <span className="muted small">{KIND_LABEL[(p.kind ?? "photo") as Kind]} · {citiesLabel(p.city, p.more_cities)}</span>
         {p.shoot_types.length > 0 && <span className="muted small">{p.shoot_types.slice(0, 3).join(" · ")}</span>}
       </div>
     </Link>
