@@ -41,6 +41,10 @@ export function proKey(key: string): "id" | "handle" {
 /** Usernames: 3 to 30 lowercase letters, numbers or dashes, not starting or ending with a dash. */
 export const HANDLE_RE = /^[a-z0-9][a-z0-9-]{1,28}[a-z0-9]$/;
 
+/** A creator's portfolio holds 3 to 10 photos (enforced in supabase/migrations/0024_photo_limits.sql). */
+export const MIN_PHOTOS = 3;
+export const MAX_PHOTOS = 10;
+
 export function photoUrl(path: string) {
   return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/portfolio/${path}`;
 }

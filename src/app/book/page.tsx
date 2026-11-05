@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Suspense } from "react";
-import { proPath } from "@/lib/types";
+import { MIN_PHOTOS, proPath } from "@/lib/types";
 import { cityLabel, isCity } from "@/lib/cities";
 import CityFilter from "@/components/CityFilter";
 import ProCard, { type ProRow } from "@/components/ProCard";
@@ -16,7 +16,7 @@ export default async function Book({ searchParams }: { searchParams: Promise<{ c
   const { city: picked, kind } = await searchParams;
   const city = isCity(picked) ? picked : undefined;
   const supabase = await createClient();
-  let q = supabase.from("pros").select("*, profiles(name), packages(*)").order("updated_at", { ascending: false });
+  let q = supabase.from("pros").select("*, profiles(name), packages(*)").gte("photo_count", MIN_PHOTOS).order("updated_at", { ascending: false });
   if (city) q = q.eq("city", city);
   if (kind === "photo" || kind === "video") q = q.in("kind", [kind, "both"]);
   const [{ data }, { data: cc }] = await Promise.all([q, supabase.rpc("city_counts")]);

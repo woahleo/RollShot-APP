@@ -2,7 +2,7 @@ import Link from "next/link";
 import SignedInAs from "@/components/SignedInAs";
 import { accountLabel } from "@/lib/account";
 import { getMe } from "@/lib/supabase/server";
-import { photoUrl, proPath } from "@/lib/types";
+import { MIN_PHOTOS, photoUrl, proPath } from "@/lib/types";
 import { type ProRow } from "@/components/ProCard";
 import Feed, { buildFeed, type FeedShot } from "@/components/Feed";
 import ClientHome from "@/components/home/ClientHome";
@@ -28,7 +28,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ d
   const { data } = await supabase
     .from("pros")
     .select("*, profiles(name, avatar), packages(*)")
-    .neq("photos", "{}")
+    .gte("photo_count", MIN_PHOTOS)
     .order("updated_at", { ascending: false })
     .limit(24);
   const featured = (data ?? []) as ProRow[];

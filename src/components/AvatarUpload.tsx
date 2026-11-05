@@ -2,7 +2,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { squareAvatar } from "@/lib/photos";
+import { squareAvatar, photoExt } from "@/lib/photos";
 import Avatar from "./Avatar";
 
 /** Pick, crop and upload a profile picture. It shows on your page, in the feed and in the top bar. */
@@ -28,8 +28,8 @@ export default function AvatarUpload({ userId, name, avatar }: { userId: string;
     setError("");
     try {
       const blob = await squareAvatar(f);
-      const path = `${userId}/avatar-${crypto.randomUUID().slice(0, 8)}.webp`;
-      const { error } = await supabase.storage.from("portfolio").upload(path, blob, { contentType: "image/webp", cacheControl: "31536000" });
+      const path = `${userId}/avatar-${crypto.randomUUID().slice(0, 8)}.${photoExt(blob)}`;
+      const { error } = await supabase.storage.from("portfolio").upload(path, blob, { contentType: blob.type, cacheControl: "31536000" });
       if (error) throw error;
       await save(path);
     } catch (err) {
