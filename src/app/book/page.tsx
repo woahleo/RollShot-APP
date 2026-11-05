@@ -17,7 +17,7 @@ export default async function Book({ searchParams }: { searchParams: Promise<{ c
   const city = isCity(picked) ? picked : undefined;
   const supabase = await createClient();
   let q = supabase.from("pros").select("*, profiles(name), packages(*)").gte("photo_count", MIN_PHOTOS).order("updated_at", { ascending: false });
-  if (city) q = q.eq("city", city);
+  if (city) q = q.contains("all_cities", [city]);
   if (kind === "photo" || kind === "video") q = q.in("kind", [kind, "both"]);
   const [{ data }, { data: cc }] = await Promise.all([q, supabase.rpc("city_counts")]);
   const counts = Object.fromEntries(((cc ?? []) as { city: string; creators: number }[]).map((r) => [r.city, Number(r.creators)]));

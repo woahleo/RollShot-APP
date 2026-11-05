@@ -26,13 +26,15 @@ function ago(ts: string) {
 export default async function Requests({ searchParams }: { searchParams: Promise<{ city?: string; posted?: string }> }) {
   const { city: picked, posted } = await searchParams;
   const { supabase, user, profile } = await getMe();
-  // Creators start on their own city; anyone can switch to another city or all of them.
-  const { data: myPro } = profile?.role === "pro" && user ? await supabase.from("pros").select("city").eq("id", user.id).maybeSingle() : { data: null };
-  const home = (myPro as { city: string } | null)?.city;
-  const city = isCity(picked) ? picked : picked === "all" ? undefined : isCity(home) ? home : undefined;
+  // Creators start on their own cities; anyone can switch to another city or all of them.
+  const { data: myPro } = profile?.role === "pro" && user ? await supabase.from("pros").select("all_cities").eq("id", user.id).maybeSingle() : { data: null };
+  const myCities = ((myPro as { all_cities: string[] } | null)?.all_cities ?? []).filter(isCity);
+  const showMine = myCities.length > 1 && (picked === "mine" || !picked);
+  const city = isCity(picked) ? picked : picked === "all" || showMine ? undefined : myCities[0];
   // West Coast "today", so a request doesn't drop off the board while it's still that day there.
   let q = supabase.from("requests").select("*").eq("status", "open").gte("date_to", today("America/Los_Angeles")).order("created_at", { ascending: false }).limit(60);
   if (city) q = q.eq("city", city);
+  else if (showMine) q = q.in("city", myCities);
   const { data } = await q;
   const rows = (data ?? []) as Request[];
   const ids = rows.map((r) => r.id);
@@ -68,12 +70,12 @@ export default async function Requests({ searchParams }: { searchParams: Promise
       </div>
       {posted && <p className="notice" style={{ marginTop: 16 }}>Your request is up. You&apos;ll get a message when a creator replies.</p>}
       <div style={{ margin: "20px 0" }}>
-        <Suspense><CityFilter value={city ?? "all"} noun="requests" /></Suspense>
+        <Suspense><CityFilter value={showMine ? "mine" : city ?? "all"} noun="requests" mine={myCities} /></Suspense>
       </div>
       {rows.length === 0 && (
         <p className="notice">
-          No open requests{city ? ` in ${cityLabel(city)}` : ""} right now.{role !== "pro" ? " Be the first to post one." : ""}
-          {city && role === "pro" ? <> <Link href="/requests?city=all">See all cities</Link>.</> : null}
+          No open requests{city ? ` in ${cityLabel(city)}` : showMine ? " in your cities" : ""} right now.{role !== "pro" ? " Be the first to post one." : ""}
+          {(city || showMine) && role === "pro" ? <> <Link href="/requests?city=all">See all cities</Link>.</> : null}
         </p>
       )}
       <div className="grid">

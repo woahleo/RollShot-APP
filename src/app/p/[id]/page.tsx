@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { cityLabel, tzOf } from "@/lib/cities";
+import { citiesLabel, cityLabel, tzOf } from "@/lib/cities";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { getMe } from "@/lib/supabase/server";
@@ -70,7 +70,7 @@ export default async function ProPage({ params }: { params: Promise<{ id: string
 
   return (
     <main className="wrap">
-      <p className="eyebrow">{KIND_LABEL[(pro.kind ?? "photo") as Kind]} · {cityLabel(pro.city)}{late ? <span className="late"> · {lateLabel(late)}</span> : null}</p>
+      <p className="eyebrow">{KIND_LABEL[(pro.kind ?? "photo") as Kind]} · {citiesLabel(pro.city, pro.more_cities)}{late ? <span className="late"> · {lateLabel(late)}</span> : null}</p>
       <div className="row" style={{ justifyContent: "space-between", alignItems: "flex-end" }}>
         <div className="pro-head">
           <Avatar name={name} avatar={pro.profiles?.avatar} size={72} />

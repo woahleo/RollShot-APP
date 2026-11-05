@@ -43,7 +43,8 @@ export default async function ProHome({ supabase, userId, profile }: { supabase:
   const toPost = rows.filter((b) => (b.status === "confirmed" || b.status === "rescheduled") && b.shoot_date <= now && !posted.has(b.id));
   const offered = new Map(((myReplies ?? []) as { request_id: string; price: number | null }[]).map((r) => [r.request_id, r.price]));
   // Requests in their own city first, then everything else, newest first within each.
-  const reqs = ((reqRows ?? []) as Req[]).sort((a, b) => Number(b.city === pro.city) - Number(a.city === pro.city)).slice(0, 6);
+  const myCities = [pro.city, ...(pro.more_cities ?? [])];
+  const reqs = ((reqRows ?? []) as Req[]).sort((a, b) => Number(myCities.includes(b.city)) - Number(myCities.includes(a.city))).slice(0, 6);
   const openDays = pro.open_dates.filter((d) => d >= now).length;
   const missing = [
     !pro.photos.length && { href: "/pro#photos", text: "Add photos so car owners can see your work" },
@@ -146,7 +147,7 @@ export default async function ProHome({ supabase, userId, profile }: { supabase:
           <h2 style={{ margin: 0 }}>Car owners looking<em>.</em></h2>
           <Link className="small" href="/requests">See all requests</Link>
         </div>
-        <p className="lede" style={{ margin: "8px 0 16px" }}>People who posted a date. Send an offer and they pick who shoots it. {pro.city} first.</p>
+        <p className="lede" style={{ margin: "8px 0 16px" }}>People who posted a date. Send an offer and they pick who shoots it. {myCities.length > 1 ? "Your cities" : pro.city} first.</p>
         {reqs.length === 0 ? (
           <p className="muted">No open requests right now. They show up here as soon as someone posts.</p>
         ) : (
@@ -165,7 +166,7 @@ export default async function ProHome({ supabase, userId, profile }: { supabase:
                   </div>
                   {r.note && <p className="small req-note">{r.note}</p>}
                   <div className="req-foot">
-                    <span className="small muted">{r.city === pro.city ? "In your city" : "Nearby"}</span>
+                    <span className="small muted">{myCities.includes(r.city) ? "In your city" : "Nearby"}</span>
                     <span className={mine ? "badge confirmed" : "todo-go"}>{mine ? `You offered${offered.get(r.id) != null ? ` ${money(offered.get(r.id))}` : ""}` : "Send an offer"}</span>
                   </div>
                 </Link>

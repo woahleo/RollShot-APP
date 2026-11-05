@@ -16,7 +16,7 @@ const STATUS: Record<string, string> = { requested: "Waiting for them to accept"
 /** A car owner's home: what's coming up, offers waiting on them, then the feed. */
 export default async function ClientHome({ supabase, userId, profile }: { supabase: SupabaseClient; userId: string; profile: Profile }) {
   const now = today();
-  const [{ data: nextRows }, { data: reqRows }, feed] = await Promise.all([
+  const [{ data: nextRows }, { data: reqRows }, feed, { data: carRows }] = await Promise.all([
     supabase
       .from("bookings")
       .select("*, pro:pros(handle, profiles(name, avatar))")
@@ -27,7 +27,10 @@ export default async function ClientHome({ supabase, userId, profile }: { supaba
       .limit(3),
     supabase.from("requests").select("id, car, shoot_type, date_from, city").eq("client_id", userId).eq("status", "open").gte("date_to", now).order("date_from").limit(3),
     loadFeed(supabase),
+    supabase.from("cars").select("photos").eq("owner_id", userId),
   ]);
+  // Car owners show their car; older accounts made before that was required get a nudge.
+  const hasCarPhoto = ((carRows ?? []) as { photos: string[] | null }[]).some((c) => (c.photos ?? []).length > 0);
   const next = (nextRows ?? []) as unknown as Next[];
   const reqs = (reqRows ?? []) as Req[];
   const { data: counts } = reqs.length ? await supabase.rpc("request_reply_counts", { p_ids: reqs.map((r) => r.id) }) : { data: [] };
@@ -43,6 +46,19 @@ export default async function ClientHome({ supabase, userId, profile }: { supaba
           <Link className="btn small" href="/requests/new">Post a request</Link>
         </div>
       </section>
+
+      {!hasCarPhoto && (
+        <section className="wrap">
+          <Link href="/me" className="card todo-item">
+            <div style={{ minWidth: 0 }}>
+              <span className="eyebrow">Your garage</span>
+              <b>Show creators your car</b>
+              <span className="small muted">Add your car and a photo of it. Creators reply faster when they can see what they&apos;re shooting.</span>
+            </div>
+            <span className="todo-go">Add car</span>
+          </Link>
+        </section>
+      )}
 
       {(next.length > 0 || reqs.length > 0) && (
         <section className="wrap">

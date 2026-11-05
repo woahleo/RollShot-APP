@@ -64,3 +64,12 @@ export const CITY_GROUPS = CITY_LIST.reduce<{ region: string; cities: City[] }[]
   else groups.push({ region: c.region, cities: [c] });
   return groups;
 }, []);
+
+/** Most a creator can work in: their home city plus 2 more. */
+export const MAX_CITIES = 3;
+
+/** "Miami, FL" or "Miami, FL · also New York City, Atlanta" for a creator's cities. */
+export function citiesLabel(home: string, more: string[] | null | undefined) {
+  const extra = (more ?? []).filter((c) => c && c !== home);
+  return extra.length ? `${cityLabel(home)} · also ${extra.join(", ")}` : cityLabel(home);
+}

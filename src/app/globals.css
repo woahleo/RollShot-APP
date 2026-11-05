@@ -461,8 +461,10 @@ button.link { background: none; border: 0; padding: 0; color: var(--ink); text-d
 .tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
 .tile { display: grid; gap: 2px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); }
 .tile b { font-size: 30px; font-weight: 200; line-height: 1.1; }
-.people { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
-.person { display: flex; align-items: center; gap: 12px; padding: 12px 2px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.people { list-style: none; margin: 0; padding: 0; }
+.people-box { max-height: min(62vh, 560px); overflow-y: auto; overscroll-behavior: contain; border: 1px solid var(--line); border-radius: 16px; padding: 0 12px; background: var(--surface); }
+.people-box .person:last-child { border-bottom: 0; }
+.person { display: flex; align-items: center; gap: 10px; padding: 10px 2px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
 .avatar.sm { flex: none; width: 40px; height: 40px; display: grid; place-items: center; overflow: hidden; cursor: default; }
 .avatar.sm img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
 .person-main { flex: 1 1 220px; min-width: 0; display: grid; gap: 1px; }
@@ -517,3 +519,4 @@ main.wrap:has(+ .site-foot) { padding-bottom: 72px; }
 .onboard-photo img { width: 100%; height: 100%; object-fit: cover; }
 .onboard-photo button { position: absolute; top: 6px; right: 6px; width: 26px; height: 26px; border-radius: 50%; border: 0; background: rgb(10 10 10 / .6); color: #fff; font-size: 12px; cursor: pointer; display: grid; place-items: center; }
 .onboard-drop { min-height: 110px; }
+.chip[aria-pressed="true"] .muted { color: inherit; opacity: .65; }
