@@ -41,7 +41,7 @@ export default async function AdminPage() {
           </div>
         ))}
       </div>
-      <Suspense><AdminUsers users={(users ?? []) as AdminUser[]} /></Suspense>
+      <Suspense><AdminUsers users={(users ?? []) as AdminUser[]} meId={user.id} /></Suspense>
       <PushSetup
         appReady={pushReady()}
         dbLinked={counts.push_linked === true}

@@ -475,6 +475,10 @@ button.link { background: none; border: 0; padding: 0; color: var(--ink); text-d
 .person-stats { display: flex; gap: 12px; flex-wrap: wrap; }
 .person-stats b { color: var(--ink); font-weight: 400; }
 @media (max-width: 560px) { .person-stats { flex-basis: 100%; padding-left: 52px; } }
+.person-delete { margin-left: auto; background: none; border: 0; padding: 0 2px; color: var(--muted); cursor: pointer; font: inherit; }
+.person-delete:hover, .person-delete:focus-visible { color: var(--bad); }
+.person-confirm { flex-basis: 100%; display: grid; gap: 10px; border-color: var(--bad); }
+.btn.danger { color: var(--bad); border-color: var(--bad); }
 .badge.pro { background: color-mix(in srgb, var(--sky) 22%, var(--bg)); }
 .badge.client { background: color-mix(in srgb, var(--sun) 30%, var(--bg)); }
 .badge.none { background: var(--chip); color: var(--muted); }
