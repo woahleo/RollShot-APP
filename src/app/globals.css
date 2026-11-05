@@ -125,6 +125,16 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--pink); outl
 .gallery img { aspect-ratio: 1; object-fit: cover; border-radius: 12px; width: 100%; }
 .gallery.feature { grid-template-columns: repeat(2, 1fr); gap: 10px; }
 .gallery.feature img:first-child { grid-column: 1 / -1; aspect-ratio: 16 / 10; border-radius: 18px; }
+/* A tall lead photo keeps its own shape (no taller than 9:16), centred, and never taller than the screen. */
+.gallery.feature img.tall:first-child, .gallery-split > .lead { aspect-ratio: var(--r, 4 / 5); width: min(100%, calc(min(78vh, 720px) * var(--r, .8))); justify-self: center; object-fit: cover; border-radius: 18px; }
+.gallery-split { display: grid; gap: 10px; }
+.gallery-split .split-rest { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+@media (min-width: 700px) {
+  .gallery-split { grid-template-columns: auto minmax(0, 1fr); align-items: start; }
+  .gallery-split > .lead { width: min(44vw, 440px, calc(min(78vh, 720px) * var(--r, .8))); }
+}
+/* When most photos are tall, the small tiles are 4:5 so tall cars aren't cut off at the top and bottom. */
+.gallery.tall-tiles img:not(:first-child), .gallery.tall-tiles:not(.feature) img { aspect-ratio: 4 / 5; }
 .seg.wide > button { color: var(--ink); }
 /* three across when the small photos fill whole rows of three (4, 7, 10 photos) */
 @media (min-width: 700px) { .gallery.feature:has(img:nth-child(3n+1):last-child) { grid-template-columns: repeat(3, 1fr); } }
