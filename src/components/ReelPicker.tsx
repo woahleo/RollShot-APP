@@ -108,7 +108,7 @@ export default function ReelPicker({ userId, reels: initialReels, videos: initia
         )}
       </div>
       <p className="small muted" style={{ margin: "6px 0 14px" }}>
-        Up to {MAX_REELS} videos for your page. Uploaded videos play right on the page as tall, plain video with nothing around them (up to {MAX_VIDEO_MB} MB each).
+        Up to {MAX_REELS} videos for your page. Uploaded videos play right on the page, tall or wide just as you shot them, with nothing around them (up to {MAX_VIDEO_MB} MB each).
         You can also paste an Instagram reel link{instagram ? <>, or <Link href="/pro/instagram">pick from Instagram</Link></> : ""}.
         {pageHref && total > 0 && <> <Link href={pageHref}>See them on your page</Link>.</>}
       </p>
