@@ -2,7 +2,9 @@ import SignupForm from "./SignupForm";
 import SignedInAs from "@/components/SignedInAs";
 import { accountLabel } from "@/lib/account";
 import { getMe } from "@/lib/supabase/server";
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
+import AgeBlocked from "@/components/AgeBlocked";
+import { AGE_BLOCK_COOKIE } from "@/lib/legal";
 
 /** Which social sign-ins are switched on in Supabase, so we never show a button that errors. */
 async function enabledProviders(): Promise<{ google: boolean; apple: boolean }> {
@@ -45,6 +47,13 @@ export default async function Signup({ searchParams }: { searchParams: Promise<{
         <div className="auth">
           <SignedInAs profile={profile} label={label} email={user.email ?? ""} wanted={role} />
         </div>
+      </main>
+    );
+  }
+  if ((await cookies()).has(AGE_BLOCK_COOKIE)) {
+    return (
+      <main className="wrap">
+        <div className="auth"><AgeBlocked /></div>
       </main>
     );
   }

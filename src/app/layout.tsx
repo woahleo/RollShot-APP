@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import { Outfit } from "next/font/google";
 import Link from "next/link";
 import "./globals.css";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -9,8 +8,6 @@ import AccountMenu from "@/components/AccountMenu";
 import Bell from "@/components/Bell";
 import { getMe } from "@/lib/supabase/server";
 import { accountLabel } from "@/lib/account";
-
-const outfit = Outfit({ subsets: ["latin"], weight: ["200", "300", "400", "500"], variable: "--font-outfit" });
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : "https://roll-shot-app.vercel.app");
 const DESCRIPTION = "Book car photo and video creators in cities across the US. Real portfolios, real open dates, no back and forth.";
@@ -42,8 +39,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         ? [{ href: "/book", label: "Creators" }, { href: "/requests", label: "Requests" }, { href: "/shoots", label: "Shoots" }, { href: "/me", label: "Garage" }]
         : [{ href: "/book", label: "Creators" }, { href: "/requests", label: "Requests" }];
   return (
-    <html lang="en" data-rs="light" className={outfit.variable} suppressHydrationWarning>
+    <html lang="en" data-rs="light" suppressHydrationWarning>
       <head>
+        <link rel="preload" href="/fonts/outfit-latin.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body>
@@ -67,6 +65,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           </div>
         </header>
         {children}
+        <footer className="site-foot">
+          <div className="wrap">
+            <span>© {new Date().getFullYear()} Rollshot</span>
+            <Link href="/terms">Terms</Link>
+            <Link href="/privacy">Privacy</Link>
+            <Link href="/copyright">Copyright</Link>
+          </div>
+        </footer>
         {user && <ChatBubble userId={user.id} />}
       </body>
     </html>
