@@ -27,6 +27,7 @@ export default async function Dashboard() {
   ]);
   type MyOffer = { price: number; status: "waiting" | "chosen" | "passed"; request: { car: string; shoot_type: string; city: string; date_from: string } | null };
   const myOffers = ((offerRows ?? []) as unknown as MyOffer[]).filter((o) => o.request && o.request.date_from >= today());
+  if (!pro) redirect("/onboarding"); // signed up as a creator but the creator details never saved
   const p = pro as Pro;
   const rows = (bookings ?? []) as Row[];
   const now = today();
