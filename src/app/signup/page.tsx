@@ -7,16 +7,16 @@ import AgeBlocked from "@/components/AgeBlocked";
 import { AGE_BLOCK_COOKIE } from "@/lib/legal";
 
 /** Which social sign-ins are switched on in Supabase, so we never show a button that errors. */
-async function enabledProviders(): Promise<{ google: boolean; apple: boolean }> {
+async function enabledProviders(): Promise<{ google: boolean; apple: boolean; phone: boolean }> {
   try {
     const res = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/settings`, {
       headers: { apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY! },
       next: { revalidate: 60 },
     });
     const s = (await res.json()) as { external?: Record<string, boolean> };
-    return { google: !!s.external?.google, apple: !!s.external?.apple };
+    return { google: !!s.external?.google, apple: !!s.external?.apple, phone: !!s.external?.phone };
   } catch {
-    return { google: false, apple: false };
+    return { google: false, apple: false, phone: false };
   }
 }
 
@@ -45,7 +45,7 @@ export default async function Signup({ searchParams }: { searchParams: Promise<{
     return (
       <main className="wrap">
         <div className="auth">
-          <SignedInAs profile={profile} label={label} email={user.email ?? ""} wanted={role} />
+          <SignedInAs profile={profile} label={label} email={user.email || (user.phone ? `+${user.phone}` : "")} wanted={role} />
         </div>
       </main>
     );

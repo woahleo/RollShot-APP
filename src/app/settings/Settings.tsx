@@ -53,7 +53,7 @@ export default function Settings({ userId, email, name: initialName, role, label
       <form className="card" onSubmit={saveName}>
         <h3>Account</h3>
         <AvatarUpload userId={userId} name={initialName} avatar={avatar} />
-        <label className="field"><span>Email</span><input value={email} disabled /></label>
+        <label className="field"><span>{email.startsWith("+") ? "Phone" : "Email"}</span><input value={email} disabled /></label>
         <label className="field"><span>Name</span><input required maxLength={80} value={name} onChange={(e) => setName(e.target.value)} /></label>
         <button className="btn solid">Save name</button>
       </form>

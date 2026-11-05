@@ -74,7 +74,7 @@ export default function AdminUsers({ users }: { users: AdminUser[] }) {
     <section style={{ marginTop: 28 }}>
       <div className="row" style={{ justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
         <h2 style={{ margin: 0 }}>Everyone</h2>
-        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search name, email, city" style={{ maxWidth: 280 }} aria-label="Search people" />
+        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search name, email, phone, city" style={{ maxWidth: 280 }} aria-label="Search people" />
       </div>
       <div className="chips" style={{ margin: "12px 0 14px" }}>
         {FILTERS.map((x) => (
@@ -106,7 +106,7 @@ export default function AdminUsers({ users }: { users: AdminUser[] }) {
                     {href ? <Link href={href}><b>{name}</b></Link> : <b>{name}</b>}
                     <span className={`badge ${u.role ?? "none"}`}>{u.role === "pro" ? "Creator" : u.role === "client" ? "Car owner" : "Didn't finish"}</span>
                   </div>
-                  {u.email && <a className="small person-email" href={`mailto:${u.email}`}>{u.email}</a>}
+                  {u.email && <a className="small person-email" href={u.email.startsWith("+") ? `tel:${u.email}` : `mailto:${u.email}`}>{u.email}</a>}
                   <span className="small muted">
                     Joined {day(u.signed_up)} · last in {day(u.last_seen)}
                     {u.city ? ` · ${u.city}` : ""}

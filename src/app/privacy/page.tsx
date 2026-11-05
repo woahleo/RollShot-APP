@@ -14,7 +14,7 @@ export default function Privacy() {
 
       <h2>What we collect</h2>
       <ul>
-        <li><b>Account:</b> your email, name, and whether you own a car or shoot cars. If you sign in with Google or Apple, we get your name and email from them.</li>
+        <li><b>Account:</b> your email or phone number, your name, and whether you own a car or shoot cars. If you sign in with Google or Apple, we get your name and email from them.</li>
         <li><b>Age check:</b> when you sign up we ask your date of birth to make sure you&apos;re at least {MIN_AGE}. We don&apos;t save the date, only that the check passed.</li>
         <li><b>Creator profile:</b> your photo, city, bio, what you shoot, packages and prices, portfolio photos, Instagram reel links, open dates and username.</li>
         <li><b>Contact details:</b> the Instagram handle and phone number creators choose to add.</li>
@@ -36,6 +36,7 @@ export default function Privacy() {
       <ul>
         <li><b>Supabase:</b> database, sign-in, sign-in emails and photo storage.</li>
         <li><b>Vercel:</b> hosting the website.</li>
+        <li><b>Twilio:</b> texting sign-in codes, if you sign in with your phone number.</li>
         <li><b>Google or Apple:</b> only if you choose to sign in with them.</li>
         <li><b>Browser push services</b> (Apple, Google, Mozilla): deliver push notifications you turn on. The message is encrypted on the way.</li>
         <li><b>Instagram:</b> reels on creator pages play in Instagram&apos;s own player, which loads from Instagram and follows <a href="https://privacycenter.instagram.com/policy" target="_blank" rel="noreferrer">Instagram&apos;s privacy policy</a>.</li>
@@ -44,7 +45,7 @@ export default function Privacy() {
       <p>We may also share information if the law requires it, or to protect someone&apos;s safety.</p>
 
       <h2>Emails and notifications</h2>
-      <p>We only email you sign-in links. We don&apos;t send marketing emails. In-app and push notifications are about your own shoots, requests and messages, and you can turn push off at any time on the <Link href="/notifications">Notifications</Link> page or in your browser settings.</p>
+      <p>We only email or text you sign-in links and codes. We don&apos;t send marketing emails or texts. In-app and push notifications are about your own shoots, requests and messages, and you can turn push off at any time on the <Link href="/notifications">Notifications</Link> page or in your browser settings.</p>
 
       <h2>Keeping and deleting your data</h2>
       <p>We keep your information while your account is open. You can delete your account at any time in <Link href="/settings">Settings</Link>. That removes your profile, photos, garage, packages, requests, bookings and messages right away. Copies in our providers&apos; backups are erased on their normal schedule, usually within a few weeks.</p>
